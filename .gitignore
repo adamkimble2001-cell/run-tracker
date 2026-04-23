@@ -1,0 +1,14 @@
+# Session notes / Obsidian files
+*.md
+!DEVLOG.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE / editor
+.vscode/
+.idea/
+
+# Claude
+.claude/
