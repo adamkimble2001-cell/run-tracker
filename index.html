@@ -21,12 +21,13 @@
     --loss:        #ff2840;
     --loss-bg:     rgba(255,40,64,0.08);
     --abandoned:   #336644;
-    --text:        #d4ffea;
-    --text-dim:    #7ac49a;
-    --text-faint:  #3a7055;
+    --text:        #a0ffbe;
+    --text-dim:    #3d7a52;
+    --text-faint:  #1e5c35;
     --font:        'Courier New', 'Consolas', 'Lucida Console', monospace;
     --mono:        'Courier New', 'Consolas', monospace;
     --radius:      2px;
+    --scanline-tint: rgba(0,255,112,0.018);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -50,8 +51,8 @@
       0deg,
       transparent,
       transparent 3px,
-      rgba(0,255,112,0.018) 3px,
-      rgba(0,255,112,0.018) 4px
+      var(--scanline-tint) 3px,
+      var(--scanline-tint) 4px
     );
     pointer-events: none;
     z-index: 9999;
@@ -98,10 +99,31 @@
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    cursor: pointer;
-    transition: background 0.15s;
     flex-shrink: 0;
     position: relative;
+  }
+
+  #edit-profile-btn {
+    margin: 6px 12px 2px;
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--border-hi);
+    border-radius: var(--radius);
+    color: var(--text-dim);
+    font-family: var(--font);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: calc(100% - 24px);
+    transition: border-color 0.15s, color 0.15s, text-shadow 0.15s;
+    flex-shrink: 0;
+  }
+  #edit-profile-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    text-shadow: 0 0 8px var(--accent);
   }
 
   #profile-section::after {
@@ -113,12 +135,6 @@
     opacity: 0.4;
   }
 
-  #profile-section:hover { background: var(--surface2); }
-
-  #profile-section:hover .profile-name {
-    color: var(--accent);
-    text-shadow: 0 0 8px var(--accent);
-  }
 
   .profile-avatar {
     width: 44px;
@@ -218,8 +234,8 @@
   }
 
   .profile-stat-label {
-    font-size: 8px;
-    letter-spacing: 0.12em;
+    font-size: 10px;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-faint);
   }
@@ -256,11 +272,15 @@
     padding: 8px 16px;
     cursor: pointer;
     border-left: 2px solid transparent;
-    transition: background 0.1s, border-color 0.1s;
+    transition: background 0.16s ease, border-color 0.16s ease, padding-left 0.16s ease, box-shadow 0.16s ease;
     user-select: none;
   }
 
-  .game-item:hover { background: var(--surface2); }
+  .game-item:hover {
+    background: var(--surface2);
+    padding-left: 20px;
+    box-shadow: inset 2px 0 8px var(--accent-glow2);
+  }
 
   .game-item.active {
     background: var(--surface2);
@@ -360,68 +380,37 @@
     text-shadow: 0 0 8px var(--accent);
   }
 
-  /* ── Sidebar footer ── */
-  #sidebar-footer {
-    border-top: 1px solid var(--border-hi);
-    padding: 10px 14px;
+  /* ── Sidebar auth bar ── */
+  #sidebar-auth {
     flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  #sf-status {
+    border-top: 1px solid var(--border-hi);
+    padding: 8px 12px;
     display: flex;
     align-items: center;
     gap: 6px;
     font-size: 9px;
     letter-spacing: 0.1em;
-    text-transform: uppercase;
   }
-
-  #sf-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    flex-shrink: 0;
+  #sidebar-auth .sa-dot {
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
   }
-
-  #sf-dot.online  { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-  #sf-dot.offline { background: var(--text-faint); }
-
-  #sf-email {
-    color: var(--text-dim);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    min-width: 0;
+  #sidebar-auth .sa-dot.online  { background: var(--accent); box-shadow: 0 0 5px var(--accent); }
+  #sidebar-auth .sa-dot.offline { background: var(--text-faint); }
+  #sidebar-auth .sa-label {
+    flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    color: var(--text-faint); text-transform: uppercase;
   }
-
-  #sf-mode-label { color: var(--text-faint); }
-
-  #sf-actions {
-    display: flex;
-    gap: 4px;
-  }
-
-  .sf-btn {
-    flex: 1;
-    background: none;
-    border: 1px solid var(--border-hi);
-    border-radius: var(--radius);
-    color: var(--text-dim);
-    font-size: 9px;
-    font-family: var(--font);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    padding: 5px 4px;
+  #sidebar-auth .sa-label.online { color: var(--text-dim); text-transform: none; }
+  #btn-sidebar-auth {
+    background: none; border: 1px solid var(--border-hi); border-radius: var(--radius);
+    color: var(--text-dim); font-size: 9px; font-family: var(--font);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    cursor: pointer; padding: 4px 8px; white-space: nowrap;
     transition: color 0.15s, border-color 0.15s;
-    white-space: nowrap;
   }
-
-  .sf-btn:hover { color: var(--accent); border-color: var(--accent); }
-  .sf-btn.sf-danger:hover { color: var(--loss); border-color: var(--loss); }
+  #btn-sidebar-auth:hover { color: var(--accent); border-color: var(--accent); }
+  #btn-sidebar-auth.danger:hover { color: var(--loss); border-color: var(--loss); }
 
   /* ── Main ── */
   #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -434,7 +423,8 @@
     align-items: center;
     gap: 14px;
     flex-shrink: 0;
-    background: var(--surface);
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(6px);
   }
 
   #topbar-game-icon {
@@ -459,11 +449,22 @@
   #topbar-title {
     font-size: 16px;
     font-weight: 700;
-    flex: 1;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--accent);
     text-shadow: 0 0 12px var(--accent);
+  }
+
+  #sync-badge { margin-left: auto; }
+
+  #new-run-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 499;
+    padding: 10px 20px;
+    font-size: 12px;
+    box-shadow: 0 0 20px var(--accent-glow), 0 4px 16px rgba(0,0,0,0.5);
   }
 
   /* ── Buttons ── */
@@ -526,7 +527,8 @@
     gap: 0;
     border-bottom: 1px solid var(--border-hi);
     flex-shrink: 0;
-    background: var(--surface);
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(4px);
   }
 
   .stat-card {
@@ -536,7 +538,14 @@
     text-align: center;
     border-right: 1px solid var(--border);
     position: relative;
+    transition: background 0.18s ease, transform 0.18s ease;
   }
+  .stat-card:hover {
+    background: var(--surface2);
+    transform: translateY(-1px);
+  }
+  .stat-card .stat-value { transition: text-shadow 0.18s ease, color 0.18s ease; }
+  .stat-card:hover .stat-value { text-shadow: 0 0 10px var(--accent-glow); }
 
   .stat-card:last-child { border-right: none; }
 
@@ -549,8 +558,8 @@
   }
 
   .stat-label {
-    font-size: 9px;
-    letter-spacing: 0.16em;
+    font-size: 11px;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--text-faint);
     margin-top: 2px;
@@ -568,7 +577,8 @@
     align-items: center;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
-    background: var(--surface);
+    background: rgba(0,0,0,0.28);
+    backdrop-filter: blur(4px);
     flex-wrap: wrap;
   }
 
@@ -584,8 +594,10 @@
     background: transparent;
     color: var(--text-dim);
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.18s cubic-bezier(.4,.2,.2,1);
   }
+  .filter-chip:active { transform: scale(0.94); }
+  .filter-chip.active { transform: translateY(-1px); }
 
   .filter-chip:hover { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 6px var(--accent); }
   .filter-chip.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); text-shadow: 0 0 8px var(--accent); }
@@ -608,13 +620,299 @@
 
   #sort-select:focus { outline: none; border-color: var(--accent); }
 
+  /* ── View tabs ── */
+  #view-tabs {
+    padding: 0 24px;
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border-hi);
+    background: rgba(0,0,0,0.28);
+    backdrop-filter: blur(4px);
+    flex-shrink: 0;
+  }
+
+  .view-tab {
+    padding: 9px 16px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    font-family: var(--font);
+    margin-bottom: -1px;
+    transition: color 0.14s, border-color 0.14s, text-shadow 0.14s;
+  }
+
+  .view-tab:hover { color: var(--accent); }
+  .view-tab.active { color: var(--accent); border-bottom-color: var(--accent); text-shadow: 0 0 8px var(--accent); }
+
   /* ── Runs area ── */
-  #runs-area { flex: 1; overflow-y: auto; padding: 18px 24px; background: var(--bg); }
+  #runs-area { flex: 1; overflow-y: auto; padding: 18px 24px; background: transparent; }
+
+  /* ── Builds view ── */
+  #builds-view {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 24px;
+    background: transparent;
+    display: none;
+  }
+
+  .bv-card {
+    background: rgba(0,0,0,0.42);
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--border-hi);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .bv-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.25);
+  }
+
+  .bv-name {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px var(--accent-glow);
+  }
+
+  .bv-run-count {
+    font-size: 9px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+    border: 1px solid var(--border-hi);
+    padding: 2px 6px;
+    border-radius: var(--radius);
+  }
+
+  .bv-details {
+    padding: 8px 14px;
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .bv-detail-pill {
+    border: 1px solid var(--border-hi);
+    padding: 2px 7px;
+    border-radius: var(--radius);
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+  }
+
+  .bv-detail-pill strong {
+    color: var(--text-faint);
+    font-weight: 700;
+    margin-right: 3px;
+  }
+
+  .bv-runs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .bv-run-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+  }
+
+  .bv-run-row:last-child { border-bottom: none; }
+
+  .bv-run-row .run-date { font-size: 10px; color: var(--text-faint); }
+
+  .bv-run-notes {
+    flex: 1;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bv-empty {
+    padding: 10px 14px;
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+  }
+
+  .bv-no-builds {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--text-faint);
+  }
+
+  .bv-no-builds .term-prompt { font-size: 11px; margin-bottom: 10px; }
+  .bv-no-builds p { font-size: 11px; letter-spacing: 0.06em; }
+
+  /* ── Game integration (right panel) ── */
+  .rp-game-type-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .rp-game-type-row select {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border-hi);
+    color: var(--text-dim);
+    padding: 5px 8px;
+    border-radius: var(--radius);
+    font-size: 10px;
+    font-family: var(--font);
+    letter-spacing: 0.06em;
+    cursor: pointer;
+  }
+
+  .rp-game-type-row select:focus { outline: none; border-color: var(--accent); }
+
+  .watcher-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border: 1px solid var(--border-hi);
+    border-radius: var(--radius);
+    background: var(--surface2);
+    margin-bottom: 8px;
+  }
+
+  .watcher-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-faint);
+    flex-shrink: 0;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  .watcher-dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+    animation: watcher-pulse 2s ease-in-out infinite;
+  }
+
+  .watcher-dot.error { background: var(--loss); }
+
+  @keyframes watcher-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .watcher-label {
+    flex: 1;
+    font-size: 9px;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .watcher-hint {
+    font-size: 9px;
+    color: var(--text-faint);
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+
+  /* ── Auto-run toast ── */
+  #auto-run-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    box-shadow: 0 0 20px rgba(0,255,112,0.2);
+    border-radius: var(--radius);
+    padding: 12px 18px;
+    display: none;
+    align-items: center;
+    gap: 16px;
+    z-index: 10000;
+    min-width: 340px;
+    animation: toast-in 0.3s ease;
+  }
+
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  #auto-run-toast-icon {
+    font-size: 16px;
+    color: var(--accent);
+    text-shadow: 0 0 10px var(--accent);
+  }
+
+  #auto-run-toast-body { flex: 1; }
+
+  #auto-run-toast-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-shadow: 0 0 8px var(--accent);
+    margin-bottom: 2px;
+  }
+
+  #auto-run-toast-sub {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.07em;
+  }
+
+  .toast-actions { display: flex; gap: 6px; }
+
+  /* Build selector in run modal */
+  #rm-build-row select {
+    background: var(--surface2);
+    border: 1px solid var(--border-hi);
+    color: var(--text-dim);
+    padding: 6px 10px;
+    border-radius: var(--radius);
+    font-size: 11px;
+    font-family: var(--font);
+    letter-spacing: 0.06em;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  #rm-build-row select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 6px var(--accent-glow); }
 
   #runs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
 
   .run-card {
-    background: var(--surface);
+    background: rgba(0,0,0,0.42);
+    backdrop-filter: blur(4px);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 14px 16px;
@@ -701,6 +999,8 @@
   }
 
   .run-actions { display: flex; gap: 6px; margin-top: 10px; padding-left: 6px; }
+  .delete-run-card-btn { color: var(--text-faint); }
+  .delete-run-card-btn:hover { color: var(--loss); border-color: var(--loss); box-shadow: 0 0 6px rgba(255,80,80,0.25); }
 
   /* ── No game / empty ── */
   #no-game-selected {
@@ -749,18 +1049,61 @@
   /* ── Blink animation ── */
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-  /* ── RIGHT PANEL (Game Settings) ── */
-  #right-panel {
-    width: 272px;
-    min-width: 272px;
-    background: var(--surface);
-    border-left: 1px solid var(--border-hi);
-    display: none;
-    flex-direction: column;
+  /* ── Reactive UI animations ── */
+  @keyframes cardIn {
+    0%   { opacity: 0; transform: translateY(6px) scale(0.985); }
+    100% { opacity: 1; transform: translateY(0)   scale(1); }
+  }
+  .run-card { animation: cardIn 0.28s cubic-bezier(.2,.7,.2,1) both; }
+
+  @keyframes badgePulse {
+    0%   { box-shadow: 0 0 0 0 var(--accent-glow); }
+    70%  { box-shadow: 0 0 0 6px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+
+  /* Subtle scale on every action button on press */
+  button { transition: transform 0.08s ease; }
+  button:active:not(:disabled) { transform: scale(0.96); }
+
+  /* Topbar stays smooth on scroll/render */
+  #topbar, #stats-strip, #filter-bar {
+    transition: border-color 0.2s ease, background 0.2s ease;
+  }
+
+  /* Result badges glow more on hover */
+  .result-badge { transition: text-shadow 0.18s ease, box-shadow 0.18s ease; }
+  .run-card:hover .result-badge { box-shadow: 0 0 12px currentColor; }
+
+  /* Scrollbars (webkit) */
+  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; transition: background 0.18s; }
+  *::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+  /* ── GAME SETTINGS PANEL (modal) ── */
+  #game-settings-modal .modal {
+    max-width: 360px;
+    padding: 0;
     overflow: hidden;
   }
 
-  #right-panel.visible { display: flex; }
+  #right-panel {
+    width: 100%;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    max-height: 86vh;
+    overflow: hidden;
+    position: relative;
+  }
+
+  #right-panel > .modal-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 1;
+  }
 
   /* RP Header */
   #rp-header {
@@ -890,8 +1233,8 @@
   }
 
   .rp-stat-label {
-    font-size: 8px;
-    letter-spacing: 0.14em;
+    font-size: 10px;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--text-faint);
     margin-top: 3px;
@@ -909,9 +1252,9 @@
   }
 
   .rp-section-label {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 700;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--text-faint);
     margin-bottom: 10px;
@@ -945,9 +1288,12 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
+    opacity: 0;
+    transition: opacity 0.18s ease;
+    backdrop-filter: blur(2px);
   }
 
-  .modal-overlay.open { display: flex; }
+  .modal-overlay.open { display: flex; opacity: 1; }
 
   .modal {
     background: var(--surface);
@@ -958,7 +1304,11 @@
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 0 40px var(--accent-glow), 0 20px 60px rgba(0,0,0,0.8);
+    transform: translateY(8px) scale(0.985);
+    opacity: 0;
+    transition: transform 0.22s cubic-bezier(.2,.7,.2,1), opacity 0.22s ease;
   }
+  .modal-overlay.open .modal { transform: translateY(0) scale(1); opacity: 1; }
 
   .modal-header {
     padding: 16px 24px;
@@ -1054,8 +1404,8 @@
   }
 
   .pm-stat-label {
-    font-size: 8px;
-    letter-spacing: 0.14em;
+    font-size: 10px;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--text-faint);
     margin-top: 4px;
@@ -1175,115 +1525,6 @@
   .avatar-upload-area { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 4px; }
   .avatar-upload-label { font-size: 9px; color: var(--text-faint); text-align: center; margin-top: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
 
-  /* ── Image adjuster overlay ── */
-  #img-adjuster-overlay {
-    position: fixed; inset: 0; z-index: 3000;
-    background: rgba(0,0,0,0.82);
-    display: none; align-items: center; justify-content: center;
-  }
-  #img-adjuster-overlay.open { display: flex; }
-  #img-adjuster-box {
-    background: var(--surface2);
-    border: 1px solid var(--border-hi);
-    padding: 18px;
-    display: flex; flex-direction: column; gap: 12px;
-    width: 280px;
-  }
-  #adj-title {
-    font-size: 10px; font-weight: 700; letter-spacing: 0.18em;
-    text-transform: uppercase; color: var(--accent); text-shadow: 0 0 8px var(--accent);
-  }
-  #adj-viewport {
-    position: relative; overflow: hidden; align-self: center;
-    cursor: grab; user-select: none;
-    border: 1px solid var(--border-hi);
-  }
-  #adj-viewport.dragging { cursor: grabbing; }
-  #adj-viewport canvas { display: block; }
-  #adj-circle-mask {
-    position: absolute; inset: 0; pointer-events: none;
-    background: radial-gradient(circle 50% at 50% 50%, transparent 50%, rgba(0,0,0,0.65) 50%);
-    display: none;
-  }
-  #adj-circle-mask.show { display: block; }
-  #adj-zoom-row {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
-  }
-  #adj-zoom { flex: 1; accent-color: var(--accent); }
-  #adj-hint { font-size: 9px; color: var(--text-faint); letter-spacing: 0.06em; text-align: center; }
-  #adj-actions { display: flex; gap: 8px; justify-content: flex-end; }
-
-  /* ── Password input row ── */
-  .pw-input-row {
-    display: flex; align-items: stretch; gap: 0;
-  }
-  .pw-input-row input {
-    flex: 1; border-right: none !important;
-    border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;
-  }
-  .pw-toggle {
-    background: var(--surface2); border: 1px solid var(--border-hi);
-    border-left: none; color: var(--text-faint);
-    font-size: 13px; padding: 0 10px; cursor: pointer;
-    transition: color 0.15s, background 0.15s; flex-shrink: 0;
-  }
-  .pw-toggle:hover { color: var(--accent); background: var(--accent-glow2); }
-
-  /* ── Forgot password ── */
-  #magic-link-btn {
-    background: none; border: none; padding: 0;
-    color: var(--text-faint); font-size: 9px; font-family: var(--font);
-    letter-spacing: 0.08em; cursor: pointer; text-decoration: none;
-    display: inline-block; margin-top: 2px;
-  }
-  #magic-link-btn:hover { color: var(--accent); }
-
-  #forgot-pw-btn {
-    background: none; border: none; padding: 0;
-    color: var(--text-faint); font-size: 9px; font-family: var(--font);
-    letter-spacing: 0.1em; cursor: pointer; text-decoration: underline;
-    text-underline-offset: 2px; transition: color 0.15s;
-    display: inline-block; margin-top: 4px;
-  }
-  #forgot-pw-btn:hover { color: var(--accent); }
-
-  /* ── Builds strip ── */
-  #builds-strip {
-    padding: 8px 20px;
-    border-bottom: 1px solid var(--border);
-    display: none; flex-wrap: wrap; align-items: center; gap: 6px;
-    flex-shrink: 0;
-  }
-  #builds-strip.has-builds { display: flex; }
-  .bs-label {
-    font-size: 9px; font-weight: 700; letter-spacing: 0.18em;
-    text-transform: uppercase; color: var(--text-faint);
-    margin-right: 4px; white-space: nowrap;
-  }
-  .bs-chip {
-    background: var(--surface2); border: 1px solid var(--border-hi);
-    padding: 4px 10px; font-size: 10px; font-family: var(--font);
-    color: var(--text-dim); cursor: pointer; letter-spacing: 0.06em;
-    text-transform: uppercase; transition: border-color 0.15s, color 0.15s;
-    position: relative;
-  }
-  .bs-chip:hover, .bs-chip.active { border-color: var(--accent); color: var(--accent); }
-  .bs-detail {
-    position: absolute; top: calc(100% + 6px); left: 0; z-index: 100;
-    background: var(--surface2); border: 1px solid var(--accent-dim);
-    padding: 12px 14px; min-width: 220px; max-width: 320px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: none;
-  }
-  .bs-chip.active .bs-detail { display: block; }
-  .bs-detail-name {
-    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
-    text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
-  }
-  .bs-detail-row { font-size: 10px; color: var(--text-dim); margin-bottom: 4px; line-height: 1.5; }
-  .bs-detail-row strong { color: var(--text); font-weight: 700; }
-  .bs-detail-row:last-child { margin-bottom: 0; }
-
   /* ── Result selector ── */
   .result-selector { display: flex; gap: 8px; }
 
@@ -1320,13 +1561,47 @@
   .field-row { display: flex; align-items: center; gap: 10px; padding: 7px 12px; border-bottom: 1px solid var(--border); }
   .field-row:last-child { border-bottom: none; }
   .field-row:hover { background: var(--surface2); }
-  .field-row input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+  /* custom themed checkbox toggle replaces native input[type=checkbox] */
+  .field-checkbox-btn {
+    flex-shrink: 0;
+    width: 34px;
+    padding: 3px 0;
+    background: transparent;
+    border: 1px solid var(--border-hi);
+    border-radius: var(--radius);
+    color: var(--text-faint);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.12s, color 0.12s, background 0.12s, box-shadow 0.12s, transform 0.1s;
+  }
+  .field-checkbox-btn:hover {
+    border-color: var(--accent-dim);
+    color: var(--text-dim);
+    box-shadow: 0 2px 8px rgba(0,255,112,0.08);
+  }
+  .field-checkbox-btn:active { transform: scale(0.88); }
+  .field-checkbox-btn.on {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+    text-shadow: 0 0 6px var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow), 0 2px 10px rgba(0,255,112,0.1);
+  }
+  .field-checkbox-btn.on:hover {
+    background: rgba(0,255,112,0.14);
+    box-shadow: 0 0 14px var(--accent-glow), 0 2px 14px rgba(0,255,112,0.15);
+  }
   .field-label-text { flex: 1; font-size: 12px; cursor: pointer; color: var(--text); letter-spacing: 0.04em; }
   .field-type-badge { font-size: 9px; padding: 1px 5px; border-radius: var(--radius); background: var(--bg); color: var(--text-faint); border: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.1em; font-family: var(--mono); }
   .field-row input[type="text"] { flex: 1; padding: 5px 8px; font-size: 12px; background: var(--bg); border: 1px solid var(--border-hi); border-radius: var(--radius); color: var(--text); outline: none; font-family: var(--font); letter-spacing: 0.04em; }
   .field-row input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 6px var(--accent-glow); }
   .field-del-btn { background: none; border: none; color: var(--text-faint); cursor: pointer; font-size: 12px; padding: 2px 6px; font-family: var(--font); transition: color 0.15s; }
   .field-del-btn:hover { color: var(--loss); }
+  .field-reset-btn { background: none; border: none; color: var(--text-faint); cursor: pointer; font-size: 13px; padding: 2px 6px; font-family: var(--font); transition: color 0.15s; }
+  .field-reset-btn:hover { color: var(--accent); text-shadow: 0 0 6px var(--accent); }
   .fields-add-row { padding: 7px 12px; }
   .fields-add-btn { background: none; border: 1px dashed var(--border-hi); border-radius: var(--radius); color: var(--text-dim); font-size: 10px; font-family: var(--font); padding: 4px 12px; cursor: pointer; letter-spacing: 0.1em; text-transform: uppercase; transition: border-color 0.15s, color 0.15s; }
   .fields-add-btn:hover { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 6px var(--accent); }
@@ -1373,6 +1648,38 @@
   }
 
   .auth-tab:hover:not(.active) { color: var(--text); }
+
+  .pw-input-row { display: flex; align-items: stretch; gap: 0; }
+  .pw-input-row input {
+    flex: 1; border-right: none !important;
+    border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;
+  }
+  .pw-toggle {
+    background: var(--surface2); border: 1px solid var(--border-hi);
+    border-left: none; color: var(--text-faint);
+    font-size: 13px; padding: 0 10px; cursor: pointer;
+    transition: color 0.15s, background 0.15s; flex-shrink: 0;
+    position: relative;
+  }
+  .pw-toggle:hover { color: var(--accent); background: var(--accent-glow2); }
+  .pw-toggle.closed::after {
+    content: '';
+    position: absolute;
+    width: 2px; height: 65%;
+    top: 17%; left: 50%;
+    transform: translateX(-50%) rotate(40deg);
+    background: currentColor;
+    pointer-events: none;
+  }
+
+  #forgot-pw-btn {
+    background: none; border: none; padding: 0;
+    color: var(--text-faint); font-size: 9px; font-family: var(--font);
+    letter-spacing: 0.1em; cursor: pointer; text-decoration: underline;
+    text-underline-offset: 2px; transition: color 0.15s;
+    display: inline-block; margin-top: 4px;
+  }
+  #forgot-pw-btn:hover { color: var(--accent); }
 
   .auth-error {
     color: var(--loss);
@@ -1454,7 +1761,8 @@
     to   { box-shadow: inset 2px 0 20px rgba(0,255,112,0.1); }
   }
 
-  /* Sign-out link in profile modal */
+  /* Go-online / sign-out links in profile modal */
+  #go-online-btn,
   #signout-btn {
     background: none;
     border: none;
@@ -1469,6 +1777,7 @@
     margin-right: auto;
   }
 
+  #go-online-btn:hover { color: var(--accent); }
   #signout-btn:hover { color: var(--loss); }
 
   /* ── Share banner ── */
@@ -1649,14 +1958,215 @@
   }
 
   #share-profile-btn:hover { color: var(--accent); }
+
+  /* ── Settings button ── */
+  #settings-btn {
+    position: fixed;
+    top: 12px;
+    right: 16px;
+    z-index: 500;
+    background: none;
+    border: 1px solid var(--border-hi);
+    color: var(--text-dim);
+    font-family: var(--font);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 5px 11px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+  #settings-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+
+  /* ── Settings modal ── */
+  #settings-modal .modal { max-width: 440px; }
+
+  .settings-section { margin-bottom: 28px; }
+  .settings-section:last-child { margin-bottom: 0; }
+
+  .settings-section-title {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 7px;
+    margin-bottom: 16px;
+  }
+
+  .settings-msg {
+    font-size: 11px;
+    letter-spacing: 0.07em;
+    margin-top: 8px;
+    min-height: 16px;
+  }
+  .settings-msg.ok  { color: var(--accent); }
+  .settings-msg.err { color: var(--loss); }
+
+  #settings-offline-notice {
+    text-align: center;
+    padding: 24px 0;
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── Appearance settings ── */
+  .cw-layout {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-top: 8px;
+  }
+  .color-wheel-wrap {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    flex-shrink: 0;
+    cursor: crosshair;
+    border-radius: 50%;
+  }
+  #settings-color-wheel { display: block; border-radius: 50%; }
+  .cw-selector-dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 5px rgba(0,0,0,0.9), 0 0 8px rgba(255,255,255,0.3);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: left 0.1s, top 0.1s;
+  }
+  .cw-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .cw-swatch {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-hi);
+    box-shadow: 0 0 10px currentColor;
+  }
+  .cw-hue-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── Background image ── */
+  .bg-upload-zone {
+    border: 1px dashed var(--border-hi);
+    border-radius: var(--radius);
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    transition: border-color 0.15s, color 0.15s;
+    margin-top: 8px;
+  }
+  .bg-upload-zone:hover { border-color: var(--accent); color: var(--accent); }
+  .bg-img-preview {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .bg-img-thumb {
+    width: 88px;
+    height: 50px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-hi);
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+  }
+
+  /* custom bg layer behind the app */
+  #app-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  #app-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.58);
+  }
+
+  #bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    display: none;
+    pointer-events: none;
+    opacity: 0.85;
+  }
+  #bg-canvas.active { display: block; }
+
+  /* Effect picker chips */
+  .bg-effect-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .bg-effect-chip {
+    padding: 5px 11px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-family: var(--font);
+    background: transparent;
+    border: 1px solid var(--border-hi);
+    border-radius: var(--radius);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.18s cubic-bezier(.4,.2,.2,1);
+  }
+  .bg-effect-chip:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    text-shadow: 0 0 6px var(--accent);
+    transform: translateY(-1px);
+  }
+  .bg-effect-chip.active {
+    background: var(--accent-glow);
+    color: var(--accent);
+    border-color: var(--accent);
+    text-shadow: 0 0 8px var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+  }
 </style>
 </head>
 <body>
 
+<!-- Background image layer -->
+<div id="app-bg"></div>
+<canvas id="bg-canvas"></canvas>
+
 <!-- Hidden file inputs -->
 <input type="file" id="file-game-icon" accept="image/*" style="display:none">
-<input type="file" id="file-avatar"    accept="image/*" style="display:none">
+<input type="file" id="file-avatar"    accept="image/jpeg,image/png,image/webp" style="display:none">
 <input type="file" id="file-rp-icon"   accept="image/*" style="display:none">
+<input type="file" id="file-bg-image"  accept="image/jpeg,image/png,image/webp" style="display:none">
 
 <!-- SIDEBAR -->
 <aside id="sidebar">
@@ -1691,20 +2201,18 @@
     </div>
   </div>
 
+  <button id="edit-profile-btn">[ edit profile ]</button>
+
   <div class="sidebar-label">// games</div>
   <div id="games-list"></div>
   <button id="add-game-btn">[ + add game ]</button>
 
-  <div id="sidebar-footer">
-    <div id="sf-status">
-      <span id="sf-dot" class="offline"></span>
-      <span id="sf-email" style="display:none"></span>
-      <span id="sf-mode-label">offline</span>
-    </div>
-    <div id="sf-actions">
-      <!-- populated by updateSidebarFooter() -->
-    </div>
+  <div id="sidebar-auth">
+    <span class="sa-dot offline"></span>
+    <span class="sa-label">offline</span>
+    <button id="btn-sidebar-auth">[ sign in ]</button>
   </div>
+
 </aside>
 
 <!-- MAIN -->
@@ -1726,9 +2234,10 @@
     <div id="topbar">
       <div id="topbar-game-icon"><span id="topbar-icon-initials"></span></div>
       <span id="topbar-title"></span>
+      <button class="btn btn-ghost btn-sm" id="open-game-settings-btn">[ ⚙ game settings ]</button>
       <span id="sync-badge"></span>
-      <button class="btn btn-primary" id="new-run-btn">+ New Run</button>
     </div>
+    <button class="btn btn-primary" id="new-run-btn">+ New Run</button>
 
     <div id="stats-strip">
       <div class="stat-card"><div class="stat-value" id="stat-total">0</div><div class="stat-label">Total Runs</div></div>
@@ -1738,8 +2247,9 @@
       <div class="stat-card"><div class="stat-value" id="stat-streak">—</div><div class="stat-label">Streak</div></div>
     </div>
 
-    <div id="builds-strip">
-      <span class="bs-label">// builds</span>
+    <div id="view-tabs">
+      <button class="view-tab active" data-view="runs">Runs</button>
+      <button class="view-tab" data-view="builds">Builds</button>
     </div>
 
     <div id="filter-bar">
@@ -1762,11 +2272,15 @@
         <p>click [ + new run ] to log your first attempt</p>
       </div>
     </div>
+
+    <div id="builds-view"></div>
   </div>
 </div>
 
-<!-- RIGHT PANEL: Game Settings -->
-<div id="right-panel">
+<!-- MODAL: Game Settings (was right-panel) -->
+<div class="modal-overlay" id="game-settings-modal">
+<div id="right-panel" class="modal">
+  <button class="modal-close" data-close="game-settings-modal">✕</button>
   <div id="rp-header">
     <div id="rp-icon-zone">
       <span id="rp-icon-initial">?</span>
@@ -1825,12 +2339,35 @@
         <button class="fields-add-btn" id="rp-add-build-field-btn">+ add build field</button>
       </div>
     </div>
+
+    <div class="rp-section-label" style="margin-top:18px">game integration</div>
+    <div class="rp-game-type-row">
+      <select id="rp-game-type">
+        <option value="">// manual only</option>
+        <option value="hades">Hades</option>
+        <option value="hades2">Hades II</option>
+        <option value="ror2">Risk of Rain 2</option>
+        <option value="sts2">Slay the Spire 2</option>
+        <option value="megabonk">Megabonk</option>
+      </select>
+    </div>
+    <div id="rp-watcher-block" style="display:none">
+      <div class="watcher-hint" id="rp-watcher-hint"></div>
+      <div class="watcher-row">
+        <div class="watcher-dot" id="rp-watcher-dot"></div>
+        <span class="watcher-label" id="rp-watcher-label">no folder selected</span>
+      </div>
+      <div class="fields-add-row">
+        <button class="fields-add-btn" id="rp-select-folder-btn">⊕ select save folder</button>
+      </div>
+    </div>
   </div>
 
   <div id="rp-footer">
     <button class="btn btn-danger btn-sm" id="rp-delete-btn" style="margin-right:auto">Delete</button>
     <button class="btn btn-primary btn-sm" id="rp-save-btn">[ Save ]</button>
   </div>
+</div>
 </div>
 
 <!-- MODAL: Profile -->
@@ -1890,10 +2427,11 @@
       </div>
       <div class="pm-favorite" id="pm-favorite" style="display:none"></div>
 
-      <p class="form-hint" style="margin-top:12px">avatar — jpeg · png · gif · webp</p>
+      <p class="form-hint" style="margin-top:12px">avatar — jpeg · png · webp</p>
     </div>
     <div class="modal-footer">
       <div style="display:flex;gap:4px;margin-right:auto;align-items:center">
+        <button id="go-online-btn" style="display:none">[ go online ]</button>
         <button id="signout-btn" style="display:none">[ sign out ]</button>
         <button id="share-profile-btn" style="display:none">[ share profile ]</button>
       </div>
@@ -1924,16 +2462,15 @@
         <label>Password</label>
         <div class="pw-input-row">
           <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password">
-          <button type="button" class="pw-toggle" id="pw-toggle" title="show/hide">👁</button>
+          <button type="button" class="pw-toggle closed" id="pw-toggle">👁</button>
         </div>
         <button id="forgot-pw-btn">// forgot password?</button>
-        <button id="magic-link-btn">// send magic link instead</button>
       </div>
       <div class="form-group" id="confirm-pw-group" style="display:none">
         <label>Confirm Password</label>
         <div class="pw-input-row">
           <input type="password" id="auth-confirm" placeholder="••••••••" autocomplete="new-password">
-          <button type="button" class="pw-toggle" id="pw-toggle-confirm" title="show/hide">👁</button>
+          <button type="button" class="pw-toggle closed" id="pw-toggle-confirm">👁</button>
         </div>
       </div>
       <div id="auth-error" class="auth-error"></div>
@@ -2009,6 +2546,12 @@
           <button class="result-option" data-val="abandoned">QUIT</button>
         </div>
       </div>
+      <div class="form-group" id="rm-build-row" style="display:none">
+        <label>Build <span style="letter-spacing:0;text-transform:none;font-size:9px;opacity:0.6">// optional</span></label>
+        <select id="rm-build-select">
+          <option value="">// no build selected</option>
+        </select>
+      </div>
       <div class="form-group">
         <label>Date</label>
         <input type="date" id="rm-date">
@@ -2035,12 +2578,174 @@
   </div>
 </div>
 
+<!-- MODAL: Password Recovery -->
+<div class="modal-overlay" id="recovery-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h2>Set New Password</h2>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:16px;letter-spacing:0.07em">// recovery link verified — set your new password below</div>
+      <div class="form-group">
+        <label>New Password</label>
+        <div class="pw-input-row">
+          <input type="password" id="recovery-pw-new" placeholder="••••••••" autocomplete="new-password">
+          <button type="button" class="pw-toggle closed" id="recovery-pw-toggle">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <div class="pw-input-row">
+          <input type="password" id="recovery-pw-confirm" placeholder="••••••••" autocomplete="new-password">
+          <button type="button" class="pw-toggle closed" id="recovery-pw-confirm-toggle">👁</button>
+        </div>
+      </div>
+      <div class="settings-msg" id="recovery-msg"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="recovery-cancel-btn">Cancel</button>
+      <button class="btn btn-primary" id="recovery-pw-btn">[ Set Password ]</button>
+    </div>
+  </div>
+</div>
+
+<!-- Auto-run detection toast -->
+<div id="auto-run-toast">
+  <div id="auto-run-toast-icon">◈</div>
+  <div id="auto-run-toast-body">
+    <div id="auto-run-toast-title">run detected</div>
+    <div id="auto-run-toast-sub"></div>
+  </div>
+  <div class="toast-actions">
+    <button class="btn btn-primary btn-sm" id="auto-run-log-btn">[ log run ]</button>
+    <button class="btn btn-ghost btn-sm" id="auto-run-dismiss-btn">[ dismiss ]</button>
+  </div>
+</div>
+
+<!-- Settings trigger button -->
+<button id="settings-btn">[ ⚙ settings ]</button>
+
+<!-- MODAL: Settings -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h2>Settings</h2>
+      <button class="modal-close" data-close="settings-modal">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Appearance — always visible regardless of auth state -->
+      <div class="settings-section">
+        <div class="settings-section-title">// appearance</div>
+
+        <div class="form-group">
+          <label>Lighting Color</label>
+          <div class="cw-layout">
+            <div class="color-wheel-wrap" id="cw-wrap">
+              <canvas id="settings-color-wheel" width="140" height="140"></canvas>
+              <div class="cw-selector-dot" id="cw-selector-dot"></div>
+            </div>
+            <div class="cw-controls">
+              <div class="cw-swatch" id="cw-swatch"></div>
+              <div class="cw-hue-label" id="cw-hue-label">hue: 145°</div>
+              <button class="btn btn-ghost btn-sm" id="cw-reset-btn">[ Default ]</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:18px">
+          <label>Background Effect</label>
+          <div class="bg-effect-row" id="bg-effect-row">
+            <button class="bg-effect-chip" data-fx="none">None</button>
+            <button class="bg-effect-chip" data-fx="rain">Matrix Rain</button>
+            <button class="bg-effect-chip" data-fx="grid">Pulse Grid</button>
+            <button class="bg-effect-chip" data-fx="wave">Wave Scan</button>
+            <button class="bg-effect-chip" data-fx="pulse">Radial Pulse</button>
+            <button class="bg-effect-chip" data-fx="starfield">Starfield</button>
+          </div>
+          <p class="form-hint" style="margin-top:6px">animations adapt to your lighting color</p>
+        </div>
+
+        <div class="form-group" style="margin-top:18px">
+          <label>Background Image</label>
+          <div class="bg-upload-zone" id="bg-upload-zone">⬡ click to upload</div>
+          <div class="bg-img-preview" id="bg-img-preview" style="display:none">
+            <div class="bg-img-thumb" id="bg-img-thumb"></div>
+            <button class="btn btn-ghost btn-sm" id="bg-clear-btn">[ Remove ]</button>
+          </div>
+          <p class="form-hint" style="margin-top:6px">jpeg · png · webp — static, fills behind the terminal (combines with effect)</p>
+        </div>
+      </div>
+
+      <div id="settings-offline-notice" style="display:none">
+        // sign in to access account settings
+      </div>
+
+      <div id="settings-account-section">
+
+        <div class="settings-section">
+          <div class="settings-section-title">// change email</div>
+          <div class="form-group">
+            <label>New Email</label>
+            <input type="email" id="settings-email" placeholder="new@email.com" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label>Current Password</label>
+            <div class="pw-input-row">
+              <input type="password" id="settings-email-pw" placeholder="••••••••" autocomplete="current-password">
+              <button type="button" class="pw-toggle closed" id="settings-email-pw-toggle">👁</button>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="settings-email-btn">[ Update Email ]</button>
+          <div class="settings-msg" id="settings-email-msg"></div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">// change password</div>
+
+          <div class="form-group">
+            <label>New Password</label>
+            <div class="pw-input-row">
+              <input type="password" id="settings-pw-new" placeholder="••••••••" autocomplete="new-password">
+              <button type="button" class="pw-toggle closed" id="settings-pw-toggle">👁</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Confirm New Password</label>
+            <div class="pw-input-row">
+              <input type="password" id="settings-pw-confirm" placeholder="••••••••" autocomplete="new-password">
+              <button type="button" class="pw-toggle closed" id="settings-pw-confirm-toggle">👁</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Current Password</label>
+            <div class="pw-input-row">
+              <input type="password" id="settings-pw-current" placeholder="••••••••" autocomplete="current-password">
+              <button type="button" class="pw-toggle closed" id="settings-pw-current-toggle">👁</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" id="settings-pw-btn">[ Update Password ]</button>
+            <button class="btn btn-ghost btn-sm" id="settings-pw-email-btn">or reset via email</button>
+          </div>
+
+          <div class="settings-msg" id="settings-pw-msg"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── Supabase ──────────────────────────────────────────────────────────────────
 const SB_URL  = 'https://wbbfkyzdmpnyiizifijz.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiYmZreXpkbXBueWlpemlmaWp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NDQ0NTEsImV4cCI6MjA5MjQyMDQ1MX0.vwy06QlB7PcmHn2FXEZ_LBiF_lsa5TRWOgQsnnobFdg';
-const sb = supabase.createClient(SB_URL, SB_ANON);
+let sb = null;
+try { sb = supabase.createClient(SB_URL, SB_ANON); }
+catch(e) { console.warn('Supabase unavailable — offline only:', e.message); }
 let sbUser = null;
+let _authBusy = false;
 
 // ── Sync badge ────────────────────────────────────────────────────────────────
 function setSyncBadge(state, text) {
@@ -2075,7 +2780,7 @@ async function loadFromSupabase() {
       }));
     }
     if (runs && runs.length) {
-      db.runs = runs.map(r => ({ id: r.id, gameId: r.game_id, result: r.result, date: r.date, notes: r.notes || '', comment: r.comment || '', tags: r.tags || [], fields: r.fields || {} }));
+      db.runs = runs.map(r => ({ id: r.id, gameId: r.game_id, result: r.result, date: r.date, notes: r.notes || '', comment: r.comment || '', tags: r.tags || [], fields: r.fields || {}, buildId: r.build_id || null }));
     }
     save(db);
     setSyncBadge('synced', '✓ synced');
@@ -2105,7 +2810,7 @@ async function syncGame(game) {
 async function syncRun(run) {
   if (!sbUser) return;
   try {
-    await sb.from('runs').upsert({ id: run.id, game_id: run.gameId, user_id: sbUser.id, result: run.result, date: run.date, notes: run.notes || '', comment: run.comment || '', tags: run.tags || [], fields: run.fields || {} });
+    await sb.from('runs').upsert({ id: run.id, game_id: run.gameId, user_id: sbUser.id, result: run.result, date: run.date, notes: run.notes || '', comment: run.comment || '', tags: run.tags || [], fields: run.fields || {}, build_id: run.buildId || null });
   } catch(e) { console.error('syncRun', e); }
 }
 
@@ -2131,29 +2836,31 @@ function switchAuthTab(mode) {
   document.getElementById('auth-submit-btn').textContent = mode === 'in' ? '[ Sign In ]' : '[ Create Account ]';
   document.getElementById('auth-error').textContent = '';
   document.getElementById('auth-error').style.color = '';
-  document.getElementById('confirm-pw-group').style.display  = mode === 'up' ? '' : 'none';
-  document.getElementById('forgot-pw-btn').style.display    = mode === 'in' ? '' : 'none';
-  document.getElementById('magic-link-btn').style.display   = mode === 'in' ? '' : 'none';
+  document.getElementById('confirm-pw-group').style.display = mode === 'up' ? '' : 'none';
+  document.getElementById('forgot-pw-btn').style.display   = mode === 'in' ? '' : 'none';
 }
 
 document.getElementById('auth-tab-in').addEventListener('click', () => switchAuthTab('in'));
 document.getElementById('auth-tab-up').addEventListener('click', () => switchAuthTab('up'));
 
 // Password visibility toggles
-function makePwToggle(toggleId, inputId) {
-  document.getElementById(toggleId).addEventListener('click', () => {
-    const inp = document.getElementById(inputId);
-    inp.type = inp.type === 'password' ? 'text' : 'password';
-  });
-}
-makePwToggle('pw-toggle', 'auth-password');
-makePwToggle('pw-toggle-confirm', 'auth-confirm');
+document.getElementById('pw-toggle').addEventListener('click', function() {
+  const inp = document.getElementById('auth-password');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  this.classList.toggle('closed', inp.type === 'password');
+});
+document.getElementById('pw-toggle-confirm').addEventListener('click', function() {
+  const inp = document.getElementById('auth-confirm');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  this.classList.toggle('closed', inp.type === 'password');
+});
 
 // Forgot password
 document.getElementById('forgot-pw-btn').addEventListener('click', async () => {
   const email = document.getElementById('auth-email').value.trim();
   const errEl = document.getElementById('auth-error');
   errEl.style.color = '';
+  if (!sb) { errEl.textContent = '// supabase unavailable — use offline mode'; return; }
   if (!email) { errEl.textContent = '// enter your email address first'; return; }
   errEl.textContent = '// sending reset link...';
   try {
@@ -2164,33 +2871,7 @@ document.getElementById('forgot-pw-btn').addEventListener('click', async () => {
       errEl.style.color = 'var(--accent)';
       errEl.textContent = '// reset link sent — check your email';
     }
-  } catch(e) {
-    errEl.textContent = '// ' + e.message;
-  }
-});
-
-// Magic link
-document.getElementById('magic-link-btn').addEventListener('click', async () => {
-  const email = document.getElementById('auth-email').value.trim();
-  const errEl = document.getElementById('auth-error');
-  errEl.style.color = '';
-  if (!email) { errEl.textContent = '// enter your email address first'; return; }
-  const btn = document.getElementById('magic-link-btn');
-  btn.textContent = '// sending...';
-  btn.disabled = true;
-  try {
-    const { error } = await sb.auth.signInWithOtp({ email });
-    if (error) {
-      errEl.textContent = '// ' + error.message;
-    } else {
-      errEl.style.color = 'var(--accent)';
-      errEl.textContent = '// magic link sent — check your email';
-    }
-  } catch(e) {
-    errEl.textContent = '// ' + e.message;
-  }
-  btn.textContent = '// send magic link instead';
-  btn.disabled = false;
+  } catch(e) { errEl.textContent = '// ' + e.message; }
 });
 
 document.getElementById('auth-submit-btn').addEventListener('click', async () => {
@@ -2199,10 +2880,9 @@ document.getElementById('auth-submit-btn').addEventListener('click', async () =>
   const confirm = document.getElementById('auth-confirm').value;
   const errEl   = document.getElementById('auth-error');
   errEl.textContent = ''; errEl.style.color = '';
+  if (!sb) { errEl.textContent = '// supabase unavailable — use offline mode'; return; }
   if (!email || !pass) { errEl.textContent = '// email and password required'; return; }
-  if (authMode === 'up' && pass !== confirm) {
-    errEl.textContent = '// passwords do not match'; return;
-  }
+  if (authMode === 'up' && pass !== confirm) { errEl.textContent = '// passwords do not match'; return; }
   const btn = document.getElementById('auth-submit-btn');
   btn.textContent = '[ ... ]'; btn.disabled = true;
   try {
@@ -2214,15 +2894,38 @@ document.getElementById('auth-submit-btn').addEventListener('click', async () =>
     }
     if (result.error) {
       errEl.textContent = '// ' + result.error.message;
+      btn.textContent = authMode === 'in' ? '[ Sign In ]' : '[ Create Account ]';
+      btn.disabled = false;
+    } else if (authMode === 'in' && result.data?.session) {
+      _authBusy = true;
+      errEl.style.color = 'var(--accent)';
+      errEl.textContent = '// signed in! welcome back.';
+      btn.textContent = '[ ✓ ]';
+      setTimeout(async () => {
+        sbUser = result.data.session.user;
+        await loadFromSupabase();
+        closeModal('auth-modal');
+        bootUI();
+        updateAuthBar();
+        renderSidebarProfile();
+        renderSidebar();
+        if (db.games.length) selectGame(db.games[0].id);
+        _authBusy = false;
+      }, 900);
     } else if (authMode === 'up' && result.data?.user && !result.data?.session) {
       errEl.style.color = 'var(--accent)';
       errEl.textContent = '// check your email to confirm your account';
+      btn.textContent = '[ Create Account ]';
+      btn.disabled = false;
+    } else {
+      btn.textContent = authMode === 'in' ? '[ Sign In ]' : '[ Create Account ]';
+      btn.disabled = false;
     }
   } catch(e) {
     errEl.textContent = '// ' + e.message;
+    btn.textContent = authMode === 'in' ? '[ Sign In ]' : '[ Create Account ]';
+    btn.disabled = false;
   }
-  btn.textContent = authMode === 'in' ? '[ Sign In ]' : '[ Create Account ]';
-  btn.disabled = false;
 });
 
 document.getElementById('auth-email').addEventListener('keydown', e => {
@@ -2241,74 +2944,31 @@ document.getElementById('auth-confirm').addEventListener('keydown', e => {
 document.getElementById('auth-skip-btn').addEventListener('click', () => {
   closeModal('auth-modal');
   seedDemo();
+  updateAuthBar();
   renderSidebarProfile();
   renderSidebar();
-  updateSidebarFooter();
   if (db.games.length) selectGame(db.games[0].id);
 });
 
-document.getElementById('signout-btn').addEventListener('click', async () => {
-  if (!confirm('Sign out of your account?')) return;
-  await doSignOut();
-});
-
 async function doSignOut() {
-  await sb.auth.signOut();
+  if (sb) await sb.auth.signOut();
   sbUser = null;
+  _authBusy = false;
   db = defaultDB();
   save(db);
   closeModal('profile-modal');
+  updateAuthBar();
   renderSidebarProfile();
   renderSidebar();
-  updateSidebarFooter();
   document.getElementById('game-view').style.display = 'none';
   document.getElementById('no-game-selected').style.display = '';
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-password').value = '';
+  document.getElementById('auth-confirm').value = '';
+  document.getElementById('auth-error').textContent = '';
+  document.getElementById('auth-submit-btn').textContent = '[ Sign In ]';
+  document.getElementById('auth-submit-btn').disabled = false;
   openModal('auth-modal');
-}
-
-function updateSidebarFooter() {
-  const dot       = document.getElementById('sf-dot');
-  const emailEl   = document.getElementById('sf-email');
-  const modeLabel = document.getElementById('sf-mode-label');
-  const actions   = document.getElementById('sf-actions');
-  actions.innerHTML = '';
-
-  if (sbUser) {
-    dot.className = 'online';
-    emailEl.style.display = '';
-    emailEl.textContent = sbUser.email;
-    modeLabel.style.display = 'none';
-
-    const signOutBtn = document.createElement('button');
-    signOutBtn.className = 'sf-btn sf-danger';
-    signOutBtn.textContent = '[ sign out ]';
-    signOutBtn.addEventListener('click', async () => {
-      if (!confirm('Sign out of your account?')) return;
-      await doSignOut();
-    });
-
-    const switchBtn = document.createElement('button');
-    switchBtn.className = 'sf-btn';
-    switchBtn.textContent = '[ switch account ]';
-    switchBtn.addEventListener('click', async () => {
-      if (!confirm('Sign out and switch account?')) return;
-      await doSignOut();
-    });
-
-    actions.append(signOutBtn, switchBtn);
-  } else {
-    dot.className = 'offline';
-    emailEl.style.display = 'none';
-    modeLabel.style.display = '';
-    modeLabel.textContent = 'offline';
-
-    const goOnlineBtn = document.createElement('button');
-    goOnlineBtn.className = 'sf-btn';
-    goOnlineBtn.textContent = '[ go online / sign in ]';
-    goOnlineBtn.style.flex = '1';
-    goOnlineBtn.addEventListener('click', () => openModal('auth-modal'));
-    actions.appendChild(goOnlineBtn);
-  }
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -2329,7 +2989,7 @@ function load() {
   try { return JSON.parse(localStorage.getItem(STORE_KEY)) || defaultDB(); }
   catch { return defaultDB(); }
 }
-function defaultDB() { return { profile: { name: 'PLAYER', avatar: null, bio: '', currentGame: null }, games: [], runs: [] }; }
+function defaultDB() { return { profile: { name: 'PLAYER', avatar: null, bio: '', currentGame: null }, games: [], runs: [], settings: { accentHue: 145, accentSat: 1, bgEffect: 'none' } }; }
 function save(data) {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
   catch { alert('Storage full — try removing images or old runs.'); }
@@ -2353,13 +3013,17 @@ let isReadOnly = false;
 
 let modalEnabledGeneric = new Set();
 let modalCustomFields   = [];
+let modalGenericLabels  = {};
 
 let rpEnabledGeneric = new Set();
 let rpCustomFields   = [];
+let rpGenericLabels  = {};
 
 let rpBuilds            = [];
 let rpBuildCustomFields = [];
 let rpExpandedBuildId   = null;
+
+let activeGameView = 'runs';
 
 // ── Image utilities ───────────────────────────────────────────────────────────
 function resizeImage(file, maxPx) {
@@ -2394,105 +3058,6 @@ function setImgZone(zone, src) {
   }
 }
 
-// ── Image adjuster ────────────────────────────────────────────────────────────
-const ADJ_SIZE = 240;
-let adjImg = null, adjOffX = 0, adjOffY = 0, adjScale = 1, adjMinScale = 1;
-let adjCallback = null, adjOutputSize = 300, adjIsCircle = false;
-let adjDragging = false, adjDragStartX = 0, adjDragStartY = 0;
-
-function adjDraw() {
-  const canvas = document.getElementById('adj-canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, ADJ_SIZE, ADJ_SIZE);
-  if (!adjImg) return;
-  ctx.drawImage(adjImg, adjOffX, adjOffY, adjImg.width * adjScale, adjImg.height * adjScale);
-}
-
-function adjClamp() {
-  const iw = adjImg.width * adjScale, ih = adjImg.height * adjScale;
-  adjOffX = Math.min(0, Math.max(ADJ_SIZE - iw, adjOffX));
-  adjOffY = Math.min(0, Math.max(ADJ_SIZE - ih, adjOffY));
-}
-
-function adjSetScale(newScale, cx, cy) {
-  const prev = adjScale;
-  adjScale = Math.max(adjMinScale, Math.min(8, newScale));
-  const ratio = adjScale / prev;
-  adjOffX = cx - ratio * (cx - adjOffX);
-  adjOffY = cy - ratio * (cy - adjOffY);
-  adjClamp();
-  document.getElementById('adj-zoom').value = Math.round(adjScale / adjMinScale * 100);
-  adjDraw();
-}
-
-function openImageAdjuster(dataUrl, outputSize, isCircle, callback) {
-  adjCallback   = callback;
-  adjOutputSize = outputSize;
-  adjIsCircle   = isCircle;
-  adjImg        = new Image();
-  adjImg.onload = () => {
-    adjMinScale = Math.max(ADJ_SIZE / adjImg.width, ADJ_SIZE / adjImg.height);
-    adjScale    = adjMinScale;
-    adjOffX     = (ADJ_SIZE - adjImg.width * adjScale) / 2;
-    adjOffY     = (ADJ_SIZE - adjImg.height * adjScale) / 2;
-    adjClamp();
-    document.getElementById('adj-zoom').value = 100;
-    document.getElementById('adj-circle-mask').classList.toggle('show', isCircle);
-    adjDraw();
-    document.getElementById('img-adjuster-overlay').classList.add('open');
-  };
-  adjImg.src = dataUrl;
-}
-
-function adjApply() {
-  const out = document.createElement('canvas');
-  out.width = adjOutputSize; out.height = adjOutputSize;
-  const ctx = out.getContext('2d');
-  const ratio = adjOutputSize / ADJ_SIZE;
-  ctx.drawImage(adjImg, adjOffX * ratio, adjOffY * ratio,
-    adjImg.width * adjScale * ratio, adjImg.height * adjScale * ratio);
-  const dataUrl = out.toDataURL('image/jpeg', 0.88);
-  document.getElementById('img-adjuster-overlay').classList.remove('open');
-  adjCallback(dataUrl);
-}
-
-function loadFileForAdjuster(file, outputSize, isCircle, callback) {
-  const reader = new FileReader();
-  reader.onload = e => openImageAdjuster(e.target.result, outputSize, isCircle, callback);
-  reader.readAsDataURL(file);
-}
-
-(function wireAdjuster() {
-  const vp = document.getElementById('adj-viewport');
-  vp.addEventListener('mousedown', e => {
-    adjDragging = true; adjDragStartX = e.clientX; adjDragStartY = e.clientY;
-    vp.classList.add('dragging');
-  });
-  window.addEventListener('mousemove', e => {
-    if (!adjDragging) return;
-    adjOffX += e.clientX - adjDragStartX;
-    adjOffY += e.clientY - adjDragStartY;
-    adjDragStartX = e.clientX; adjDragStartY = e.clientY;
-    adjClamp(); adjDraw();
-  });
-  window.addEventListener('mouseup', () => {
-    adjDragging = false;
-    document.getElementById('adj-viewport').classList.remove('dragging');
-  });
-  vp.addEventListener('wheel', e => {
-    e.preventDefault();
-    const rect = vp.getBoundingClientRect();
-    const cx = e.clientX - rect.left, cy = e.clientY - rect.top;
-    adjSetScale(adjScale * (e.deltaY < 0 ? 1.08 : 0.93), cx, cy);
-  }, { passive: false });
-  document.getElementById('adj-zoom').addEventListener('input', e => {
-    const cx = ADJ_SIZE / 2, cy = ADJ_SIZE / 2;
-    adjSetScale(adjMinScale * (parseInt(e.target.value) / 100), cx, cy);
-  });
-  document.getElementById('adj-apply').addEventListener('click', adjApply);
-  document.getElementById('adj-cancel').addEventListener('click', () =>
-    document.getElementById('img-adjuster-overlay').classList.remove('open'));
-})();
 
 // ── Icon rendering ────────────────────────────────────────────────────────────
 function applyGameIcon(el, game) {
@@ -2576,6 +3141,7 @@ function renderSidebarProfile() {
 function openProfileModal() {
   pendingAvatar = undefined;
   // Show sign-out and share only when authenticated
+  document.getElementById('go-online-btn').style.display    = sbUser ? 'none' : '';
   document.getElementById('signout-btn').style.display      = sbUser ? '' : 'none';
   document.getElementById('share-profile-btn').style.display = sbUser ? '' : 'none';
   const p = db.profile;
@@ -2618,7 +3184,7 @@ function openProfileModal() {
   openModal('profile-modal');
 }
 
-document.getElementById('profile-section').addEventListener('click', openProfileModal);
+document.getElementById('edit-profile-btn').addEventListener('click', openProfileModal);
 
 document.getElementById('avatar-upload-zone').addEventListener('click', () =>
   document.getElementById('file-avatar').click());
@@ -2626,10 +3192,15 @@ document.getElementById('avatar-upload-zone').addEventListener('click', () =>
 document.getElementById('file-avatar').addEventListener('change', e => {
   const file = e.target.files[0]; if (!file) return;
   e.target.value = '';
-  loadFileForAdjuster(file, 300, true, dataUrl => {
+  resizeImage(file, 300).then(dataUrl => {
     pendingAvatar = dataUrl;
     setImgZone(document.getElementById('avatar-upload-zone'), pendingAvatar);
   });
+});
+
+document.getElementById('go-online-btn').addEventListener('click', () => {
+  closeModal('profile-modal');
+  openModal('auth-modal');
 });
 
 document.getElementById('clear-avatar-btn').addEventListener('click', () => {
@@ -2687,6 +3258,7 @@ function renderSidebar() {
 function selectGame(id) {
   activeGameId = id;
   activeFilter = 'all';
+  activeGameView = 'runs';
   document.querySelectorAll('.filter-chip').forEach(c =>
     c.classList.toggle('active', c.dataset.filter === 'all'));
   renderSidebar();
@@ -2718,75 +3290,143 @@ function renderGameView() {
   }
 
   document.getElementById('topbar-title').textContent = game.name.toUpperCase();
+
+  // Sync tab visibility with activeGameView
+  document.querySelectorAll('.view-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.view === activeGameView));
+  const filterBar  = document.getElementById('filter-bar');
+  const runsArea   = document.getElementById('runs-area');
+  const buildsView = document.getElementById('builds-view');
+  const isRuns = activeGameView === 'runs';
+  filterBar.style.display  = isRuns ? 'flex' : 'none';
+  runsArea.style.display   = isRuns ? 'block' : 'none';
+  buildsView.style.display = isRuns ? 'none' : 'block';
+
   renderStats(game);
-  renderBuildsStrip(game);
-  renderRuns(game);
+  if (isRuns) renderRuns(game);
+  else renderBuildsView(game);
 }
 
-// ── Builds strip ──────────────────────────────────────────────────────────────
-function renderBuildsStrip(game) {
-  const strip = document.getElementById('builds-strip');
-  const builds = game.builds || [];
-  strip.classList.toggle('has-builds', builds.length > 0);
-  // remove old chips, keep the label
-  strip.querySelectorAll('.bs-chip').forEach(c => c.remove());
-  if (!builds.length) return;
+// ── Builds view ───────────────────────────────────────────────────────────────
+function renderBuildsView(game) {
+  const el = document.getElementById('builds-view');
+  el.innerHTML = '';
+  const builds = game?.builds || [];
 
-  let activeChip = null;
+  if (!builds.length) {
+    el.innerHTML = `
+      <div class="bv-no-builds">
+        <div class="term-prompt">&gt; NO_BUILDS_FOUND</div>
+        <p>add builds in the game settings panel →</p>
+      </div>`;
+    return;
+  }
 
-  builds.forEach(b => {
-    const chip = document.createElement('div');
-    chip.className = 'bs-chip';
-    chip.textContent = esc(b.name || 'Unnamed');
+  const gameRuns = db.runs.filter(r => r.gameId === game.id);
 
-    const detail = document.createElement('div');
-    detail.className = 'bs-detail';
+  builds.forEach(build => {
+    const buildRuns = gameRuns.filter(r => r.buildId === build.id);
+    const card = document.createElement('div');
+    card.className = 'bv-card';
 
-    const rows = [
-      ['name', b.name],
-      ['items', b.items],
-      ['bans', b.bans],
-      ['strategy', b.strategy],
-    ].filter(([, v]) => v);
-
-    const customFields = game.buildCustomFields || [];
-    customFields.forEach(cf => {
-      const val = (b.custom || {})[cf.id];
-      if (val) rows.push([cf.label, val]);
-    });
-
-    if (rows.length) {
-      const nameRow = rows[0];
-      const nameEl = document.createElement('div');
-      nameEl.className = 'bs-detail-name';
-      nameEl.textContent = nameRow[1];
-      detail.appendChild(nameEl);
-
-      rows.slice(1).forEach(([label, val]) => {
-        const row = document.createElement('div');
-        row.className = 'bs-detail-row';
-        row.innerHTML = `<strong>${esc(label)}:</strong> ${esc(val)}`;
-        detail.appendChild(row);
+    // Header
+    const header = document.createElement('div');
+    header.className = 'bv-header';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'bv-name';
+    nameEl.textContent = build.name || '(unnamed build)';
+    const countEl = document.createElement('div');
+    countEl.className = 'bv-run-count';
+    countEl.textContent = buildRuns.length + ' run' + (buildRuns.length !== 1 ? 's' : '');
+    header.append(nameEl, countEl);
+    if (!isReadOnly) {
+      const editBuildBtn = document.createElement('button');
+      editBuildBtn.className = 'btn btn-ghost btn-sm';
+      editBuildBtn.textContent = '[ edit build ]';
+      editBuildBtn.addEventListener('click', () => {
+        rpExpandedBuildId = build.id;
+        renderRightPanel();
+        openModal('game-settings-modal');
+        requestAnimationFrame(() => {
+          const el = document.querySelector(`#rp-builds-list .build-card.open`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
       });
+      header.appendChild(editBuildBtn);
+    }
+    card.appendChild(header);
+
+    // Build details (items / bans / strategy + custom fields)
+    const detailFields = [
+      { key: 'items',    label: 'Items' },
+      { key: 'bans',     label: 'Bans' },
+      { key: 'strategy', label: 'Strategy' },
+    ];
+    const customFields = game.buildCustomFields || [];
+    const hasMeta = detailFields.some(df => build[df.key]) ||
+                    customFields.some(cf => (build.custom || {})[cf.id]);
+    if (hasMeta) {
+      const details = document.createElement('div');
+      details.className = 'bv-details';
+      detailFields.forEach(df => {
+        if (build[df.key]) {
+          const pill = document.createElement('span');
+          pill.className = 'bv-detail-pill';
+          pill.innerHTML = `<strong>${esc(df.label)}:</strong>${esc(build[df.key])}`;
+          details.appendChild(pill);
+        }
+      });
+      customFields.forEach(cf => {
+        const val = (build.custom || {})[cf.id];
+        if (val) {
+          const pill = document.createElement('span');
+          pill.className = 'bv-detail-pill';
+          pill.innerHTML = `<strong>${esc(cf.label)}:</strong>${esc(val)}`;
+          details.appendChild(pill);
+        }
+      });
+      card.appendChild(details);
     }
 
-    chip.appendChild(detail);
-
-    chip.addEventListener('click', e => {
-      e.stopPropagation();
-      strip.querySelectorAll('.bs-chip.active').forEach(c => { if (c !== chip) c.classList.remove('active'); });
-      chip.classList.toggle('active');
-    });
-
-    strip.appendChild(chip);
+    // Runs list
+    const runsList = document.createElement('div');
+    runsList.className = 'bv-runs-list';
+    if (!buildRuns.length) {
+      const empty = document.createElement('div');
+      empty.className = 'bv-empty';
+      empty.textContent = '> no runs logged with this build yet';
+      runsList.appendChild(empty);
+    } else {
+      [...buildRuns]
+        .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
+        .forEach(run => {
+          const row = document.createElement('div');
+          row.className = 'bv-run-row';
+          const safeResult = /^(win|loss|abandoned)$/.test(run.result) ? run.result : 'loss';
+          const badge = document.createElement('span');
+          badge.className = `result-badge ${safeResult}`;
+          badge.textContent = safeResult.toUpperCase();
+          const date = document.createElement('span');
+          date.className = 'run-date';
+          date.textContent = run.date || '';
+          const notes = document.createElement('span');
+          notes.className = 'bv-run-notes';
+          notes.textContent = run.notes || run.comment || '';
+          row.append(badge, date, notes);
+          if (!isReadOnly) {
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-ghost btn-sm';
+            editBtn.textContent = '[ edit ]';
+            editBtn.addEventListener('click', () => openRunModal(run.id));
+            row.appendChild(editBtn);
+          }
+          runsList.appendChild(row);
+        });
+    }
+    card.appendChild(runsList);
+    el.appendChild(card);
   });
 }
-
-document.addEventListener('click', e => {
-  if (!e.target.closest('.bs-chip')) {
-    document.querySelectorAll('.bs-chip.active').forEach(c => c.classList.remove('active'));
-  }
-});
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 function renderStats(game) {
@@ -2853,22 +3493,35 @@ function renderRuns(game) {
       <div class="run-details">${pills}${tags}</div>
       ${run.notes ? `<div class="run-notes">${esc(run.notes)}</div>` : ''}
       ${run.comment ? `<div class="run-comment">${esc(run.comment)}</div>` : ''}
-      ${!isReadOnly ? `<div class="run-actions"><button class="btn btn-ghost btn-sm edit-run-btn">[ edit ]</button></div>` : ''}
+      ${!isReadOnly ? `<div class="run-actions"><button class="btn btn-ghost btn-sm edit-run-btn">[ edit ]</button><button class="btn btn-ghost btn-sm delete-run-card-btn">[ delete ]</button></div>` : ''}
     `;
-    if (!isReadOnly) card.querySelector('.edit-run-btn').addEventListener('click', () => openRunModal(run.id));
+    if (!isReadOnly) {
+      card.querySelector('.edit-run-btn').addEventListener('click', () => openRunModal(run.id));
+      card.querySelector('.delete-run-card-btn').addEventListener('click', () => {
+        if (!confirm('DELETE this run?')) return;
+        db.runs = db.runs.filter(r => r.id !== run.id);
+        save(db);
+        deleteRunFromSb(run.id);
+        renderSidebar();
+        renderSidebarProfile();
+        renderGameView();
+        renderRightPanel();
+      });
+    }
     grid.appendChild(card);
   });
 }
 
 // ── Right Panel ───────────────────────────────────────────────────────────────
 function renderRightPanel() {
-  const panel = document.getElementById('right-panel');
-  if (!activeGameId) { panel.classList.remove('visible'); return; }
+  const toggleBtn = document.getElementById('open-game-settings-btn');
+  if (toggleBtn) toggleBtn.style.display = (activeGameId && !isReadOnly) ? 'inline-flex' : 'none';
+
+  if (!activeGameId) { closeModal('game-settings-modal'); return; }
 
   const game = db.games.find(g => g.id === activeGameId);
-  if (!game) { panel.classList.remove('visible'); return; }
+  if (!game) { closeModal('game-settings-modal'); return; }
 
-  panel.classList.add('visible');
   pendingRpIcon = undefined;
 
   // Icon
@@ -2891,11 +3544,18 @@ function renderRightPanel() {
   const active = game.fields || [];
   rpEnabledGeneric = new Set(active.filter(f => f.builtin).map(f => f.id));
   rpCustomFields   = active.filter(f => !f.builtin).map(f => ({ ...f }));
+  rpGenericLabels  = {};
+  active.filter(f => f.builtin).forEach(f => { rpGenericLabels[f.id] = f.label; });
 
   // Builds
   rpBuilds            = (game.builds || []).map(b => ({ ...b, custom: { ...(b.custom || {}) } }));
   rpBuildCustomFields = (game.buildCustomFields || []).map(f => ({ ...f }));
   rpExpandedBuildId   = null;
+
+  // Game integration
+  const gtSel = document.getElementById('rp-game-type');
+  gtSel.value = game.gameType || '';
+  renderWatcherBlock(game.id, game.gameType || '');
 
   renderRpFields();
   renderRpBuilds();
@@ -2908,25 +3568,50 @@ function renderRpFields() {
     const row = document.createElement('div');
     row.className = 'field-row';
 
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.id   = 'rpgf-' + gf.id;
-    cb.checked = rpEnabledGeneric.has(gf.id);
-    cb.addEventListener('change', () => {
-      if (cb.checked) rpEnabledGeneric.add(gf.id);
-      else            rpEnabledGeneric.delete(gf.id);
+    const isOn = rpEnabledGeneric.has(gf.id);
+    const cb = document.createElement('button');
+    cb.className = 'field-checkbox-btn' + (isOn ? ' on' : '');
+    cb.textContent = isOn ? '[✓]' : '[ ]';
+    cb.title = isOn ? 'Disable field' : 'Enable field';
+    cb.addEventListener('click', () => {
+      const nowOn = cb.classList.toggle('on');
+      cb.textContent = nowOn ? '[✓]' : '[ ]';
+      cb.title = nowOn ? 'Disable field' : 'Enable field';
+      if (nowOn) rpEnabledGeneric.add(gf.id);
+      else       rpEnabledGeneric.delete(gf.id);
     });
 
-    const lbl = document.createElement('label');
-    lbl.htmlFor = 'rpgf-' + gf.id;
-    lbl.className = 'field-label-text';
-    lbl.textContent = gf.label;
+    const input = document.createElement('input');
+    input.type  = 'text';
+    input.value = rpGenericLabels[gf.id] ?? gf.label;
+    input.placeholder = gf.label;
+    input.title = 'Default: ' + gf.label;
+
+    const reset = document.createElement('button');
+    reset.className = 'field-reset-btn';
+    reset.textContent = '↺';
+    reset.title = 'Reset to default (' + gf.label + ')';
+    const updateResetVis = () => {
+      const v = input.value.trim();
+      reset.style.display = (v && v !== gf.label) ? 'inline-block' : 'none';
+    };
+    input.addEventListener('input', () => {
+      rpGenericLabels[gf.id] = input.value;
+      updateResetVis();
+    });
+    reset.addEventListener('click', () => {
+      input.value = gf.label;
+      rpGenericLabels[gf.id] = gf.label;
+      updateResetVis();
+      input.focus();
+    });
+    updateResetVis();
 
     const badge = document.createElement('span');
     badge.className = 'field-type-badge';
     badge.textContent = gf.type;
 
-    row.append(cb, lbl, badge);
+    row.append(cb, input, reset, badge);
     genList.appendChild(row);
   });
   renderRpCustomList();
@@ -3089,8 +3774,10 @@ function saveRightPanel() {
 
   const fields = [];
   GENERIC_FIELDS.forEach(gf => {
-    if (rpEnabledGeneric.has(gf.id))
-      fields.push({ id: gf.id, label: gf.label, type: gf.type, builtin: true });
+    if (rpEnabledGeneric.has(gf.id)) {
+      const custom = (rpGenericLabels[gf.id] || '').trim();
+      fields.push({ id: gf.id, label: custom || gf.label, type: gf.type, builtin: true });
+    }
   });
   rpCustomFields.filter(cf => cf.label.trim()).forEach(cf =>
     fields.push({ id: cf.id, label: cf.label.trim(), type: 'text', builtin: false }));
@@ -3098,6 +3785,7 @@ function saveRightPanel() {
   game.fields            = fields;
   game.builds            = rpBuilds.filter(b => b.name.trim());
   game.buildCustomFields = rpBuildCustomFields.filter(f => f.label.trim());
+  game.gameType          = document.getElementById('rp-game-type').value || null;
   pendingRpIcon          = undefined;
 
   save(db);
@@ -3107,10 +3795,7 @@ function saveRightPanel() {
   renderRightPanel();
   renderSidebarProfile();
 
-  const btn = document.getElementById('rp-save-btn');
-  btn.classList.add('btn-saved');
-  btn.textContent = '[ Saved! ]';
-  setTimeout(() => { btn.classList.remove('btn-saved'); btn.textContent = '[ Save ]'; }, 1600);
+  closeModal('game-settings-modal');
 }
 
 // RP icon click → open file picker
@@ -3120,13 +3805,19 @@ document.getElementById('rp-icon-zone').addEventListener('click', () =>
 document.getElementById('file-rp-icon').addEventListener('change', e => {
   const file = e.target.files[0]; if (!file) return;
   e.target.value = '';
-  loadFileForAdjuster(file, 256, false, dataUrl => {
+  resizeImage(file, 256).then(dataUrl => {
     pendingRpIcon = dataUrl;
     applyRpIcon(pendingRpIcon, document.getElementById('rp-name').value || '?');
   });
 });
 
 document.getElementById('rp-save-btn').addEventListener('click', saveRightPanel);
+
+document.getElementById('open-game-settings-btn').addEventListener('click', () => {
+  if (!activeGameId) return;
+  renderRightPanel();
+  openModal('game-settings-modal');
+});
 
 document.getElementById('rp-delete-btn').addEventListener('click', () =>
   promptDeleteGame(activeGameId));
@@ -3153,6 +3844,8 @@ function openGameModal(gameId = null) {
   modalEnabledGeneric = new Set(active.filter(f => f.builtin).map(f => f.id));
   if (!game) { modalEnabledGeneric.add('char'); modalEnabledGeneric.add('diff'); modalEnabledGeneric.add('floor'); }
   modalCustomFields = active.filter(f => !f.builtin).map(f => ({ ...f }));
+  modalGenericLabels = {};
+  active.filter(f => f.builtin).forEach(f => { modalGenericLabels[f.id] = f.label; });
 
   renderFieldsEditor();
   openModal('game-modal');
@@ -3165,25 +3858,50 @@ function renderFieldsEditor() {
     const row = document.createElement('div');
     row.className = 'field-row';
 
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.id   = 'gf-' + gf.id;
-    cb.checked = modalEnabledGeneric.has(gf.id);
-    cb.addEventListener('change', () => {
-      if (cb.checked) modalEnabledGeneric.add(gf.id);
-      else            modalEnabledGeneric.delete(gf.id);
+    const isOn = modalEnabledGeneric.has(gf.id);
+    const cb = document.createElement('button');
+    cb.className = 'field-checkbox-btn' + (isOn ? ' on' : '');
+    cb.textContent = isOn ? '[✓]' : '[ ]';
+    cb.title = isOn ? 'Disable field' : 'Enable field';
+    cb.addEventListener('click', () => {
+      const nowOn = cb.classList.toggle('on');
+      cb.textContent = nowOn ? '[✓]' : '[ ]';
+      cb.title = nowOn ? 'Disable field' : 'Enable field';
+      if (nowOn) modalEnabledGeneric.add(gf.id);
+      else       modalEnabledGeneric.delete(gf.id);
     });
 
-    const lbl = document.createElement('label');
-    lbl.htmlFor = 'gf-' + gf.id;
-    lbl.className = 'field-label-text';
-    lbl.textContent = gf.label;
+    const input = document.createElement('input');
+    input.type  = 'text';
+    input.value = modalGenericLabels[gf.id] ?? gf.label;
+    input.placeholder = gf.label;
+    input.title = 'Default: ' + gf.label;
+
+    const reset = document.createElement('button');
+    reset.className = 'field-reset-btn';
+    reset.textContent = '↺';
+    reset.title = 'Reset to default (' + gf.label + ')';
+    const updateResetVis = () => {
+      const v = input.value.trim();
+      reset.style.display = (v && v !== gf.label) ? 'inline-block' : 'none';
+    };
+    input.addEventListener('input', () => {
+      modalGenericLabels[gf.id] = input.value;
+      updateResetVis();
+    });
+    reset.addEventListener('click', () => {
+      input.value = gf.label;
+      modalGenericLabels[gf.id] = gf.label;
+      updateResetVis();
+      input.focus();
+    });
+    updateResetVis();
 
     const badge = document.createElement('span');
     badge.className = 'field-type-badge';
     badge.textContent = gf.type;
 
-    row.append(cb, lbl, badge);
+    row.append(cb, input, reset, badge);
     genList.appendChild(row);
   });
   renderCustomFieldsList();
@@ -3226,7 +3944,7 @@ document.getElementById('game-icon-zone').addEventListener('click', () =>
 document.getElementById('file-game-icon').addEventListener('change', e => {
   const file = e.target.files[0]; if (!file) return;
   e.target.value = '';
-  loadFileForAdjuster(file, 256, false, dataUrl => {
+  resizeImage(file, 256).then(dataUrl => {
     pendingGameIcon = dataUrl;
     setImgZone(document.getElementById('game-icon-zone'), pendingGameIcon);
     document.getElementById('clear-game-icon-btn').style.display = 'block';
@@ -3246,8 +3964,10 @@ document.getElementById('save-game-btn').addEventListener('click', () => {
 
   const fields = [];
   GENERIC_FIELDS.forEach(gf => {
-    if (modalEnabledGeneric.has(gf.id))
-      fields.push({ id: gf.id, label: gf.label, type: gf.type, builtin: true });
+    if (modalEnabledGeneric.has(gf.id)) {
+      const custom = (modalGenericLabels[gf.id] || '').trim();
+      fields.push({ id: gf.id, label: custom || gf.label, type: gf.type, builtin: true });
+    }
   });
   modalCustomFields.filter(cf => cf.label.trim()).forEach(cf =>
     fields.push({ id: cf.id, label: cf.label.trim(), type: 'text', builtin: false }));
@@ -3291,7 +4011,7 @@ function promptDeleteGame(gameId, fromModal = false) {
 }
 
 // ── Run modal ─────────────────────────────────────────────────────────────────
-function openRunModal(runId = null) {
+function openRunModal(runId = null, prefill = {}) {
   if (!activeGameId) return;
   editingRunId = runId;
   const run  = runId ? db.runs.find(r => r.id === runId) : null;
@@ -3300,11 +4020,25 @@ function openRunModal(runId = null) {
   document.getElementById('run-modal-title').textContent  = run ? 'Edit Run' : 'New Run';
   document.getElementById('delete-run-btn').style.display = run ? 'inline-flex' : 'none';
   document.getElementById('rm-date').value    = run?.date    || today();
-  document.getElementById('rm-notes').value   = run?.notes   || '';
+  document.getElementById('rm-notes').value   = run?.notes   || prefill.notes   || '';
   document.getElementById('rm-comment').value = run?.comment || '';
   document.getElementById('rm-tags').value    = (run?.tags || []).join(', ');
 
-  selectedResult = run?.result || 'loss';
+  // Build selector — show only if the game has saved builds
+  const builds = game?.builds || [];
+  const buildRow = document.getElementById('rm-build-row');
+  const buildSel = document.getElementById('rm-build-select');
+  buildRow.style.display = builds.length ? '' : 'none';
+  buildSel.innerHTML = '<option value="">// no build selected</option>';
+  builds.forEach(b => {
+    const opt = document.createElement('option');
+    opt.value = b.id;
+    opt.textContent = b.name || '(unnamed build)';
+    buildSel.appendChild(opt);
+  });
+  buildSel.value = run?.buildId || '';
+
+  selectedResult = run?.result || prefill.result || 'loss';
   document.querySelectorAll('.result-option').forEach(b =>
     b.classList.toggle('selected', b.dataset.val === selectedResult));
 
@@ -3325,7 +4059,7 @@ function openRunModal(runId = null) {
       inp.type  = f.type === 'number' ? 'number' : 'text';
       inp.id    = 'rf-' + f.id;
       inp.placeholder = f.label.toLowerCase() + '...';
-      inp.value = (run?.fields || {})[f.id] || '';
+      inp.value = (run?.fields || {})[f.id] || (prefill.fields || {})[f.id] || '';
       fg.append(lbl, inp);
       row.appendChild(fg);
     }
@@ -3346,6 +4080,7 @@ document.getElementById('save-run-btn').addEventListener('click', () => {
   });
   const tags = document.getElementById('rm-tags').value
     .split(',').map(s => s.trim()).filter(Boolean);
+  const buildId = document.getElementById('rm-build-select').value || null;
 
   const runData = {
     gameId:  activeGameId,
@@ -3353,7 +4088,7 @@ document.getElementById('save-run-btn').addEventListener('click', () => {
     date:    document.getElementById('rm-date').value,
     notes:   document.getElementById('rm-notes').value.trim(),
     comment: document.getElementById('rm-comment').value.trim(),
-    tags, fields,
+    tags, fields, buildId,
   };
 
   let savedRun;
@@ -3396,6 +4131,24 @@ document.querySelectorAll('.result-option').forEach(btn =>
       b.classList.toggle('selected', b === btn));
   }));
 
+// View tabs (Runs / Builds)
+document.querySelectorAll('.view-tab').forEach(tab =>
+  tab.addEventListener('click', () => {
+    activeGameView = tab.dataset.view;
+    document.querySelectorAll('.view-tab').forEach(t =>
+      t.classList.toggle('active', t === tab));
+    const filterBar  = document.getElementById('filter-bar');
+    const runsArea   = document.getElementById('runs-area');
+    const buildsView = document.getElementById('builds-view');
+    const isRuns = activeGameView === 'runs';
+    filterBar.style.display  = isRuns ? 'flex' : 'none';
+    runsArea.style.display   = isRuns ? 'block' : 'none';
+    buildsView.style.display = isRuns ? 'none' : 'block';
+    if (!isRuns && activeGameId) {
+      renderBuildsView(db.games.find(g => g.id === activeGameId));
+    }
+  }));
+
 // Filters
 document.querySelectorAll('.filter-chip').forEach(chip =>
   chip.addEventListener('click', () => {
@@ -3410,6 +4163,378 @@ document.getElementById('sort-select').addEventListener('change', e => {
   if (activeGameId) renderRuns(db.games.find(g => g.id === activeGameId));
 });
 
+// ── Game file integration ─────────────────────────────────────────────────────
+
+const GAME_TYPE_META = {
+  hades:    { label: 'Hades',            hint: 'Point to your Hades save folder.\nDefault: %USERPROFILE%\\Saved Games\\Hades' },
+  hades2:   { label: 'Hades II',         hint: 'Point to your Hades II save folder.\nDefault: %USERPROFILE%\\Saved Games\\Hades II' },
+  ror2:     { label: 'Risk of Rain 2',   hint: 'Point to your RoR2 profile folder.\nDefault: %AppData%\\..\\LocalLow\\Hopoo Games\\Risk of Rain 2' },
+  sts2:     { label: 'Slay the Spire 2', hint: 'Point to your StS2 saves folder.\nDefault: %AppData%\\SlayTheSpire2\\steam\\<id>\\profile1' },
+  megabonk: { label: 'Megabonk',         hint: 'Point to your Megabonk save folder.\nDefault: %AppData%\\..\\LocalLow\\vedinad\\Megabonk' },
+};
+
+const watchers = {}; // gameId → { dirHandle, gameType, lastState, interval, active }
+
+// ── IndexedDB handle persistence ──────────────────────────────────────────────
+function openWatcherDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('rte_watchers', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('handles');
+    req.onsuccess  = e => resolve(e.target.result);
+    req.onerror    = () => reject(req.error);
+  });
+}
+
+async function saveWatchHandle(gameId, handle) {
+  const db = await openWatcherDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('handles', 'readwrite');
+    tx.objectStore('handles').put(handle, gameId);
+    tx.oncomplete = resolve;
+    tx.onerror    = () => reject(tx.error);
+  });
+}
+
+async function loadWatchHandle(gameId) {
+  const idb = await openWatcherDB();
+  return new Promise((resolve, reject) => {
+    const tx = idb.transaction('handles', 'readonly');
+    const req = tx.objectStore('handles').get(gameId);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror   = () => reject(req.error);
+  });
+}
+
+// ── Per-game file readers ──────────────────────────────────────────────────────
+async function readGameState(dirHandle, gameType) {
+  try {
+    if (gameType === 'hades' || gameType === 'hades2') return await readHadesState(dirHandle);
+    if (gameType === 'ror2')     return await readRoR2State(dirHandle);
+    if (gameType === 'sts2')     return await readSTS2State(dirHandle);
+    if (gameType === 'megabonk') return await readMegabonkState(dirHandle);
+  } catch(e) { /* permission denied or file not found — skip silently */ }
+  return null;
+}
+
+async function readHadesState(dirHandle) {
+  let savMtime = 0, hasTempFile = false;
+  for await (const [name, handle] of dirHandle.entries()) {
+    if (handle.kind !== 'file') continue;
+    if (/^Profile0\.sav$/i.test(name)) {
+      const f = await handle.getFile(); savMtime = f.lastModified;
+    }
+    if (/Profile\d+_Temp\.sav/i.test(name)) hasTempFile = true;
+  }
+  return { savMtime, hasTempFile };
+}
+
+async function readRoR2State(dirHandle) {
+  // Try to find a UserProfile.xml in this dir or one level down
+  async function findXml(dir, depth = 0) {
+    for await (const [name, handle] of dir.entries()) {
+      if (handle.kind === 'file' && name.toLowerCase().endsWith('.xml')) {
+        return await (await handle.getFile()).text();
+      }
+      if (handle.kind === 'directory' && depth < 2) {
+        const found = await findXml(handle, depth + 1).catch(() => null);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+  const xml = await findXml(dirHandle);
+  if (!xml) return null;
+  const doc = new DOMParser().parseFromString(xml, 'application/xml');
+  const n = tag => {
+    const el = doc.querySelector(tag) || doc.querySelector(`fields ${tag}`);
+    return el ? (parseFloat(el.textContent) || 0) : 0;
+  };
+  return {
+    runsFinished:  n('totalRunsFinished'),
+    deaths:        n('totalDeaths'),
+    stagesCleared: n('highestStagesCompleted'),
+  };
+}
+
+async function readSTS2State(dirHandle) {
+  let latestMtime = 0, runCount = 0;
+  async function scanForRuns(dir, depth = 0) {
+    for await (const [name, handle] of dir.entries()) {
+      if (handle.kind === 'file' && name.endsWith('.run')) {
+        const f = await handle.getFile();
+        runCount++;
+        if (f.lastModified > latestMtime) latestMtime = f.lastModified;
+      }
+      if (handle.kind === 'directory' && depth < 3) {
+        await scanForRuns(handle, depth + 1).catch(() => {});
+      }
+    }
+  }
+  await scanForRuns(dirHandle);
+  return { latestMtime, runCount };
+}
+
+// Flexible key-pick helper — searches an object (one level deep, plus common nests) for
+// the first key whose lowercased name includes any of the given substrings.
+function pickStat(obj, ...needles) {
+  if (!obj || typeof obj !== 'object') return undefined;
+  const scan = (o) => {
+    for (const k of Object.keys(o)) {
+      const lk = k.toLowerCase();
+      if (needles.some(n => lk.includes(n))) return o[k];
+    }
+    return undefined;
+  };
+  let v = scan(obj);
+  if (v !== undefined) return v;
+  // Try common nests
+  for (const nest of ['stats', 'progression', 'data', 'lastRun', 'last_run', 'recentRun']) {
+    if (obj[nest] && typeof obj[nest] === 'object') {
+      v = scan(obj[nest]);
+      if (v !== undefined) return v;
+    }
+  }
+  return undefined;
+}
+
+function megabonkSummary(data) {
+  if (!data || typeof data !== 'object') return {};
+  const num = (v) => (typeof v === 'number' ? v : (typeof v === 'string' && v.trim() !== '' && !isNaN(+v) ? +v : undefined));
+  return {
+    totalRuns:   num(pickStat(data, 'totalrun', 'runscount', 'runsplayed', 'gamesplayed', 'totalgames')),
+    totalWins:   num(pickStat(data, 'totalwin', 'wins', 'runscompleted', 'runscomplete', 'victories')),
+    totalDeaths: num(pickStat(data, 'totaldeath', 'deaths', 'runslost', 'losses')),
+    lastChar:    pickStat(data, 'lastcharacter', 'lastsurvivor', 'currentcharacter', 'character', 'survivor'),
+    lastLevel:   num(pickStat(data, 'lastlevel', 'level', 'highestlevel', 'maxlevel')),
+    lastTime:    num(pickStat(data, 'lasttime', 'lastduration', 'runtime', 'duration', 'time')),
+    lastKills:   num(pickStat(data, 'lastkill', 'kills', 'kilcount', 'enemieskilled')),
+    lastDiff:    pickStat(data, 'lastdifficulty', 'difficulty'),
+  };
+}
+
+let _megabonkLogged = false;
+async function readMegabonkState(dirHandle) {
+  for await (const [name, handle] of dirHandle.entries()) {
+    if (handle.kind !== 'file') continue;
+    if (name.toLowerCase() === 'stats.json' || name.toLowerCase() === 'progression.json') {
+      const f = await handle.getFile();
+      try {
+        const data = JSON.parse(await f.text());
+        if (!_megabonkLogged) {
+          _megabonkLogged = true;
+          console.log('[megabonk] stats.json top-level keys:', Object.keys(data || {}));
+          console.log('[megabonk] parsed summary:', megabonkSummary(data));
+        }
+        return { mtime: f.lastModified, data, summary: megabonkSummary(data) };
+      } catch {
+        return { mtime: f.lastModified, data: null, summary: {} };
+      }
+    }
+  }
+  return null;
+}
+
+// Format seconds → "MM:SS" (or "H:MM:SS" if ≥ 1h)
+function fmtDuration(seconds) {
+  if (typeof seconds !== 'number' || !isFinite(seconds) || seconds < 0) return '';
+  const s = Math.round(seconds);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  const pad = (n) => String(n).padStart(2, '0');
+  return h ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`;
+}
+
+// ── Run-end detection (state delta) ───────────────────────────────────────────
+function detectRunEnd(gameType, prev, curr) {
+  if (!prev || !curr) return null;
+
+  if (gameType === 'hades' || gameType === 'hades2') {
+    // Temp save vanished + main save updated → run ended (died or escaped)
+    if (prev.hasTempFile && !curr.hasTempFile && curr.savMtime !== prev.savMtime)
+      return { result: null };  // binary save — can't read win/loss
+    // Main save updated without temp → menu save or post-run save
+    if (!prev.hasTempFile && !curr.hasTempFile && curr.savMtime !== prev.savMtime)
+      return { result: null };
+    return null;
+  }
+
+  if (gameType === 'ror2') {
+    if (curr.runsFinished > prev.runsFinished) return { result: 'win',  stages: curr.stagesCleared };
+    if (curr.deaths       > prev.deaths)       return { result: 'loss' };
+    return null;
+  }
+
+  if (gameType === 'sts2') {
+    if (curr.runCount > prev.runCount || curr.latestMtime !== prev.latestMtime)
+      return { result: null };
+    return null;
+  }
+
+  if (gameType === 'megabonk') {
+    if (curr.mtime === prev.mtime) return null;
+    const ps = prev.summary || {};
+    const cs = curr.summary || {};
+    const inc = (a, b) => (typeof a === 'number' && typeof b === 'number' && b > a);
+
+    let result = null;
+    if (inc(ps.totalWins, cs.totalWins)) result = 'win';
+    else if (inc(ps.totalDeaths, cs.totalDeaths)) result = 'loss';
+    else if (inc(ps.totalRuns, cs.totalRuns)) result = null;
+    else return null;  // mtime changed but no run-counter delta — likely a settings save
+
+    const fields = {};
+    if (cs.lastChar)  fields.char     = String(cs.lastChar);
+    if (cs.lastDiff)  fields.diff     = String(cs.lastDiff);
+    if (typeof cs.lastLevel === 'number') fields.floor    = String(cs.lastLevel);
+    if (typeof cs.lastKills === 'number') fields.score    = String(cs.lastKills);
+    if (typeof cs.lastTime  === 'number') fields.duration = fmtDuration(cs.lastTime);
+    if (typeof cs.totalRuns === 'number') fields.runnum   = String(cs.totalRuns);
+
+    return { result, fields };
+  }
+
+  return null;
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────────
+let pendingAutoRun = null;
+let toastDismissTimer = null;
+
+function showRunToast(gameId, detected) {
+  pendingAutoRun = { gameId, ...detected };
+  const meta = GAME_TYPE_META[db.games.find(g => g.id === gameId)?.gameType] || {};
+  document.getElementById('auto-run-toast-title').textContent =
+    '> RUN_DETECTED' + (meta.label ? ' [' + meta.label.toUpperCase() + ']' : '');
+  const f = detected.fields || {};
+  const extras = [
+    f.char     ? f.char                  : null,
+    f.floor    ? 'lvl ' + f.floor        : null,
+    f.duration ? f.duration              : (detected.stages ? 'stage ' + detected.stages : null),
+    f.score    ? f.score + ' kills'      : null,
+  ].filter(Boolean).join(' · ');
+  document.getElementById('auto-run-toast-sub').textContent =
+    (detected.result ? 'result: ' + detected.result.toUpperCase() : 'result unknown — set manually')
+    + (extras ? '  //  ' + extras : '');
+  document.getElementById('auto-run-toast').style.display = 'flex';
+  clearTimeout(toastDismissTimer);
+  toastDismissTimer = setTimeout(dismissRunToast, 18000);
+}
+
+function dismissRunToast() {
+  document.getElementById('auto-run-toast').style.display = 'none';
+  pendingAutoRun = null;
+  clearTimeout(toastDismissTimer);
+}
+
+document.getElementById('auto-run-log-btn').addEventListener('click', () => {
+  if (!pendingAutoRun) return;
+  const { gameId, result, fields } = pendingAutoRun;
+  dismissRunToast();
+  if (gameId !== activeGameId) selectGame(gameId);
+  openRunModal(null, { result, fields });
+});
+
+document.getElementById('auto-run-dismiss-btn').addEventListener('click', dismissRunToast);
+
+// ── Watcher engine ─────────────────────────────────────────────────────────────
+async function startWatcher(gameId) {
+  const w = watchers[gameId];
+  if (!w?.dirHandle || !w.gameType) return;
+  stopWatcher(gameId);
+  w.lastState = await readGameState(w.dirHandle, w.gameType);
+  w.active = true;
+  renderWatcherBlock(gameId, w.gameType);
+  w.interval = setInterval(async () => {
+    try {
+      const perm = await w.dirHandle.queryPermission({ mode: 'read' });
+      if (perm !== 'granted') { stopWatcher(gameId); renderWatcherBlock(gameId, w.gameType); return; }
+      const curr = await readGameState(w.dirHandle, w.gameType);
+      if (!curr) return;
+      const hit = detectRunEnd(w.gameType, w.lastState, curr);
+      if (hit) showRunToast(gameId, hit);
+      w.lastState = curr;
+    } catch(e) { console.error('watcher tick', e); }
+  }, 3000);
+}
+
+function stopWatcher(gameId) {
+  const w = watchers[gameId];
+  if (!w) return;
+  clearInterval(w.interval);
+  w.interval = null;
+  w.active = false;
+}
+
+// ── Watcher UI in right panel ──────────────────────────────────────────────────
+function renderWatcherBlock(gameId, gameType) {
+  const block = document.getElementById('rp-watcher-block');
+  const hint  = document.getElementById('rp-watcher-hint');
+  const dot   = document.getElementById('rp-watcher-dot');
+  const label = document.getElementById('rp-watcher-label');
+  if (!block) return;
+
+  if (!gameType) { block.style.display = 'none'; return; }
+  block.style.display = '';
+
+  const meta = GAME_TYPE_META[gameType] || {};
+  hint.textContent = meta.hint || '';
+
+  const w = watchers[gameId];
+  if (w?.active) {
+    dot.className = 'watcher-dot active';
+    label.textContent = 'watching — ' + meta.label;
+  } else if (w?.dirHandle) {
+    dot.className = 'watcher-dot inactive';
+    label.textContent = 'folder set — click save to activate';
+  } else {
+    dot.className = 'watcher-dot inactive';
+    label.textContent = 'no folder selected';
+  }
+}
+
+// Game type dropdown change → update hint, don't start watcher yet (need save)
+document.getElementById('rp-game-type').addEventListener('change', e => {
+  if (!activeGameId) return;
+  renderWatcherBlock(activeGameId, e.target.value);
+});
+
+// Select folder button
+document.getElementById('rp-select-folder-btn').addEventListener('click', async () => {
+  if (!activeGameId) return;
+  if (!('showDirectoryPicker' in window)) {
+    alert('File System Access API is not supported in this browser.\nUse Chrome or Edge for game integration.');
+    return;
+  }
+  try {
+    const handle = await window.showDirectoryPicker({ mode: 'read' });
+    const gameType = document.getElementById('rp-game-type').value;
+    if (!watchers[activeGameId]) watchers[activeGameId] = {};
+    watchers[activeGameId].dirHandle = handle;
+    watchers[activeGameId].gameType  = gameType;
+    await saveWatchHandle(activeGameId, handle);
+    await startWatcher(activeGameId);
+    renderWatcherBlock(activeGameId, gameType);
+  } catch(e) {
+    if (e.name !== 'AbortError') console.error('folder picker', e);
+  }
+});
+
+// Restore watchers from IndexedDB on startup
+async function initWatchers() {
+  if (!('showDirectoryPicker' in window)) return;
+  for (const game of db.games) {
+    if (!game.gameType) continue;
+    try {
+      const handle = await loadWatchHandle(game.id);
+      if (!handle) continue;
+      const perm = await handle.queryPermission({ mode: 'read' });
+      watchers[game.id] = { dirHandle: handle, gameType: game.gameType, active: false };
+      if (perm === 'granted') await startWatcher(game.id);
+    } catch(e) { /* stale handle or no permission */ }
+  }
+}
+
 // Button wires
 document.getElementById('add-game-btn').addEventListener('click', () => openGameModal());
 document.getElementById('new-run-btn').addEventListener('click',  () => openRunModal());
@@ -3420,11 +4545,16 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 
 document.querySelectorAll('[data-close]').forEach(btn =>
   btn.addEventListener('click', () => closeModal(btn.dataset.close)));
+const LOCKED_MODALS = new Set(['auth-modal', 'profile-modal', 'settings-modal', 'recovery-modal']);
 document.querySelectorAll('.modal-overlay').forEach(ov =>
-  ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); }));
+  ov.addEventListener('click', e => {
+    if (e.target === ov && !LOCKED_MODALS.has(ov.id)) closeModal(ov.id);
+  }));
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape')
-    document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id));
+    document.querySelectorAll('.modal-overlay.open').forEach(m => {
+      if (!LOCKED_MODALS.has(m.id)) closeModal(m.id);
+    });
 });
 
 // ── Utils ─────────────────────────────────────────────────────────────────────
@@ -3541,15 +4671,48 @@ document.getElementById('share-back-btn').addEventListener('click', () => {
 });
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
+function updateAuthBar() {
+  const dot   = document.querySelector('#sidebar-auth .sa-dot');
+  const label = document.querySelector('#sidebar-auth .sa-label');
+  const btn   = document.getElementById('btn-sidebar-auth');
+  if (sbUser) {
+    dot.className   = 'sa-dot online';
+    label.className = 'sa-label online';
+    label.textContent = sbUser.email;
+    btn.textContent = '[ sign out ]';
+    btn.className   = 'danger';
+  } else {
+    dot.className   = 'sa-dot offline';
+    label.className = 'sa-label';
+    label.textContent = 'offline';
+    btn.textContent = '[ sign in ]';
+    btn.className   = '';
+  }
+}
+
+document.getElementById('btn-sidebar-auth').addEventListener('click', () => {
+  if (sbUser) {
+    if (confirm('Sign out of your account?')) doSignOut();
+  } else {
+    openModal('auth-modal');
+  }
+});
+
 function bootUI() {
+  const s = db.settings || {};
+  applyAccentHue(s.accentHue ?? 145, s.accentSat ?? 1);
+  applyBgImage(localStorage.getItem('rlt_bgimg'));
+  applyBgEffect(s.bgEffect || 'none');
+  document.getElementById('profile-section').style.pointerEvents = '';
+  updateAuthBar();
   renderSidebarProfile();
   renderSidebar();
-  updateSidebarFooter();
   if (db.games.length) selectGame(db.games[0].id);
   else {
     document.getElementById('game-view').style.display = 'none';
     document.getElementById('no-game-selected').style.display = '';
   }
+  initWatchers();
 }
 
 (async () => {
@@ -3559,7 +4722,15 @@ function bootUI() {
     db = defaultDB();
     const ok = await loadSharedProfile(shareMatch[1]);
     if (ok) bootUI();
-    return; // skip auth entirely
+    return;
+  }
+
+  if (!sb) {
+    // Supabase CDN failed to load — go straight to offline boot
+    db = load();
+    bootUI();
+    updateAuthBar();
+    return;
   }
 
   const { data: { session } } = await sb.auth.getSession();
@@ -3568,43 +4739,736 @@ function bootUI() {
     await loadFromSupabase();
     bootUI();
   } else {
-    updateSidebarFooter();
     openModal('auth-modal');
   }
+  updateAuthBar();
 
   sb.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session) {
+      if (_authBusy) return;
       sbUser = session.user;
       await loadFromSupabase();
       closeModal('auth-modal');
       bootUI();
+    } else if (event === 'PASSWORD_RECOVERY') {
+      document.getElementById('recovery-pw-new').value     = '';
+      document.getElementById('recovery-pw-confirm').value = '';
+      document.getElementById('recovery-msg').textContent  = '';
+      document.getElementById('recovery-msg').className    = 'settings-msg';
+      closeModal('auth-modal');
+      openModal('recovery-modal');
     } else if (event === 'SIGNED_OUT') {
       sbUser = null;
     }
+    updateAuthBar();
   });
 })();
 
+// ── Settings modal ────────────────────────────────────────────────────────────
+function openSettingsModal() {
+  document.getElementById('settings-email').value      = '';
+  document.getElementById('settings-email-pw').value   = '';
+  document.getElementById('settings-pw-new').value     = '';
+  document.getElementById('settings-pw-confirm').value = '';
+  document.getElementById('settings-pw-current').value = '';
+  ['settings-email-msg', 'settings-pw-msg'].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = '';
+    el.className = 'settings-msg';
+  });
+  const hasAuth = !!(sbUser && sb);
+  document.getElementById('settings-account-section').style.display = hasAuth ? '' : 'none';
+  document.getElementById('settings-offline-notice').style.display  = hasAuth ? 'none' : '';
+  openModal('settings-modal');
+  // reset wheel so it re-initialises with current saved hue each open
+  const cwCanvas = document.getElementById('settings-color-wheel');
+  if (cwCanvas) cwCanvas._cwReady = false;
+  requestAnimationFrame(initColorWheel);
+  syncBgPreview(localStorage.getItem('rlt_bgimg'));
+  syncBgEffectChips();
+}
+
+document.getElementById('settings-btn').addEventListener('click', openSettingsModal);
+
+// ── Change email (password confirmation) ──────────────────────────────────────
+document.getElementById('settings-email-btn').addEventListener('click', async () => {
+  const newEmail = document.getElementById('settings-email').value.trim();
+  const pw       = document.getElementById('settings-email-pw').value;
+  const msgEl    = document.getElementById('settings-email-msg');
+  const btn      = document.getElementById('settings-email-btn');
+  msgEl.className = 'settings-msg'; msgEl.textContent = '';
+  if (!newEmail)        { msgEl.className = 'settings-msg err'; msgEl.textContent = '// enter a new email address'; return; }
+  if (!pw)              { msgEl.className = 'settings-msg err'; msgEl.textContent = '// enter your current password'; return; }
+  if (!sb || !sbUser)   { msgEl.className = 'settings-msg err'; msgEl.textContent = '// not signed in'; return; }
+  btn.textContent = '[ ... ]'; btn.disabled = true;
+  try {
+    const { error: reAuthErr } = await sb.auth.signInWithPassword({ email: sbUser.email, password: pw });
+    if (reAuthErr) {
+      msgEl.className = 'settings-msg err';
+      msgEl.textContent = '// incorrect password';
+    } else {
+      const { error: updateErr } = await sb.auth.updateUser({ email: newEmail });
+      if (updateErr) {
+        msgEl.className = 'settings-msg err';
+        msgEl.textContent = '// ' + updateErr.message;
+      } else {
+        msgEl.className = 'settings-msg ok';
+        msgEl.textContent = '// confirmation sent to ' + newEmail + ' — click the link to complete the change';
+        document.getElementById('settings-email').value    = '';
+        document.getElementById('settings-email-pw').value = '';
+      }
+    }
+  } catch(e) {
+    msgEl.className = 'settings-msg err'; msgEl.textContent = '// ' + e.message;
+  }
+  btn.textContent = '[ Update Email ]'; btn.disabled = false;
+});
+
+// ── Change password (current password confirmation) ───────────────────────────
+document.getElementById('settings-pw-btn').addEventListener('click', async () => {
+  const pw      = document.getElementById('settings-pw-new').value;
+  const confirm = document.getElementById('settings-pw-confirm').value;
+  const current = document.getElementById('settings-pw-current').value;
+  const msgEl   = document.getElementById('settings-pw-msg');
+  const btn     = document.getElementById('settings-pw-btn');
+  msgEl.className = 'settings-msg'; msgEl.textContent = '';
+  if (!pw)            { msgEl.className = 'settings-msg err'; msgEl.textContent = '// enter a new password'; return; }
+  if (pw.length < 6)  { msgEl.className = 'settings-msg err'; msgEl.textContent = '// password must be at least 6 characters'; return; }
+  if (pw !== confirm)  { msgEl.className = 'settings-msg err'; msgEl.textContent = '// passwords do not match'; return; }
+  if (!current)        { msgEl.className = 'settings-msg err'; msgEl.textContent = '// enter your current password'; return; }
+  if (!sb || !sbUser)  { msgEl.className = 'settings-msg err'; msgEl.textContent = '// not signed in'; return; }
+  btn.textContent = '[ ... ]'; btn.disabled = true;
+  try {
+    const { error: reAuthErr } = await sb.auth.signInWithPassword({ email: sbUser.email, password: current });
+    if (reAuthErr) {
+      msgEl.className = 'settings-msg err'; msgEl.textContent = '// incorrect current password';
+    } else {
+      const { error: updateErr } = await sb.auth.updateUser({ password: pw });
+      if (updateErr) {
+        msgEl.className = 'settings-msg err'; msgEl.textContent = '// ' + updateErr.message;
+      } else {
+        msgEl.className = 'settings-msg ok'; msgEl.textContent = '// password updated successfully';
+        document.getElementById('settings-pw-new').value     = '';
+        document.getElementById('settings-pw-confirm').value = '';
+        document.getElementById('settings-pw-current').value = '';
+      }
+    }
+  } catch(e) {
+    msgEl.className = 'settings-msg err'; msgEl.textContent = '// ' + e.message;
+  }
+  btn.textContent = '[ Update Password ]'; btn.disabled = false;
+});
+
+// Password visibility toggles
+document.getElementById('settings-email-pw-toggle').addEventListener('click', function() {
+  const inp = document.getElementById('settings-email-pw');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  this.classList.toggle('closed', inp.type === 'password');
+});
+document.getElementById('settings-pw-toggle').addEventListener('click', function() {
+  const inp = document.getElementById('settings-pw-new');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  this.classList.toggle('closed', inp.type === 'password');
+});
+document.getElementById('settings-pw-confirm-toggle').addEventListener('click', function() {
+  const inp = document.getElementById('settings-pw-confirm');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  this.classList.toggle('closed', inp.type === 'password');
+});
+document.getElementById('settings-pw-current-toggle').addEventListener('click', function() {
+  const inp = document.getElementById('settings-pw-current');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  this.classList.toggle('closed', inp.type === 'password');
+});
+
+document.getElementById('settings-pw-email-btn').addEventListener('click', async () => {
+  const msgEl = document.getElementById('settings-pw-msg');
+  const btn   = document.getElementById('settings-pw-email-btn');
+  msgEl.className = 'settings-msg'; msgEl.textContent = '';
+  if (!sb || !sbUser) { msgEl.className = 'settings-msg err'; msgEl.textContent = '// not signed in'; return; }
+  btn.textContent = '...'; btn.disabled = true;
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(sbUser.email, {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    if (error) {
+      msgEl.className = 'settings-msg err'; msgEl.textContent = '// ' + error.message;
+    } else {
+      msgEl.className = 'settings-msg ok';
+      msgEl.textContent = '// reset link sent to ' + sbUser.email + ' — click it to set a new password';
+    }
+  } catch(e) {
+    msgEl.className = 'settings-msg err'; msgEl.textContent = '// ' + e.message;
+  }
+  btn.textContent = 'or reset via email'; btn.disabled = false;
+});
+
+// ── Recovery modal ────────────────────────────────────────────────────────────
+document.getElementById('recovery-pw-btn').addEventListener('click', async () => {
+  const pw      = document.getElementById('recovery-pw-new').value;
+  const confirm = document.getElementById('recovery-pw-confirm').value;
+  const msgEl   = document.getElementById('recovery-msg');
+  const btn     = document.getElementById('recovery-pw-btn');
+  msgEl.className = 'settings-msg'; msgEl.textContent = '';
+  if (!pw)           { msgEl.className = 'settings-msg err'; msgEl.textContent = '// enter a new password'; return; }
+  if (pw.length < 6) { msgEl.className = 'settings-msg err'; msgEl.textContent = '// password must be at least 6 characters'; return; }
+  if (pw !== confirm) { msgEl.className = 'settings-msg err'; msgEl.textContent = '// passwords do not match'; return; }
+  btn.textContent = '[ ... ]'; btn.disabled = true;
+  try {
+    const { error } = await sb.auth.updateUser({ password: pw });
+    if (error) {
+      msgEl.className = 'settings-msg err'; msgEl.textContent = '// ' + error.message;
+    } else {
+      msgEl.className = 'settings-msg ok'; msgEl.textContent = '// password updated successfully';
+      setTimeout(() => closeModal('recovery-modal'), 1200);
+    }
+  } catch(e) {
+    msgEl.className = 'settings-msg err'; msgEl.textContent = '// ' + e.message;
+  }
+  btn.textContent = '[ Set Password ]'; btn.disabled = false;
+});
+
+document.getElementById('recovery-cancel-btn').addEventListener('click', () => closeModal('recovery-modal'));
+
+// ── Appearance: accent color ──────────────────────────────────────────────────
+function applyAccentHue(h, s = 1) {
+  h = ((h % 360) + 360) % 360;
+  s = Math.max(0, Math.min(1, s));
+  const sp = Math.round(s * 100);
+  const r  = document.documentElement;
+  r.style.setProperty('--accent',        `hsl(${h},${sp}%,50%)`);
+  r.style.setProperty('--accent-dim',    `hsl(${h},${sp}%,21%)`);
+  r.style.setProperty('--accent-glow',   `hsla(${h},${sp}%,50%,0.12)`);
+  r.style.setProperty('--accent-glow2',  `hsla(${h},${sp}%,50%,0.06)`);
+  r.style.setProperty('--win',           `hsl(${h},${sp}%,50%)`);
+  r.style.setProperty('--win-bg',        `hsla(${h},${sp}%,50%,0.08)`);
+  r.style.setProperty('--text',          `hsl(${h},${Math.round(s*80+20)}%,81%)`);
+  r.style.setProperty('--text-dim',      `hsl(${h},${Math.round(s*25+8)}%,36%)`);
+  r.style.setProperty('--text-faint',    `hsl(${h},${Math.round(s*40+12)}%,23%)`);
+  r.style.setProperty('--surface',       `hsl(${h},${Math.round(s*50+10)}%,3%)`);
+  r.style.setProperty('--surface2',      `hsl(${h},${Math.round(s*40+10)}%,6%)`);
+  r.style.setProperty('--border',        `hsl(${h},${Math.round(s*55+12)}%,12%)`);
+  r.style.setProperty('--border-hi',     `hsl(${h},${Math.round(s*48+11)}%,21%)`);
+  r.style.setProperty('--scanline-tint', `hsla(${h},${sp}%,50%,0.018)`);
+}
+
+// ── Appearance: background image ─────────────────────────────────────────────
+function applyBgImage(dataUrl) {
+  const el = document.getElementById('app-bg');
+  if (dataUrl) {
+    el.style.backgroundImage = `url(${dataUrl})`;
+    el.style.display = 'block';
+    document.body.style.backgroundColor = 'transparent';
+  } else {
+    el.style.display = 'none';
+    el.style.backgroundImage = '';
+    if (!bgFx.current || bgFx.current === 'none') document.body.style.backgroundColor = '';
+  }
+}
+
+// ── Appearance: matrix-style background effects ──────────────────────────────
+const bgFx = {
+  current: 'none',
+  raf: null,
+  canvas: null,
+  ctx: null,
+  state: null,
+  start: 0,
+  resizeBound: null,
+};
+
+function bgFxAccent() {
+  const h = (db.settings && typeof db.settings.accentHue === 'number') ? db.settings.accentHue : 145;
+  const s = (db.settings && typeof db.settings.accentSat === 'number') ? db.settings.accentSat : 1;
+  return { h, s: Math.round(s * 100) };
+}
+
+function bgFxResize() {
+  const c = bgFx.canvas;
+  if (!c) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  c.width  = Math.floor(window.innerWidth  * dpr);
+  c.height = Math.floor(window.innerHeight * dpr);
+  c.style.width  = window.innerWidth  + 'px';
+  c.style.height = window.innerHeight + 'px';
+  bgFx.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // Reset per-effect state on resize
+  if (bgFx.state && bgFx.state.init) bgFx.state.init();
+}
+
+function applyBgEffect(name) {
+  bgFx.current = name || 'none';
+  const c = document.getElementById('bg-canvas');
+  if (!c) return;
+  bgFx.canvas = c;
+  bgFx.ctx = c.getContext('2d');
+
+  // Stop existing loop
+  if (bgFx.raf) cancelAnimationFrame(bgFx.raf);
+  bgFx.raf = null;
+  if (bgFx.resizeBound) {
+    window.removeEventListener('resize', bgFx.resizeBound);
+    bgFx.resizeBound = null;
+  }
+
+  if (bgFx.current === 'none') {
+    c.classList.remove('active');
+    bgFx.ctx.clearRect(0, 0, c.width, c.height);
+    bgFx.state = null;
+    if (!document.getElementById('app-bg').style.backgroundImage) document.body.style.backgroundColor = '';
+    return;
+  }
+
+  c.classList.add('active');
+  document.body.style.backgroundColor = 'transparent';
+  bgFx.state = bgFxFactory(bgFx.current);
+  bgFx.resizeBound = bgFxResize;
+  window.addEventListener('resize', bgFx.resizeBound);
+  bgFxResize();
+  bgFx.start = performance.now();
+  const loop = (now) => {
+    if (!bgFx.state || bgFx.current === 'none') return;
+    const t = (now - bgFx.start) / 1000;
+    bgFx.state.frame(t);
+    bgFx.raf = requestAnimationFrame(loop);
+  };
+  bgFx.raf = requestAnimationFrame(loop);
+}
+
+function bgFxFactory(name) {
+  if (name === 'rain')      return makeRainFx();
+  if (name === 'grid')      return makeGridFx();
+  if (name === 'wave')      return makeWaveFx();
+  if (name === 'pulse')     return makePulseFx();
+  if (name === 'starfield') return makeStarfieldFx();
+  return null;
+}
+
+// Matrix Rain — falling glyph columns
+function makeRainFx() {
+  const GLYPHS = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789<>/\\|=*+-_';
+  let columns = [], colW = 16, lastT = 0;
+  function init() {
+    const w = window.innerWidth, h = window.innerHeight;
+    colW = 16;
+    const cols = Math.ceil(w / colW);
+    columns = new Array(cols).fill(0).map((_, i) => ({
+      x: i * colW + colW / 2,
+      y: Math.random() * h,
+      speed: 60 + Math.random() * 120,
+      length: 8 + Math.floor(Math.random() * 18),
+      glyphSeed: Math.random() * 99,
+    }));
+    lastT = 0;
+  }
+  function frame(t) {
+    const ctx = bgFx.ctx;
+    const w = window.innerWidth, h = window.innerHeight;
+    const dt = Math.min(0.05, t - lastT); lastT = t;
+    const { h: hue, s } = bgFxAccent();
+
+    // Trail fade
+    ctx.fillStyle = 'rgba(0,0,0,0.10)';
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.font = '14px ui-monospace, "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+
+    columns.forEach(col => {
+      col.y += col.speed * dt;
+      if (col.y - col.length * 14 > h) {
+        col.y = -Math.random() * h * 0.5;
+        col.speed = 60 + Math.random() * 120;
+      }
+      for (let i = 0; i < col.length; i++) {
+        const yy = col.y - i * 14;
+        if (yy < -14 || yy > h + 14) continue;
+        const charIdx = Math.floor((t * 8 + col.glyphSeed + i * 3.13) % GLYPHS.length);
+        const ch = GLYPHS[charIdx];
+        if (i === 0) {
+          ctx.fillStyle = `hsla(${hue}, ${Math.max(40, s)}%, 88%, 0.95)`;
+          ctx.shadowColor = `hsl(${hue}, ${s}%, 60%)`;
+          ctx.shadowBlur = 8;
+        } else {
+          const alpha = Math.max(0.04, (1 - i / col.length) * 0.7);
+          ctx.fillStyle = `hsla(${hue}, ${s}%, ${50 - i * 1.5}%, ${alpha})`;
+          ctx.shadowBlur = 0;
+        }
+        ctx.fillText(ch, col.x, yy);
+      }
+    });
+    ctx.shadowBlur = 0;
+  }
+  init();
+  return { init, frame };
+}
+
+// Pulse Grid — dot grid with traveling pulse waves
+function makeGridFx() {
+  let dots = [], spacing = 28;
+  function init() {
+    const w = window.innerWidth, h = window.innerHeight;
+    spacing = 28;
+    dots = [];
+    for (let y = spacing / 2; y < h; y += spacing) {
+      for (let x = spacing / 2; x < w; x += spacing) {
+        dots.push({ x, y, phase: Math.random() * Math.PI * 2 });
+      }
+    }
+  }
+  function frame(t) {
+    const ctx = bgFx.ctx;
+    const w = window.innerWidth, h = window.innerHeight;
+    const { h: hue, s } = bgFxAccent();
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillRect(0, 0, w, h);
+
+    // Two traveling pulse centers
+    const cxA = (Math.sin(t * 0.18) * 0.5 + 0.5) * w;
+    const cyA = (Math.cos(t * 0.13) * 0.5 + 0.5) * h;
+    const cxB = (Math.cos(t * 0.21) * 0.5 + 0.5) * w;
+    const cyB = (Math.sin(t * 0.17) * 0.5 + 0.5) * h;
+
+    dots.forEach(d => {
+      const dxA = d.x - cxA, dyA = d.y - cyA;
+      const dxB = d.x - cxB, dyB = d.y - cyB;
+      const distA = Math.sqrt(dxA * dxA + dyA * dyA);
+      const distB = Math.sqrt(dxB * dxB + dyB * dyB);
+      const wA = Math.max(0, Math.cos((distA / 80 - t * 1.4)));
+      const wB = Math.max(0, Math.cos((distB / 90 - t * 1.1)));
+      const intensity = Math.min(1, (wA + wB) * 0.55);
+      const r = 1.2 + intensity * 2.4;
+      const alpha = 0.05 + intensity * 0.85;
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${hue}, ${s}%, ${40 + intensity * 30}%, ${alpha})`;
+      if (intensity > 0.5) {
+        ctx.shadowColor = `hsl(${hue}, ${s}%, 55%)`;
+        ctx.shadowBlur = 6 * intensity;
+      } else { ctx.shadowBlur = 0; }
+      ctx.fill();
+    });
+    ctx.shadowBlur = 0;
+  }
+  init();
+  return { init, frame };
+}
+
+// Wave Scan — sine-wave horizontal scan lines drifting upward
+function makeWaveFx() {
+  let waves = [];
+  function init() {
+    waves = new Array(8).fill(0).map((_, i) => ({
+      yOffset: i * 80,
+      amp: 18 + Math.random() * 26,
+      freq: 0.005 + Math.random() * 0.012,
+      speed: 30 + Math.random() * 40,
+      phase: Math.random() * Math.PI * 2,
+    }));
+  }
+  function frame(t) {
+    const ctx = bgFx.ctx;
+    const w = window.innerWidth, h = window.innerHeight;
+    const { h: hue, s } = bgFxAccent();
+    ctx.fillStyle = 'rgba(0,0,0,0.12)';
+    ctx.fillRect(0, 0, w, h);
+
+    waves.forEach((wv, idx) => {
+      const baseY = ((wv.yOffset + t * wv.speed) % (h + 200)) - 100;
+      const grad = ctx.createLinearGradient(0, 0, w, 0);
+      grad.addColorStop(0,    `hsla(${hue}, ${s}%, 50%, 0)`);
+      grad.addColorStop(0.5,  `hsla(${hue}, ${s}%, 60%, ${0.45 - idx * 0.03})`);
+      grad.addColorStop(1,    `hsla(${hue}, ${s}%, 50%, 0)`);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.4;
+      ctx.shadowColor = `hsl(${hue}, ${s}%, 55%)`;
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      for (let x = 0; x <= w; x += 6) {
+        const y = baseY + Math.sin(x * wv.freq + t * 1.4 + wv.phase) * wv.amp;
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    });
+    ctx.shadowBlur = 0;
+  }
+  init();
+  return { init, frame };
+}
+
+// Radial Pulse — expanding rings from random points
+function makePulseFx() {
+  let pulses = [];
+  function spawn(t) {
+    pulses.push({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      born: t,
+      maxR: 220 + Math.random() * 280,
+      duration: 2.6 + Math.random() * 1.8,
+    });
+  }
+  let lastSpawn = 0;
+  function init() { pulses = []; lastSpawn = 0; }
+  function frame(t) {
+    const ctx = bgFx.ctx;
+    const w = window.innerWidth, h = window.innerHeight;
+    const { h: hue, s } = bgFxAccent();
+    ctx.fillStyle = 'rgba(0,0,0,0.16)';
+    ctx.fillRect(0, 0, w, h);
+
+    if (t - lastSpawn > 0.55) { spawn(t); lastSpawn = t; }
+    pulses = pulses.filter(p => t - p.born < p.duration);
+
+    pulses.forEach(p => {
+      const k = (t - p.born) / p.duration;     // 0 → 1
+      const r = k * p.maxR;
+      const alpha = (1 - k) * 0.55;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.strokeStyle = `hsla(${hue}, ${s}%, ${55 - k * 15}%, ${alpha})`;
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = `hsl(${hue}, ${s}%, 55%)`;
+      ctx.shadowBlur = 12 * (1 - k);
+      ctx.stroke();
+      // inner core dot
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 2 + (1 - k) * 3, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${hue}, ${s}%, 70%, ${alpha * 1.4})`;
+      ctx.fill();
+    });
+    ctx.shadowBlur = 0;
+  }
+  init();
+  return { init, frame };
+}
+
+// Starfield — drifting glyphs/sparks toward viewer (warp-style)
+function makeStarfieldFx() {
+  let stars = [];
+  function init() {
+    const N = 220;
+    stars = new Array(N).fill(0).map(() => ({
+      x: (Math.random() - 0.5),
+      y: (Math.random() - 0.5),
+      z: Math.random(),
+      speed: 0.18 + Math.random() * 0.5,
+    }));
+  }
+  function frame(t) {
+    const ctx = bgFx.ctx;
+    const w = window.innerWidth, h = window.innerHeight;
+    const { h: hue, s } = bgFxAccent();
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.fillRect(0, 0, w, h);
+
+    const cx = w / 2, cy = h / 2;
+    stars.forEach(st => {
+      st.z -= 0.0045 * st.speed;
+      if (st.z <= 0.02) {
+        st.x = (Math.random() - 0.5);
+        st.y = (Math.random() - 0.5);
+        st.z = 1;
+        st.speed = 0.18 + Math.random() * 0.5;
+      }
+      const k = 1 / st.z;
+      const px = cx + st.x * k * w * 0.5;
+      const py = cy + st.y * k * h * 0.5;
+      if (px < -10 || px > w + 10 || py < -10 || py > h + 10) return;
+      const size = (1 - st.z) * 2.4;
+      const alpha = Math.min(1, 1 - st.z);
+      // streak
+      const tailK = 1 / Math.min(1, st.z + 0.04);
+      const tx = cx + st.x * tailK * w * 0.5;
+      const ty = cy + st.y * tailK * h * 0.5;
+      ctx.strokeStyle = `hsla(${hue}, ${s}%, 70%, ${alpha * 0.45})`;
+      ctx.lineWidth = Math.max(0.6, size);
+      ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(px, py); ctx.stroke();
+      // head
+      ctx.fillStyle = `hsla(${hue}, ${s}%, 85%, ${alpha})`;
+      ctx.shadowColor = `hsl(${hue}, ${s}%, 60%)`;
+      ctx.shadowBlur = 6 * alpha;
+      ctx.beginPath(); ctx.arc(px, py, size, 0, Math.PI * 2); ctx.fill();
+    });
+    ctx.shadowBlur = 0;
+  }
+  init();
+  return { init, frame };
+}
+
+// ── Color wheel canvas ────────────────────────────────────────────────────────
+function drawColorWheel(canvas) {
+  const ctx = canvas.getContext('2d');
+  const cx = canvas.width / 2, cy = canvas.height / 2;
+  const r  = Math.min(cx, cy) - 1;
+  // draw hue+saturation wheel: each slice gets a radial gradient white→hue
+  for (let deg = 0; deg < 360; deg++) {
+    const startA = (deg - 0.5) * Math.PI / 180;
+    const endA   = (deg + 1.5) * Math.PI / 180;
+    const grad   = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grad.addColorStop(0,   'rgba(255,255,255,1)');
+    grad.addColorStop(0.15,'rgba(255,255,255,0.6)');
+    grad.addColorStop(1,   `hsl(${deg},100%,50%)`);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, startA, endA);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+  }
+  // dark outer ring
+  const ring = ctx.createRadialGradient(cx, cy, r - 6, cx, cy, r);
+  ring.addColorStop(0, 'rgba(0,0,0,0)');
+  ring.addColorStop(1, 'rgba(0,0,0,0.35)');
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fillStyle = ring;
+  ctx.fill();
+}
+
+function cwUpdateDot(canvas, dot, h, s) {
+  const cx = canvas.width / 2, cy = canvas.height / 2;
+  const r  = Math.min(cx, cy) - 1;
+  const rad = h * Math.PI / 180;
+  const dist = s * (r - 4);
+  dot.style.left = (cx + Math.cos(rad) * dist) + 'px';
+  dot.style.top  = (cy + Math.sin(rad) * dist) + 'px';
+}
+
+function cwUpdateSwatch(h, s) {
+  const swatch = document.getElementById('cw-swatch');
+  const label  = document.getElementById('cw-hue-label');
+  if (!swatch) return;
+  swatch.style.background  = `hsl(${h},${Math.round(s*100)}%,50%)`;
+  swatch.style.boxShadow   = `0 0 12px hsl(${h},${Math.round(s*100)}%,50%)`;
+  swatch.style.borderColor = `hsl(${h},${Math.round(s*100)}%,30%)`;
+  if (label) label.textContent = `hue: ${Math.round(h)}°  sat: ${Math.round(s*100)}%`;
+}
+
+function initColorWheel() {
+  const canvas = document.getElementById('settings-color-wheel');
+  const dot    = document.getElementById('cw-selector-dot');
+  if (!canvas || canvas._cwReady) return;
+  canvas._cwReady = true;
+  drawColorWheel(canvas);
+
+  const s0 = db.settings || {};
+  let cwH = s0.accentHue ?? 145;
+  let cwS = s0.accentSat ?? 1;
+  cwUpdateDot(canvas, dot, cwH, cwS);
+  cwUpdateSwatch(cwH, cwS);
+
+  function pickFromEvent(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width  / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    const x  = (e.clientX - rect.left) * scaleX - cx;
+    const y  = (e.clientY - rect.top)  * scaleY - cy;
+    const r  = Math.min(cx, cy) - 1;
+    const dist = Math.sqrt(x * x + y * y);
+    if (dist > r) return;
+    cwH = ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360;
+    cwS = Math.min(1, dist / (r - 4));
+    cwUpdateDot(canvas, dot, cwH, cwS);
+    cwUpdateSwatch(cwH, cwS);
+    applyAccentHue(cwH, cwS);
+    if (!db.settings) db.settings = {};
+    db.settings.accentHue = cwH;
+    db.settings.accentSat = cwS;
+    save(db);
+  }
+
+  let dragging = false;
+  canvas.addEventListener('mousedown', e => { dragging = true; pickFromEvent(e); });
+  window.addEventListener('mousemove', e => { if (dragging) pickFromEvent(e); });
+  window.addEventListener('mouseup',   ()  => { dragging = false; });
+  canvas.addEventListener('touchstart', e => { pickFromEvent(e.touches[0]); }, { passive: true });
+  canvas.addEventListener('touchmove',  e => { pickFromEvent(e.touches[0]); e.preventDefault(); }, { passive: false });
+}
+
+document.getElementById('cw-reset-btn').addEventListener('click', () => {
+  if (!db.settings) db.settings = {};
+  db.settings.accentHue = 145;
+  db.settings.accentSat = 1;
+  save(db);
+  applyAccentHue(145, 1);
+  const canvas = document.getElementById('settings-color-wheel');
+  const dot    = document.getElementById('cw-selector-dot');
+  canvas._cwReady = false;
+  initColorWheel();
+});
+
+// ── Background image handlers ─────────────────────────────────────────────────
+document.getElementById('bg-upload-zone').addEventListener('click', () => {
+  document.getElementById('file-bg-image').click();
+});
+document.getElementById('file-bg-image').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  const dataUrl = await new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = ev => resolve(ev.target.result);
+    reader.readAsDataURL(file);
+  });
+  try {
+    localStorage.setItem('rlt_bgimg', dataUrl);
+  } catch {
+    alert('Image too large for storage — try a smaller file.');
+    return;
+  }
+  applyBgImage(dataUrl);
+  syncBgPreview(dataUrl);
+});
+document.getElementById('bg-clear-btn').addEventListener('click', () => {
+  localStorage.removeItem('rlt_bgimg');
+  applyBgImage(null);
+  syncBgPreview(null);
+});
+
+// ── Background effect handlers ────────────────────────────────────────────────
+function syncBgEffectChips() {
+  const cur = (db.settings && db.settings.bgEffect) || 'none';
+  document.querySelectorAll('.bg-effect-chip').forEach(b =>
+    b.classList.toggle('active', b.dataset.fx === cur));
+}
+document.getElementById('bg-effect-row').addEventListener('click', e => {
+  const btn = e.target.closest('.bg-effect-chip');
+  if (!btn) return;
+  const fx = btn.dataset.fx;
+  if (!db.settings) db.settings = {};
+  db.settings.bgEffect = fx;
+  save(db);
+  applyBgEffect(fx);
+  syncBgEffectChips();
+});
+
+function syncBgPreview(dataUrl) {
+  const preview = document.getElementById('bg-img-preview');
+  const thumb   = document.getElementById('bg-img-thumb');
+  if (dataUrl) {
+    thumb.style.backgroundImage = `url(${dataUrl})`;
+    preview.style.display = 'flex';
+  } else {
+    thumb.style.backgroundImage = '';
+    preview.style.display = 'none';
+  }
+}
+
+document.getElementById('recovery-pw-toggle').addEventListener('click', function() {
+  const inp = document.getElementById('recovery-pw-new');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  this.classList.toggle('closed', inp.type === 'password');
+});
+document.getElementById('recovery-pw-confirm-toggle').addEventListener('click', function() {
+  const inp = document.getElementById('recovery-pw-confirm');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  this.classList.toggle('closed', inp.type === 'password');
+});
+
 </script>
 
-<!-- IMAGE ADJUSTER -->
-<div id="img-adjuster-overlay">
-  <div id="img-adjuster-box">
-    <div id="adj-title">// adjust image</div>
-    <div id="adj-viewport">
-      <canvas id="adj-canvas" width="240" height="240"></canvas>
-      <div id="adj-circle-mask"></div>
-    </div>
-    <div id="adj-zoom-row">
-      <span>zoom</span>
-      <input type="range" id="adj-zoom" min="50" max="400" value="100">
-    </div>
-    <div id="adj-hint">drag to reframe · scroll to zoom</div>
-    <div id="adj-actions">
-      <button class="btn btn-ghost btn-sm" id="adj-cancel">Cancel</button>
-      <button class="btn btn-primary" id="adj-apply">[ Apply ]</button>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>

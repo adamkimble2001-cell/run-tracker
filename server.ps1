@@ -17,17 +17,31 @@ $mimeMap = @{
 
 $ep     = [System.Net.IPEndPoint]::new([System.Net.IPAddress]::Loopback, $Port)
 $server = [System.Net.Sockets.TcpListener]::new($ep)
-$server.Start()
-Write-Host "Serving http://localhost:$Port/ from $root"
+
+try {
+    $server.Start()
+} catch {
+    Write-Host "ERROR: Cannot bind to port $Port — is it already in use?" -ForegroundColor Red
+    Write-Host "Run: netstat -ano | findstr :$Port  to see what's using it." -ForegroundColor Yellow
+    exit 1
+}
+
+Write-Host "Serving http://localhost:$Port/ from $root" -ForegroundColor Green
+Write-Host "Open http://localhost:$Port in Chrome or Edge to test. Ctrl+C to stop." -ForegroundColor Cyan
 
 while ($true) {
-    $client = $server.AcceptTcpClient()
-    $client.ReceiveTimeout = 3000   # 3 s read timeout
-    $client.SendTimeout    = 10000  # 10 s write timeout
+    try {
+        $client = $server.AcceptTcpClient()
+    } catch {
+        Write-Host "Server stopped." -ForegroundColor Yellow
+        break
+    }
+
+    $client.ReceiveTimeout = 3000
+    $client.SendTimeout    = 10000
     $stream = $client.GetStream()
 
     try {
-        # Read request line-by-line until blank line (end of headers)
         $sb  = [System.Text.StringBuilder]::new()
         $buf = [byte[]]::new(1)
         while ($true) {
@@ -39,7 +53,6 @@ while ($true) {
         }
         $reqText = $sb.ToString()
 
-        # Parse: "GET /path?q HTTP/1.x"
         $firstLine = ($reqText -split "`r`n")[0]
         $parts     = $firstLine -split ' '
         $urlPath   = if ($parts.Count -ge 2) { ($parts[1] -split '\?')[0] } else { '/' }
@@ -61,15 +74,13 @@ while ($true) {
             $ct     = 'text/plain'
         }
 
-        # Respond with HTTP/1.0 — always closes after response, no keep-alive needed
         $headerStr = "HTTP/1.0 $status`r`nContent-Type: $ct`r`nContent-Length: $($body.Length)`r`nCache-Control: no-cache`r`n`r`n"
         $hBytes    = [System.Text.Encoding]::ASCII.GetBytes($headerStr)
-
         $stream.Write($hBytes, 0, $hBytes.Length)
         $stream.Write($body,   0, $body.Length)
         $stream.Flush()
     } catch {
-        Write-Host "ERR: $_"
+        # Silently ignore individual request errors (e.g. client disconnected early)
     } finally {
         try { $stream.Close() } catch {}
         try { $client.Close() } catch {}
