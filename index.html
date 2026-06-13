@@ -1,46 +1,17 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RUN_TRACKER.EXE</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://wbbfkyzdmpnyiizifijz.supabase.co; img-src 'self' data: blob:; frame-src 'none'; object-src 'none';">
+<title>RUN_TRACKER.EXE // ONLINE</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
-  :root {
-    --bg:          #000000;
-    --surface:     #030d06;
-    --surface2:    #07160a;
-    --border:      #0c3018;
-    --border-hi:   #165c2c;
-    --accent:      #00ff70;
-    --accent-dim:  #006b2e;
-    --accent-glow: rgba(0,255,112,0.12);
-    --accent-glow2:rgba(0,255,112,0.06);
-    --win:         #00ff70;
-    --win-bg:      rgba(0,255,112,0.08);
-    --loss:        #ff2840;
-    --loss-bg:     rgba(255,40,64,0.08);
-    --abandoned:   #336644;
-    --text:        #a0ffbe;
-    --text-dim:    #3d7a52;
-    --text-faint:  #1e5c35;
-    --font:        'Courier New', 'Consolas', 'Lucida Console', monospace;
-    --mono:        'Courier New', 'Consolas', monospace;
-    --radius:      2px;
-    --scanline-tint: rgba(0,255,112,0.018);
-  }
+  :root { --bg:          #000000; --surface:     #030d06; --surface2:    #07160a; --border:      #0c3018; --border-hi:   #165c2c; --accent:      #00ff70; --accent-dim:  #006b2e; --accent-glow: rgba(0,255,112,0.12); --accent-glow2:rgba(0,255,112,0.06); --win:         #00ff70; --win-bg:      rgba(0,255,112,0.08); --loss:        #ff2840; --loss-bg:     rgba(255,40,64,0.08); --abandoned:   #336644; --text:        #a0ffbe; --text-dim:    #3d7a52; --text-faint:  #1e5c35; --font:        'Courier New', 'Consolas', 'Lucida Console', monospace; --mono:        'Courier New', 'Consolas', monospace; --radius:      2px; --scanline-tint: rgba(0,255,112,0.018); }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font);
-    height: 100vh;
-    display: flex;
-    overflow: hidden;
-    font-size: 13px;
-  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); height: 100vh; display: flex; overflow: hidden; font-size: 13px; }
 
   /* Scanline overlay */
   body::after {
@@ -56,359 +27,100 @@
     );
     pointer-events: none;
     z-index: 9999;
-  }
+}
 
   /* ── Sidebar ── */
-  #sidebar {
-    width: 240px;
-    min-width: 240px;
-    background: var(--surface);
-    border-right: 1px solid var(--border-hi);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
+  #sidebar { width: 240px; min-width: 240px; background: var(--surface); border-right: 1px solid var(--border-hi); display: flex; flex-direction: column; overflow: hidden; }
 
   /* ── Sidebar header ── */
-  #sidebar-header {
-    padding: 14px 16px 12px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
+  #sidebar-header { padding: 14px 16px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 
-  #sidebar-header .sys-title {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    text-shadow: 0 0 10px var(--accent);
-  }
+  #sidebar-header .sys-title { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
 
-  #sidebar-header .sys-sub {
-    font-size: 10px;
-    color: var(--text-dim);
-    margin-top: 3px;
-    letter-spacing: 0.08em;
-  }
+  #sidebar-header .sys-sub { font-size: 10px; color: var(--text-dim); margin-top: 3px; letter-spacing: 0.08em; }
 
   /* ── Profile section ── */
-  #profile-section {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border-hi);
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    flex-shrink: 0;
-    position: relative;
-  }
+  #profile-section { padding: 12px 16px; border-bottom: 1px solid var(--border-hi); display: flex; align-items: flex-start; gap: 12px; flex-shrink: 0; position: relative; }
 
-  #edit-profile-btn {
-    margin: 6px 12px 2px;
-    padding: 6px 12px;
-    background: transparent;
-    border: 1px solid var(--border-hi);
-    border-radius: var(--radius);
-    color: var(--text-dim);
-    font-family: var(--font);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    cursor: pointer;
-    width: calc(100% - 24px);
-    transition: border-color 0.15s, color 0.15s, text-shadow 0.15s;
-    flex-shrink: 0;
-  }
-  #edit-profile-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    text-shadow: 0 0 8px var(--accent);
-  }
+  #edit-profile-btn { margin: 6px 12px 2px; padding: 6px 12px; background: transparent; border: 1px solid var(--border-hi); border-radius: var(--radius); color: var(--text-dim); font-family: var(--font); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; width: calc(100% - 24px); transition: border-color 0.15s, color 0.15s, text-shadow 0.15s; flex-shrink: 0; }
+  #edit-profile-btn:hover { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 8px var(--accent); }
 
-  #profile-section::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, var(--accent-dim), transparent);
-    opacity: 0.4;
-  }
+  #profile-section::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, var(--accent-dim), transparent); opacity: 0.4; }
 
+  .profile-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--surface2); border: 1px solid var(--accent-dim); box-shadow: 0 0 10px rgba(0,255,112,0.08); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: var(--accent); text-shadow: 0 0 8px var(--accent); transition: border-color 0.15s, box-shadow 0.15s; margin-top: 1px; }
 
-  .profile-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--surface2);
-    border: 1px solid var(--accent-dim);
-    box-shadow: 0 0 10px rgba(0,255,112,0.08);
-    overflow: hidden;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--accent);
-    text-shadow: 0 0 8px var(--accent);
-    transition: border-color 0.15s, box-shadow 0.15s;
-    margin-top: 1px;
-  }
-
-  #profile-section:hover .profile-avatar {
-    border-color: var(--accent);
-    box-shadow: 0 0 14px var(--accent-glow);
-  }
+  #profile-section:hover .profile-avatar { border-color: var(--accent); box-shadow: 0 0 14px var(--accent-glow); }
 
   .profile-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
   .profile-info { flex: 1; min-width: 0; }
 
-  .profile-name {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-transform: uppercase;
-    transition: color 0.15s, text-shadow 0.15s;
-    line-height: 1.2;
-  }
+  .profile-name { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; transition: color 0.15s, text-shadow 0.15s; line-height: 1.2; }
 
-  .profile-sub {
-    font-size: 10px;
-    color: var(--text-dim);
-    margin-top: 2px;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  .profile-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  .profile-current-game {
-    font-size: 10px;
-    color: var(--accent-dim);
-    letter-spacing: 0.06em;
-    margin-top: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  .profile-tag { font-size: 10px; font-family: var(--font-mono); color: var(--accent-dim, var(--accent)); letter-spacing: 0.1em; margin-top: 2px; }
 
-  .profile-bio-preview {
-    font-size: 10px;
-    color: var(--text-dim);
-    margin-top: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-style: italic;
-    opacity: 0.7;
-  }
+  .profile-current-game { font-size: 10px; color: var(--accent-dim); letter-spacing: 0.06em; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .profile-bio-preview { font-size: 10px; color: var(--text-dim); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-style: italic; opacity: 0.7; }
 
   /* Profile stats row */
-  .profile-stats-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 5px;
-    padding-top: 5px;
-    border-top: 1px solid var(--border);
-  }
+  .profile-stats-row { display: flex; gap: 8px; margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--border); }
 
-  .profile-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1px;
-    flex: 1;
-  }
+  .profile-stat { display: flex; flex-direction: column; align-items: center; gap: 1px; flex: 1; }
 
-  .profile-stat-value {
-    font-size: 13px;
-    font-weight: 700;
-    font-family: var(--mono);
-    color: var(--text-dim);
-    line-height: 1;
-  }
+  .profile-stat-value { font-size: 13px; font-weight: 700; font-family: var(--mono); color: var(--text-dim); line-height: 1; }
 
-  .profile-stat-label {
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-  }
+  .profile-stat-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint); }
 
-  .profile-stat.stat-rate .profile-stat-value {
-    color: var(--accent);
-    text-shadow: 0 0 6px var(--accent);
-  }
+  .profile-stat.stat-rate .profile-stat-value { color: var(--accent); text-shadow: 0 0 6px var(--accent); }
 
-  .profile-stats-divider {
-    width: 1px;
-    background: var(--border);
-    align-self: stretch;
-  }
+  .profile-stats-divider { width: 1px; background: var(--border); align-self: stretch; }
 
   /* ── Sidebar games ── */
-  .sidebar-label {
-    padding: 9px 16px 4px;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
+  .sidebar-label { padding: 9px 16px 4px; font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); border-bottom: 1px solid var(--border); flex-shrink: 0; }
 
   #games-list { flex: 1; overflow-y: auto; padding: 4px 0; }
 
-  .game-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 16px;
-    cursor: pointer;
-    border-left: 2px solid transparent;
-    transition: background 0.16s ease, border-color 0.16s ease, padding-left 0.16s ease, box-shadow 0.16s ease;
-    user-select: none;
-  }
+  .game-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; cursor: pointer; border-left: 2px solid transparent; transition: background 0.16s ease, border-color 0.16s ease, padding-left 0.16s ease, box-shadow 0.16s ease; user-select: none; }
 
-  .game-item:hover {
-    background: var(--surface2);
-    padding-left: 20px;
-    box-shadow: inset 2px 0 8px var(--accent-glow2);
-  }
+  .game-item:hover { background: var(--surface2); padding-left: 20px; box-shadow: inset 2px 0 8px var(--accent-glow2); }
 
-  .game-item.active {
-    background: var(--surface2);
-    border-left-color: var(--accent);
-    box-shadow: inset 2px 0 12px var(--accent-glow2);
-  }
+  .game-item.active { background: var(--surface2); border-left-color: var(--accent); box-shadow: inset 2px 0 12px var(--accent-glow2); }
 
-  .game-item.active .game-name {
-    color: var(--accent);
-    text-shadow: 0 0 8px var(--accent);
-  }
+  .game-item.active .game-name { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
 
-  .game-thumb {
-    width: 36px;
-    height: 36px;
-    border-radius: var(--radius);
-    background: var(--surface2);
-    overflow: hidden;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--accent);
-    border: 1px solid var(--border-hi);
-    text-shadow: 0 0 6px var(--accent);
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
-    will-change: transform;
-    transform-origin: center center;
-  }
+  .game-thumb { width: 36px; height: 36px; border-radius: var(--radius); background: var(--surface2); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: var(--accent); border: 1px solid var(--border-hi); text-shadow: 0 0 6px var(--accent); transition: border-color 0.2s, box-shadow 0.2s, transform 0.28s cubic-bezier(0.34,1.56,0.64,1); will-change: transform; transform-origin: center center; }
 
-  .game-item:hover .game-thumb {
-    border-color: var(--accent);
-    box-shadow: 0 0 12px var(--accent-glow), 0 4px 14px rgba(0,0,0,0.45);
-    transform: scale(1.1);
-  }
+  .game-item:hover .game-thumb { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow), 0 4px 14px rgba(0,0,0,0.45); transform: scale(1.1); }
 
-  .game-item.active .game-thumb {
-    border-color: var(--accent);
-    box-shadow: 0 0 20px var(--accent-glow), 0 0 0 1px var(--accent-dim), 0 6px 18px rgba(0,0,0,0.55);
-    transform: scale(1.18);
-  }
+  .game-item.active .game-thumb { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow), 0 0 0 1px var(--accent-dim), 0 6px 18px rgba(0,0,0,0.55); transform: scale(1.18); }
 
   .game-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .game-meta { flex: 1; min-width: 0; }
 
-  .game-name {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-transform: uppercase;
-    transition: color 0.15s, text-shadow 0.15s;
-  }
+  .game-name { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; transition: color 0.15s, text-shadow 0.15s; }
 
   .game-count { font-size: 10px; color: var(--text-dim); letter-spacing: 0.04em; }
 
-  .game-del {
-    display: none;
-    background: none;
-    border: none;
-    color: var(--text-faint);
-    font-size: 12px;
-    cursor: pointer;
-    padding: 3px 5px;
-    line-height: 1;
-    flex-shrink: 0;
-    font-family: var(--font);
-    transition: color 0.15s;
-  }
+  .game-del { display: none; background: none; border: none; color: var(--text-faint); font-size: 12px; cursor: pointer; padding: 3px 5px; line-height: 1; flex-shrink: 0; font-family: var(--font); transition: color 0.15s; }
 
   .game-item:hover .game-del { display: block; }
   .game-del:hover { color: var(--loss) !important; }
 
-  #add-game-btn {
-    margin: 8px 12px 12px;
-    padding: 8px 12px;
-    background: transparent;
-    border: 1px dashed var(--border-hi);
-    border-radius: var(--radius);
-    color: var(--text-dim);
-    font-size: 11px;
-    font-family: var(--font);
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: border-color 0.15s, color 0.15s, text-shadow 0.15s;
-    flex-shrink: 0;
-  }
+  #add-game-btn { margin: 8px 12px 12px; padding: 8px 12px; background: transparent; border: 1px dashed var(--border-hi); border-radius: var(--radius); color: var(--text-dim); font-size: 11px; font-family: var(--font); letter-spacing: 0.1em; cursor: pointer; text-transform: uppercase; transition: border-color 0.15s, color 0.15s, text-shadow 0.15s; flex-shrink: 0; }
 
-  #add-game-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    text-shadow: 0 0 8px var(--accent);
-  }
+  #add-game-btn:hover { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 8px var(--accent); }
 
   /* ── Sidebar auth bar ── */
-  #sidebar-auth {
-    flex-shrink: 0;
-    border-top: 1px solid var(--border-hi);
-    padding: 8px 12px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 9px;
-    letter-spacing: 0.1em;
-  }
-  #sidebar-auth .sa-dot {
-    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
-  }
+  #sidebar-auth { flex-shrink: 0; border-top: 1px solid var(--border-hi); padding: 8px 12px; display: flex; align-items: center; gap: 6px; font-size: 9px; letter-spacing: 0.1em; }
+  #sidebar-auth .sa-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
   #sidebar-auth .sa-dot.online  { background: var(--accent); box-shadow: 0 0 5px var(--accent); }
   #sidebar-auth .sa-dot.offline { background: var(--text-faint); }
-  #sidebar-auth .sa-label {
-    flex: 1; min-width: 0;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    color: var(--text-faint); text-transform: uppercase;
-  }
+  #sidebar-auth .sa-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-faint); text-transform: uppercase; }
   #sidebar-auth .sa-label.online { color: var(--text-dim); text-transform: none; }
-  #btn-sidebar-auth {
-    background: none; border: 1px solid var(--border-hi); border-radius: var(--radius);
-    color: var(--text-dim); font-size: 9px; font-family: var(--font);
-    letter-spacing: 0.1em; text-transform: uppercase;
-    cursor: pointer; padding: 4px 8px; white-space: nowrap;
-    transition: color 0.15s, border-color 0.15s;
-  }
+  #btn-sidebar-auth { background: none; border: 1px solid var(--border-hi); border-radius: var(--radius); color: var(--text-dim); font-size: 9px; font-family: var(--font); letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; padding: 4px 8px; white-space: nowrap; transition: color 0.15s, border-color 0.15s; }
   #btn-sidebar-auth:hover { color: var(--accent); border-color: var(--accent); }
   #btn-sidebar-auth.danger:hover { color: var(--loss); border-color: var(--loss); }
 
@@ -416,186 +128,95 @@
   #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
   /* ── Topbar ── */
-  #topbar {
-    padding: 12px 24px;
-    border-bottom: 1px solid var(--border-hi);
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-shrink: 0;
-    background: rgba(0,0,0,0.45);
-    backdrop-filter: blur(6px);
-  }
+  #topbar { padding: 12px 24px; border-bottom: 1px solid var(--border-hi); display: flex; align-items: center; gap: 14px; flex-shrink: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(6px); }
 
-  #topbar-game-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: var(--radius);
-    background: var(--surface2);
-    overflow: hidden;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--accent);
-    border: 1px solid var(--border-hi);
-    text-shadow: 0 0 8px var(--accent);
-  }
+  #topbar-game-icon { width: 36px; height: 36px; border-radius: var(--radius); background: var(--surface2); overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: var(--accent); border: 1px solid var(--border-hi); text-shadow: 0 0 8px var(--accent); }
 
   #topbar-game-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  #topbar-title {
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--accent);
-    text-shadow: 0 0 12px var(--accent);
-  }
+  #topbar-title { font-size: 16px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); text-shadow: 0 0 12px var(--accent); }
+
+  #topbar-watch-btn { background: transparent; border: 1px solid var(--border-hi); color: var(--text-dim); font-family: var(--font); font-size: 9px; letter-spacing: 0.12em; cursor: pointer; padding: 4px 8px; border-radius: var(--radius); display: flex; align-items: center; gap: 5px; transition: border-color 0.15s, color 0.15s; }
+  #topbar-watch-btn:hover { border-color: var(--accent); color: var(--accent); }
+  #topbar-watch-btn.active { border-color: var(--accent); color: var(--accent); }
+
+  #topbar-run-btn { display: none; align-items: center; gap: 5px; background: transparent; border: 1px solid var(--border-hi); color: var(--text-dim); font-family: var(--font); font-size: 9px; letter-spacing: 0.12em; cursor: pointer; padding: 4px 8px; border-radius: var(--radius); transition: border-color 0.15s, color 0.15s, box-shadow 0.15s; }
+  #topbar-run-btn:hover { border-color: var(--accent); color: var(--accent); }
+  #topbar-run-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-glow2); box-shadow: 0 0 8px var(--accent-glow); animation: run-btn-pulse 1.4s ease-in-out infinite; }
+  @keyframes run-btn-pulse { 0%,100% { box-shadow: 0 0 4px var(--accent-glow); } 50% { box-shadow: 0 0 12px rgba(0,255,112,0.22); } }
+  .run-indicator-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-faint); flex-shrink: 0; transition: background 0.2s, box-shadow 0.2s; }
+  .run-indicator-dot.active { background: var(--accent); box-shadow: 0 0 5px var(--accent); animation: watcher-pulse 0.9s ease-in-out infinite; }
+
+  #run-live-banner { display: none; align-items: center; gap: 16px; padding: 9px 24px; background: rgba(0,255,112,0.04); border-bottom: 1px solid var(--accent-dim); box-shadow: 0 2px 24px var(--accent-glow), inset 0 0 40px rgba(0,255,112,0.03); flex-shrink: 0; animation: banner-breathe 2s ease-in-out infinite; }
+  @keyframes banner-breathe { 0%,100% { box-shadow: 0 2px 16px var(--accent-glow), inset 0 0 40px rgba(0,255,112,0.03); } 50% { box-shadow: 0 2px 32px rgba(0,255,112,0.18), inset 0 0 40px rgba(0,255,112,0.06); } }
+  #rlb-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); flex-shrink: 0; animation: watcher-pulse 0.9s ease-in-out infinite; }
+  #rlb-status { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+  #rlb-game { font-size: 10px; letter-spacing: 0.1em; color: var(--text-dim); }
+  #rlb-timer { font-size: 13px; font-weight: 700; letter-spacing: 0.15em; color: var(--accent); text-shadow: 0 0 10px var(--accent); font-variant-numeric: tabular-nums; min-width: 52px; }
+  #rlb-end-btn { margin-left: auto; background: transparent; border: 1px solid var(--accent-dim); color: var(--text-dim); font-family: var(--font); font-size: 9px; letter-spacing: 0.14em; cursor: pointer; padding: 4px 10px; border-radius: var(--radius); transition: border-color 0.15s, color 0.15s; }
+  #rlb-end-btn:hover { border-color: var(--loss); color: var(--loss); }
+
+  /* ── Run-start prompt banner (watcher active, no run yet) ── */
+  #run-start-prompt { display: none; align-items: center; gap: 14px; padding: 8px 24px; border-bottom: 1px solid var(--border-hi); flex-shrink: 0; }
+  #rsp-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-dim); flex-shrink: 0; animation: rsp-blink 2.4s ease-in-out infinite; }
+  @keyframes rsp-blink { 0%,100% { opacity: 0.35; } 50% { opacity: 1; box-shadow: 0 0 6px var(--accent-dim); } }
+  #rsp-label { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); }
+  #rsp-game { font-size: 9px; color: var(--accent-dim); letter-spacing: 0.08em; }
+  #rsp-start-btn { margin-left: auto; background: transparent; border: 1px solid var(--accent-dim); color: var(--accent-dim); font-family: var(--font); font-size: 10px; font-weight: 700; letter-spacing: 0.16em; cursor: pointer; padding: 6px 18px; border-radius: var(--radius); transition: border-color 0.15s, color 0.15s, box-shadow 0.15s, text-shadow 0.15s; }
+  #rsp-start-btn:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); text-shadow: 0 0 8px var(--accent); }
+
+  /* ── Run-started flash notification ── */
+  #run-started-flash { position: fixed; top: 0; left: 0; right: 0; display: none; justify-content: center; align-items: center; gap: 10px; padding: 10px 24px; background: rgba(0,255,112,0.09); border-bottom: 2px solid var(--accent); z-index: 5000; pointer-events: none; }
+  @keyframes flash-slide-in { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes flash-slide-out { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-100%); } }
+  #rsf-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: watcher-pulse 0.9s ease-in-out infinite; }
+  #rsf-label { font-size: 11px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); text-shadow: 0 0 14px var(--accent); }
 
   #sync-badge { margin-left: auto; }
 
-  #new-run-btn {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 499;
-    padding: 10px 20px;
-    font-size: 12px;
-    box-shadow: 0 0 20px var(--accent-glow), 0 4px 16px rgba(0,0,0,0.5);
-  }
+  #new-run-btn { position: fixed; bottom: 24px; right: 24px; z-index: 499; padding: 10px 20px; font-size: 12px; box-shadow: 0 0 20px var(--accent-glow), 0 4px 16px rgba(0,0,0,0.5); }
 
   /* ── Buttons ── */
-  .btn {
-    padding: 6px 14px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border-hi);
-    font-size: 11px;
-    font-weight: 700;
-    font-family: var(--font);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-    background: transparent;
-  }
+  .btn { padding: 6px 14px; border-radius: var(--radius); border: 1px solid var(--border-hi); font-size: 11px; font-weight: 700; font-family: var(--font); letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: all 0.15s; white-space: nowrap; background: transparent; }
 
   .btn:active { transform: scale(0.97); }
 
-  .btn-primary {
-    background: transparent;
-    color: var(--accent);
-    border-color: var(--accent);
-    text-shadow: 0 0 8px var(--accent);
-    box-shadow: 0 0 8px var(--accent-glow), inset 0 0 8px var(--accent-glow2);
-  }
+  .btn-primary { background: transparent; color: var(--accent); border-color: var(--accent); text-shadow: 0 0 8px var(--accent); box-shadow: 0 0 8px var(--accent-glow), inset 0 0 8px var(--accent-glow2); }
 
-  .btn-primary:hover {
-    background: var(--accent-glow);
-    box-shadow: 0 0 16px var(--accent-glow), inset 0 0 12px var(--accent-glow);
-  }
+  .btn-primary:hover { background: var(--accent-glow); box-shadow: 0 0 16px var(--accent-glow), inset 0 0 12px var(--accent-glow); }
 
-  .btn-ghost {
-    color: var(--text-dim);
-    border-color: var(--border-hi);
-  }
+  .btn-ghost { color: var(--text-dim); border-color: var(--border-hi); }
 
-  .btn-ghost:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-    text-shadow: 0 0 6px var(--accent);
-  }
+  .btn-ghost:hover { color: var(--accent); border-color: var(--accent); text-shadow: 0 0 6px var(--accent); }
 
-  .btn-danger {
-    color: var(--loss);
-    border-color: var(--loss);
-  }
+  .btn-danger { color: var(--loss); border-color: var(--loss); }
 
-  .btn-danger:hover {
-    background: rgba(255,40,64,0.1);
-    box-shadow: 0 0 8px rgba(255,40,64,0.2);
-  }
+  .btn-danger:hover { background: rgba(255,40,64,0.1); box-shadow: 0 0 8px rgba(255,40,64,0.2); }
 
   .btn-sm { padding: 4px 10px; font-size: 10px; }
 
   /* ── Stats ── */
-  #stats-strip {
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid var(--border-hi);
-    flex-shrink: 0;
-    background: rgba(0,0,0,0.35);
-    backdrop-filter: blur(4px);
-  }
+  #stats-strip { display: flex; gap: 0; border-bottom: 1px solid var(--border-hi); flex-shrink: 0; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); }
 
-  .stat-card {
-    flex: 1;
-    background: transparent;
-    padding: 10px 16px;
-    text-align: center;
-    border-right: 1px solid var(--border);
-    position: relative;
-    transition: background 0.18s ease, transform 0.18s ease;
-  }
-  .stat-card:hover {
-    background: var(--surface2);
-    transform: translateY(-1px);
-  }
+  .stat-card { flex: 1; background: transparent; padding: 10px 16px; text-align: center; border-right: 1px solid var(--border); position: relative; transition: background 0.18s ease, transform 0.18s ease; }
+  .stat-card:hover { background: var(--surface2); transform: translateY(-1px); }
   .stat-card .stat-value { transition: text-shadow 0.18s ease, color 0.18s ease; }
   .stat-card:hover .stat-value { text-shadow: 0 0 10px var(--accent-glow); }
 
   .stat-card:last-child { border-right: none; }
 
-  .stat-value {
-    font-size: 20px;
-    font-weight: 700;
-    font-family: var(--mono);
-    color: var(--text-dim);
-    letter-spacing: 0.04em;
-  }
+  .stat-value { font-size: 20px; font-weight: 700; font-family: var(--mono); color: var(--text-dim); letter-spacing: 0.04em; }
 
-  .stat-label {
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-    margin-top: 2px;
-  }
+  .stat-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); margin-top: 2px; }
 
   .stat-win .stat-value  { color: var(--win);  text-shadow: 0 0 8px var(--win); }
   .stat-loss .stat-value { color: var(--loss); text-shadow: 0 0 8px var(--loss); }
   .stat-rate .stat-value { color: var(--accent); text-shadow: 0 0 10px var(--accent); }
 
   /* ── Filters ── */
-  #filter-bar {
-    padding: 8px 24px;
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    background: rgba(0,0,0,0.28);
-    backdrop-filter: blur(4px);
-    flex-wrap: wrap;
-  }
+  #filter-bar { padding: 8px 24px; display: flex; gap: 6px; align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; background: rgba(0,0,0,0.28); backdrop-filter: blur(4px); flex-wrap: wrap; }
 
-  .filter-chip {
-    padding: 3px 10px;
-    border-radius: var(--radius);
-    font-size: 10px;
-    font-weight: 700;
-    font-family: var(--font);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    border: 1px solid var(--border-hi);
-    background: transparent;
-    color: var(--text-dim);
-    cursor: pointer;
-    transition: all 0.18s cubic-bezier(.4,.2,.2,1);
-  }
+  .filter-chip { padding: 3px 10px; border-radius: var(--radius); font-size: 10px; font-weight: 700; font-family: var(--font); letter-spacing: 0.12em; text-transform: uppercase; border: 1px solid var(--border-hi); background: transparent; color: var(--text-dim); cursor: pointer; transition: all 0.18s cubic-bezier(.4,.2,.2,1); }
   .filter-chip:active { transform: scale(0.94); }
   .filter-chip.active { transform: translateY(-1px); }
 
@@ -604,48 +225,14 @@
   .filter-chip.win-chip.active  { background: var(--win-bg);  border-color: var(--win);  color: var(--win);  text-shadow: 0 0 8px var(--win); }
   .filter-chip.loss-chip.active { background: var(--loss-bg); border-color: var(--loss); color: var(--loss); text-shadow: 0 0 8px var(--loss); }
 
-  #sort-select {
-    margin-left: auto;
-    background: var(--surface2);
-    border: 1px solid var(--border-hi);
-    color: var(--text-dim);
-    padding: 3px 10px;
-    border-radius: var(--radius);
-    font-size: 10px;
-    font-family: var(--font);
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    text-transform: uppercase;
-  }
+  #sort-select { margin-left: auto; background: var(--surface2); border: 1px solid var(--border-hi); color: var(--text-dim); padding: 3px 10px; border-radius: var(--radius); font-size: 10px; font-family: var(--font); letter-spacing: 0.08em; cursor: pointer; text-transform: uppercase; }
 
   #sort-select:focus { outline: none; border-color: var(--accent); }
 
   /* ── View tabs ── */
-  #view-tabs {
-    padding: 0 24px;
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid var(--border-hi);
-    background: rgba(0,0,0,0.28);
-    backdrop-filter: blur(4px);
-    flex-shrink: 0;
-  }
+  #view-tabs { padding: 0 24px; display: flex; gap: 0; border-bottom: 1px solid var(--border-hi); background: rgba(0,0,0,0.28); backdrop-filter: blur(4px); flex-shrink: 0; }
 
-  .view-tab {
-    padding: 9px 16px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    border: none;
-    border-bottom: 2px solid transparent;
-    background: transparent;
-    cursor: pointer;
-    font-family: var(--font);
-    margin-bottom: -1px;
-    transition: color 0.14s, border-color 0.14s, text-shadow 0.14s;
-  }
+  .view-tab { padding: 9px 16px; font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim); border: none; border-bottom: 2px solid transparent; background: transparent; cursor: pointer; font-family: var(--font); margin-bottom: -1px; transition: color 0.14s, border-color 0.14s, text-shadow 0.14s; }
 
   .view-tab:hover { color: var(--accent); }
   .view-tab.active { color: var(--accent); border-bottom-color: var(--accent); text-shadow: 0 0 8px var(--accent); }
@@ -654,170 +241,51 @@
   #runs-area { flex: 1; overflow-y: auto; padding: 18px 24px; background: transparent; }
 
   /* ── Builds view ── */
-  #builds-view {
-    flex: 1;
-    overflow-y: auto;
-    padding: 18px 24px;
-    background: transparent;
-    display: none;
-  }
+  #builds-view { flex: 1; overflow-y: auto; padding: 18px 24px; background: transparent; display: none; }
 
-  .bv-card {
-    background: rgba(0,0,0,0.42);
-    backdrop-filter: blur(4px);
-    border: 1px solid var(--border-hi);
-    border-radius: var(--radius);
-    margin-bottom: 16px;
-    overflow: hidden;
-  }
+  .bv-card { background: rgba(0,0,0,0.42); backdrop-filter: blur(4px); border: 1px solid var(--border-hi); border-radius: var(--radius); margin-bottom: 16px; overflow: hidden; }
 
-  .bv-header {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(0,0,0,0.25);
-  }
+  .bv-header { padding: 10px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.25); }
 
-  .bv-name {
-    flex: 1;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    text-shadow: 0 0 8px var(--accent-glow);
-  }
+  .bv-name { flex: 1; font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; text-shadow: 0 0 8px var(--accent-glow); }
 
-  .bv-run-count {
-    font-size: 9px;
-    color: var(--text-faint);
-    letter-spacing: 0.08em;
-    border: 1px solid var(--border-hi);
-    padding: 2px 6px;
-    border-radius: var(--radius);
-  }
+  .bv-run-count { font-size: 9px; color: var(--text-faint); letter-spacing: 0.08em; border: 1px solid var(--border-hi); padding: 2px 6px; border-radius: var(--radius); }
 
-  .bv-details {
-    padding: 8px 14px;
-    font-size: 10px;
-    color: var(--text-faint);
-    letter-spacing: 0.05em;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
+  .bv-details { padding: 8px 14px; font-size: 10px; color: var(--text-faint); letter-spacing: 0.05em; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 6px; }
 
-  .bv-detail-pill {
-    border: 1px solid var(--border-hi);
-    padding: 2px 7px;
-    border-radius: var(--radius);
-    font-size: 9px;
-    color: var(--text-dim);
-    letter-spacing: 0.05em;
-  }
+  .bv-detail-pill { border: 1px solid var(--border-hi); padding: 2px 7px; border-radius: var(--radius); font-size: 9px; color: var(--text-dim); letter-spacing: 0.05em; }
 
-  .bv-detail-pill strong {
-    color: var(--text-faint);
-    font-weight: 700;
-    margin-right: 3px;
-  }
+  .bv-detail-pill strong { color: var(--text-faint); font-weight: 700; margin-right: 3px; }
 
-  .bv-runs-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
+  .bv-runs-list { display: flex; flex-direction: column; gap: 0; }
 
-  .bv-run-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 7px 14px;
-    border-bottom: 1px solid var(--border);
-    font-size: 11px;
-  }
+  .bv-run-row { display: flex; align-items: center; gap: 10px; padding: 7px 14px; border-bottom: 1px solid var(--border); font-size: 11px; }
 
   .bv-run-row:last-child { border-bottom: none; }
 
   .bv-run-row .run-date { font-size: 10px; color: var(--text-faint); }
 
-  .bv-run-notes {
-    flex: 1;
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  .bv-run-notes { flex: 1; font-size: 10px; color: var(--text-dim); letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  .bv-empty {
-    padding: 10px 14px;
-    font-size: 10px;
-    color: var(--text-faint);
-    letter-spacing: 0.08em;
-  }
+  .bv-empty { padding: 10px 14px; font-size: 10px; color: var(--text-faint); letter-spacing: 0.08em; }
 
-  .bv-no-builds {
-    text-align: center;
-    padding: 60px 24px;
-    color: var(--text-faint);
-  }
+  .bv-no-builds { text-align: center; padding: 60px 24px; color: var(--text-faint); }
 
   .bv-no-builds .term-prompt { font-size: 11px; margin-bottom: 10px; }
   .bv-no-builds p { font-size: 11px; letter-spacing: 0.06em; }
 
   /* ── Game integration (right panel) ── */
-  .rp-game-type-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
+  .rp-game-type-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 
-  .rp-game-type-row select {
-    flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--border-hi);
-    color: var(--text-dim);
-    padding: 5px 8px;
-    border-radius: var(--radius);
-    font-size: 10px;
-    font-family: var(--font);
-    letter-spacing: 0.06em;
-    cursor: pointer;
-  }
+  .rp-game-type-row select { flex: 1; background: var(--surface2); border: 1px solid var(--border-hi); color: var(--text-dim); padding: 5px 8px; border-radius: var(--radius); font-size: 10px; font-family: var(--font); letter-spacing: 0.06em; cursor: pointer; }
 
   .rp-game-type-row select:focus { outline: none; border-color: var(--accent); }
 
-  .watcher-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 10px;
-    border: 1px solid var(--border-hi);
-    border-radius: var(--radius);
-    background: var(--surface2);
-    margin-bottom: 8px;
-  }
+  .watcher-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid var(--border-hi); border-radius: var(--radius); background: var(--surface2); margin-bottom: 8px; }
 
-  .watcher-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--text-faint);
-    flex-shrink: 0;
-    transition: background 0.3s, box-shadow 0.3s;
-  }
+  .watcher-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-faint); flex-shrink: 0; transition: background 0.3s, box-shadow 0.3s; }
 
-  .watcher-dot.active {
-    background: var(--accent);
-    box-shadow: 0 0 6px var(--accent);
-    animation: watcher-pulse 2s ease-in-out infinite;
-  }
+  .watcher-dot.active { background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: watcher-pulse 2s ease-in-out infinite; }
 
   .watcher-dot.error { background: var(--loss); }
 
@@ -826,131 +294,51 @@
     50% { opacity: 0.5; }
   }
 
-  .watcher-label {
-    flex: 1;
-    font-size: 9px;
-    color: var(--text-faint);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
+  .watcher-label { flex: 1; font-size: 9px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; }
 
-  .watcher-hint {
-    font-size: 9px;
-    color: var(--text-faint);
-    letter-spacing: 0.06em;
-    margin-bottom: 8px;
-    line-height: 1.5;
-  }
+  .watcher-hint { font-size: 9px; color: var(--text-faint); letter-spacing: 0.06em; margin-bottom: 8px; line-height: 1.5; }
+
+  .watcher-folder-name { font-size: 9px; font-family: var(--mono); color: var(--accent-dim); letter-spacing: 0.06em; margin-top: 4px; padding: 4px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: none; }
+  .watcher-folder-name.visible { display: block; }
 
   /* ── Auto-run toast ── */
-  #auto-run-toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--surface2);
-    border: 1px solid var(--accent);
-    box-shadow: 0 0 20px rgba(0,255,112,0.2);
-    border-radius: var(--radius);
-    padding: 12px 18px;
-    display: none;
-    align-items: center;
-    gap: 16px;
-    z-index: 10000;
-    min-width: 340px;
-    animation: toast-in 0.3s ease;
-  }
+  #auto-run-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--surface2); border: 1px solid var(--accent); box-shadow: 0 0 20px rgba(0,255,112,0.2); border-radius: var(--radius); padding: 12px 18px; display: none; align-items: center; gap: 16px; z-index: 10000; min-width: 340px; animation: toast-in 0.3s ease; }
 
   @keyframes toast-in {
     from { opacity: 0; transform: translateX(-50%) translateY(16px); }
     to   { opacity: 1; transform: translateX(-50%) translateY(0); }
   }
 
-  #auto-run-toast-icon {
-    font-size: 16px;
-    color: var(--accent);
-    text-shadow: 0 0 10px var(--accent);
-  }
+  #auto-run-toast-icon { font-size: 16px; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
 
   #auto-run-toast-body { flex: 1; }
 
-  #auto-run-toast-title {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--accent);
-    text-shadow: 0 0 8px var(--accent);
-    margin-bottom: 2px;
-  }
+  #auto-run-toast-title { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); text-shadow: 0 0 8px var(--accent); margin-bottom: 2px; }
 
-  #auto-run-toast-sub {
-    font-size: 9px;
-    color: var(--text-dim);
-    letter-spacing: 0.07em;
-  }
+  #auto-run-toast-sub { font-size: 9px; color: var(--text-dim); letter-spacing: 0.07em; }
 
   .toast-actions { display: flex; gap: 6px; }
 
   /* Build selector in run modal */
-  #rm-build-row select {
-    background: var(--surface2);
-    border: 1px solid var(--border-hi);
-    color: var(--text-dim);
-    padding: 6px 10px;
-    border-radius: var(--radius);
-    font-size: 11px;
-    font-family: var(--font);
-    letter-spacing: 0.06em;
-    width: 100%;
-    cursor: pointer;
-  }
+  #rm-build-row select { background: var(--surface2); border: 1px solid var(--border-hi); color: var(--text-dim); padding: 6px 10px; border-radius: var(--radius); font-size: 11px; font-family: var(--font); letter-spacing: 0.06em; width: 100%; cursor: pointer; }
 
   #rm-build-row select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 6px var(--accent-glow); }
 
   #runs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
 
-  .run-card {
-    background: rgba(0,0,0,0.42);
-    backdrop-filter: blur(4px);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    transition: border-color 0.18s, box-shadow 0.18s, transform 0.2s;
-    position: relative;
-    cursor: pointer;
-  }
+  .run-card { background: rgba(0,0,0,0.42); backdrop-filter: blur(4px); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; transition: border-color 0.18s, box-shadow 0.18s, transform 0.2s; position: relative; cursor: pointer; }
 
-  .run-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 2px; height: 100%;
-    border-radius: var(--radius) 0 0 var(--radius);
-  }
+  .run-card::before { content: ''; position: absolute; top: 0; left: 0; width: 2px; height: 100%; border-radius: var(--radius) 0 0 var(--radius); }
 
   .run-card.win::before  { background: var(--win);  box-shadow: 0 0 8px var(--win); }
   .run-card.loss::before { background: var(--loss); box-shadow: 0 0 8px var(--loss); }
   .run-card.abandoned::before { background: var(--abandoned); }
 
-  .run-card:hover {
-    border-color: var(--border-hi);
-    box-shadow: 0 4px 24px var(--accent-glow2), 0 0 20px var(--accent-glow2), inset 0 0 20px var(--accent-glow2);
-    transform: translateY(-2px);
-  }
+  .run-card:hover { border-color: var(--border-hi); box-shadow: 0 4px 24px var(--accent-glow2), 0 0 20px var(--accent-glow2), inset 0 0 20px var(--accent-glow2); transform: translateY(-2px); }
 
   .run-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding-left: 6px; }
 
-  .result-badge {
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    font-family: var(--mono);
-    padding: 2px 7px;
-    border-radius: var(--radius);
-    border: 1px solid;
-  }
+  .result-badge { font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; font-family: var(--mono); padding: 2px 7px; border-radius: var(--radius); border: 1px solid; }
 
   .result-badge.win      { color: var(--win);  border-color: var(--win);  background: var(--win-bg);  text-shadow: 0 0 6px var(--win); }
   .result-badge.loss     { color: var(--loss); border-color: var(--loss); background: var(--loss-bg); text-shadow: 0 0 6px var(--loss); }
@@ -958,89 +346,33 @@
 
   .run-date { margin-left: auto; font-size: 10px; color: var(--text-faint); font-family: var(--mono); letter-spacing: 0.06em; }
 
-  .run-char {
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    padding-left: 6px;
-    color: var(--text);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
+  .run-char { font-size: 13px; font-weight: 700; margin-bottom: 8px; padding-left: 6px; color: var(--text); letter-spacing: 0.06em; text-transform: uppercase; }
 
   .run-char::before { content: '> '; color: var(--accent); text-shadow: 0 0 6px var(--accent); }
 
   .run-details { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; padding-left: 6px; }
 
-  .detail-pill {
-    font-size: 10px;
-    padding: 2px 7px;
-    background: var(--surface2);
-    border-radius: var(--radius);
-    color: var(--text-dim);
-    border: 1px solid var(--border);
-    font-family: var(--mono);
-    letter-spacing: 0.04em;
-  }
+  .detail-pill { font-size: 10px; padding: 2px 7px; background: var(--surface2); border-radius: var(--radius); color: var(--text-dim); border: 1px solid var(--border); font-family: var(--mono); letter-spacing: 0.04em; }
 
   .detail-pill.tag { color: var(--accent); border-color: var(--accent-dim); text-shadow: 0 0 5px var(--accent-glow); }
 
-  .run-notes {
-    font-size: 11px;
-    color: var(--text-dim);
-    border-top: 1px solid var(--border);
-    padding-top: 8px;
-    margin-top: 6px;
-    padding-left: 6px;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-style: italic;
-  }
+  .run-notes { font-size: 11px; color: var(--text-dim); border-top: 1px solid var(--border); padding-top: 8px; margin-top: 6px; padding-left: 6px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; font-style: italic; }
 
   .run-actions { display: flex; gap: 6px; margin-top: 10px; padding-left: 6px; }
   .delete-run-card-btn { color: var(--text-faint); }
   .delete-run-card-btn:hover { color: var(--loss); border-color: var(--loss); box-shadow: 0 0 6px rgba(255,80,80,0.25); }
 
   /* ── No game / empty ── */
-  #no-game-selected {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-dim);
-    gap: 14px;
-    background: var(--bg);
-  }
+  #no-game-selected { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); gap: 14px; background: var(--bg); }
 
-  #no-game-selected .term-prompt {
-    font-size: 14px;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-    font-family: var(--mono);
-  }
+  #no-game-selected .term-prompt { font-size: 14px; color: var(--text-dim); letter-spacing: 0.1em; font-family: var(--mono); }
 
-  #no-game-selected .term-prompt .cur {
-    display: inline-block;
-    width: 8px;
-    height: 14px;
-    background: var(--accent);
-    margin-left: 2px;
-    vertical-align: middle;
-    animation: blink 1s step-end infinite;
-    box-shadow: 0 0 8px var(--accent);
-  }
+  #no-game-selected .term-prompt .cur { display: inline-block; width: 8px; height: 14px; background: var(--accent); margin-left: 2px; vertical-align: middle; animation: blink 1s step-end infinite; box-shadow: 0 0 8px var(--accent); }
 
   #no-game-selected h2 { font-size: 13px; color: var(--text-dim); letter-spacing: 0.16em; text-transform: uppercase; }
   #no-game-selected p  { font-size: 11px; color: var(--text-faint); letter-spacing: 0.08em; }
 
-  #empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-dim);
-    font-family: var(--mono);
-  }
+  #empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); font-family: var(--mono); }
 
   #empty-state .term-prompt { font-size: 13px; letter-spacing: 0.1em; margin-bottom: 12px; }
   #empty-state h2 { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
@@ -1067,428 +399,155 @@
   button:active:not(:disabled) { transform: scale(0.96); }
 
   /* Topbar stays smooth on scroll/render */
-  #topbar, #stats-strip, #filter-bar {
-    transition: border-color 0.2s ease, background 0.2s ease;
-  }
+  #topbar, #stats-strip, #filter-bar { transition: border-color 0.2s ease, background 0.2s ease; }
 
   /* Result badges glow more on hover */
   .result-badge { transition: text-shadow 0.18s ease, box-shadow 0.18s ease; }
   .run-card:hover .result-badge { box-shadow: 0 0 12px currentColor; }
 
-  /* Scrollbars (webkit) */
-  *::-webkit-scrollbar { width: 8px; height: 8px; }
-  *::-webkit-scrollbar-track { background: transparent; }
-  *::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 4px; transition: background 0.18s; }
-  *::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
-
   /* ── GAME SETTINGS PANEL (modal) ── */
-  #game-settings-modal .modal {
-    max-width: 360px;
-    padding: 0;
-    overflow: hidden;
-  }
+  #game-settings-modal .modal { max-width: 360px; padding: 0; overflow: hidden; }
 
-  #right-panel {
-    width: 100%;
-    background: var(--surface);
-    display: flex;
-    flex-direction: column;
-    max-height: 86vh;
-    overflow: hidden;
-    position: relative;
-  }
+  #right-panel { width: 100%; background: var(--surface); display: flex; flex-direction: column; max-height: 86vh; overflow: hidden; position: relative; }
 
-  #right-panel > .modal-close {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    z-index: 1;
-  }
+  #right-panel > .modal-close { position: absolute; top: 8px; right: 8px; z-index: 1; }
 
   /* RP Header */
-  #rp-header {
-    padding: 18px 18px 14px;
-    border-bottom: 1px solid var(--border-hi);
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-    flex-shrink: 0;
-    background: var(--surface2);
-  }
+  #rp-header { padding: 18px 18px 14px; border-bottom: 1px solid var(--border-hi); display: flex; gap: 14px; align-items: flex-start; flex-shrink: 0; background: var(--surface2); }
 
   /* RP icon zone — clickable game picture */
-  #rp-icon-zone {
-    width: 62px;
-    height: 62px;
-    min-width: 62px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border-hi);
-    background: var(--bg);
-    overflow: hidden;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--accent);
-    text-shadow: 0 0 10px var(--accent);
-    cursor: pointer;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    flex-shrink: 0;
-  }
+  #rp-icon-zone { width: 62px; height: 62px; min-width: 62px; border-radius: var(--radius); border: 1px solid var(--border-hi); background: var(--bg); overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; color: var(--accent); text-shadow: 0 0 10px var(--accent); cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; flex-shrink: 0; }
 
-  #rp-icon-zone:hover {
-    border-color: var(--accent);
-    box-shadow: 0 0 12px var(--accent-glow);
-  }
+  #rp-icon-zone:hover { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
 
-  #rp-icon-zone img {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-  }
+  #rp-icon-zone img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
-  #rp-icon-zone .rp-icon-hover {
-    display: none;
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.72);
-    align-items: center;
-    justify-content: center;
-    font-size: 9px;
-    color: var(--accent);
-    font-family: var(--font);
-    letter-spacing: 0.12em;
-    text-shadow: 0 0 6px var(--accent);
-    pointer-events: none;
-  }
+  #rp-icon-zone .rp-icon-hover { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.72); align-items: center; justify-content: center; font-size: 9px; color: var(--accent); font-family: var(--font); letter-spacing: 0.12em; text-shadow: 0 0 6px var(--accent); pointer-events: none; }
 
   #rp-icon-zone:hover .rp-icon-hover { display: flex; }
 
   .rp-header-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 
-  .rp-name-label {
-    font-size: 8px;
-    font-weight: 700;
-    color: var(--text-faint);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-  }
+  .rp-name-label { font-size: 8px; font-weight: 700; color: var(--text-faint); letter-spacing: 0.2em; text-transform: uppercase; }
 
   .rp-name-label::before { content: '> '; color: var(--accent-dim); }
 
-  #rp-name {
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid var(--border-hi);
-    border-radius: 0;
-    color: var(--accent);
-    font-family: var(--font);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 3px 0;
-    width: 100%;
-    outline: none;
-    text-shadow: 0 0 6px var(--accent);
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
+  #rp-name { background: transparent; border: none; border-bottom: 1px solid var(--border-hi); border-radius: 0; color: var(--accent); font-family: var(--font); font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 0; width: 100%; outline: none; text-shadow: 0 0 6px var(--accent); transition: border-color 0.15s, box-shadow 0.15s; }
 
-  #rp-name:focus {
-    border-bottom-color: var(--accent);
-    box-shadow: 0 1px 0 0 var(--accent-glow);
-  }
+  #rp-name:focus { border-bottom-color: var(--accent); box-shadow: 0 1px 0 0 var(--accent-glow); }
 
-  .rp-icon-hint {
-    font-size: 9px;
-    color: var(--text-faint);
-    letter-spacing: 0.08em;
-    margin-top: auto;
-  }
+  .rp-icon-hint { font-size: 9px; color: var(--text-faint); letter-spacing: 0.08em; margin-top: auto; }
 
   /* RP Stats */
-  #rp-stats {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
+  #rp-stats { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 
-  .rp-stat {
-    flex: 1;
-    padding: 10px 8px;
-    text-align: center;
-    border-right: 1px solid var(--border);
-  }
+  .rp-stat { flex: 1; padding: 10px 8px; text-align: center; border-right: 1px solid var(--border); }
 
   .rp-stat:last-child { border-right: none; }
 
-  .rp-stat-value {
-    font-size: 16px;
-    font-weight: 700;
-    font-family: var(--mono);
-    color: var(--text-dim);
-    line-height: 1;
-  }
+  .rp-stat-value { font-size: 16px; font-weight: 700; font-family: var(--mono); color: var(--text-dim); line-height: 1; }
 
-  .rp-stat-label {
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-    margin-top: 3px;
-  }
+  .rp-stat-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-top: 3px; }
 
   .rp-stat.rp-stat-wins .rp-stat-value  { color: var(--win);  text-shadow: 0 0 6px var(--win); }
   .rp-stat.rp-stat-losses .rp-stat-value{ color: var(--loss); text-shadow: 0 0 6px var(--loss); }
   .rp-stat.rp-stat-rate .rp-stat-value  { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
 
   /* RP Fields area */
-  #rp-fields-scroll {
-    flex: 1;
-    overflow-y: auto;
-    padding: 14px 16px;
-  }
+  #rp-fields-scroll { flex: 1; overflow-y: auto; padding: 14px 16px; }
 
-  .rp-section-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-    margin-bottom: 10px;
-  }
+  .rp-section-label { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 10px; }
 
   /* RP Footer */
-  #rp-footer {
-    padding: 12px 16px;
-    border-top: 1px solid var(--border-hi);
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    flex-shrink: 0;
-    background: var(--surface2);
-  }
+  #rp-footer { padding: 12px 16px; border-top: 1px solid var(--border-hi); display: flex; gap: 8px; justify-content: flex-end; flex-shrink: 0; background: var(--surface2); }
 
   /* Saved flash */
-  .btn-saved {
-    color: var(--win) !important;
-    border-color: var(--win) !important;
-    text-shadow: 0 0 8px var(--win) !important;
-  }
+  .btn-saved { color: var(--win) !important; border-color: var(--win) !important; text-shadow: 0 0 8px var(--win) !important; }
 
   /* ── Modal ── */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    opacity: 0;
-    transition: opacity 0.18s ease;
-    backdrop-filter: blur(2px);
-  }
+  .modal-overlay { display: flex; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.22s ease, visibility 0s linear 0.22s; backdrop-filter: blur(2px); }
 
-  .modal-overlay.open { display: flex; opacity: 1; }
+  .modal-overlay.open { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.22s ease, visibility 0s linear 0s; }
 
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border-hi);
-    border-radius: var(--radius);
-    width: 100%;
-    max-width: 560px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 0 40px var(--accent-glow), 0 20px 60px rgba(0,0,0,0.8);
-    transform: translateY(8px) scale(0.985);
-    opacity: 0;
-    transition: transform 0.22s cubic-bezier(.2,.7,.2,1), opacity 0.22s ease;
-  }
+  .modal { background: var(--surface); border: 1px solid var(--border-hi); border-radius: var(--radius); width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: 0 0 40px var(--accent-glow), 0 20px 60px rgba(0,0,0,0.8); transform: translateY(8px) scale(0.985); opacity: 0; transition: transform 0.22s cubic-bezier(.2,.7,.2,1), opacity 0.22s ease; }
   .modal-overlay.open .modal { transform: translateY(0) scale(1); opacity: 1; }
 
-  .modal-header {
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--border-hi);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    position: sticky;
-    top: 0;
-    background: var(--surface);
-    z-index: 1;
-  }
+  .modal-header { padding: 16px 24px; border-bottom: 1px solid var(--border-hi); display: flex; align-items: center; gap: 10px; position: sticky; top: 0; background: var(--surface); z-index: 1; }
 
-  .modal-header h2 {
-    font-size: 12px;
-    flex: 1;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    text-shadow: 0 0 8px var(--accent);
-  }
+  .modal-header h2 { font-size: 12px; flex: 1; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); text-shadow: 0 0 8px var(--accent); }
 
   .modal-header h2::before { content: '// '; opacity: 0.5; }
 
-  .modal-close {
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    font-size: 16px;
-    font-family: var(--font);
-    cursor: pointer;
-    line-height: 1;
-    padding: 2px 6px;
-    transition: color 0.15s;
-  }
+  .modal-close { background: none; border: none; color: var(--text-dim); font-size: 16px; font-family: var(--font); cursor: pointer; line-height: 1; padding: 2px 6px; transition: color 0.15s; }
 
   .modal-close:hover { color: var(--loss); }
 
   .modal-body { padding: 20px 24px; }
 
-  .modal-footer {
-    padding: 12px 24px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    position: sticky;
-    bottom: 0;
-    background: var(--surface);
-  }
+  .modal-footer { padding: 12px 24px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; position: sticky; bottom: 0; background: var(--surface); }
 
   /* ── Profile modal specific ── */
-  .pm-divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 18px 0 16px;
-  }
+  .pm-divider { border: none; border-top: 1px solid var(--border); margin: 18px 0 16px; }
 
-  .pm-section-label {
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-    margin-bottom: 12px;
-  }
+  .gm-file-section { margin-top: 4px; }
+  .gm-file-label { font-size: 9px; letter-spacing: 0.1em; color: var(--text-dim); text-transform: uppercase; margin-bottom: 10px; }
+  .gm-file-optional { font-size: 9px; opacity: 0.5; text-transform: none; letter-spacing: 0; }
+  .gm-connect-btn { width: 100%; padding: 12px; background: transparent; border: 2px solid var(--accent); color: var(--accent); font-family: var(--font-mono); font-size: 0.9em; letter-spacing: 0.08em; cursor: pointer; border-radius: var(--radius); transition: background 0.15s, color 0.15s, box-shadow 0.15s; }
+  .gm-connect-btn:hover { background: var(--accent-glow); box-shadow: 0 0 12px var(--accent-glow); }
+  .gm-connect-btn.connected { border-color: var(--win); color: var(--win); }
+  .gm-connect-btn.connected:hover { background: var(--win-bg); box-shadow: 0 0 12px rgba(0,255,112,0.15); }
+  .gm-connect-btn.unavailable { border-color: var(--border-hi); color: var(--text-faint); cursor: default; opacity: 0.75; font-size: 0.78em; letter-spacing: 0.04em; }
+  .gm-connect-btn.unavailable:hover { background: transparent; box-shadow: none; }
+  .gm-path-hint { background: var(--surface2); border: 1px solid var(--border-hi); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 10px; }
+  .gm-path-desc { font-size: 0.78em; color: var(--text-dim); margin-bottom: 7px; letter-spacing: 0.03em; }
+  .gm-path-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .gm-path-label { font-size: 0.72em; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+  .gm-path-value { font-family: var(--font-mono); font-size: 0.78em; color: var(--accent); word-break: break-all; flex: 1; }
+  .gm-path-copy { background: none; border: 1px solid var(--border); color: var(--text-dim); font-size: 0.85em; padding: 2px 7px; border-radius: 3px; cursor: pointer; flex-shrink: 0; transition: color 0.15s, border-color 0.15s; }
+  .gm-path-copy:hover { color: var(--accent); border-color: var(--accent); }
+
+  .gm-connect-hint { font-size: 0.75em; color: var(--text-dim); margin-top: 7px; min-height: 1em; font-family: var(--font-mono); letter-spacing: 0.04em; }
+
+  .pm-section-label { font-size: 9px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 12px; }
 
   .pm-section-label::before { content: '// '; color: var(--accent-dim); }
 
-  .pm-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
+  .pm-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 
-  .pm-stat {
-    background: var(--surface2);
-    padding: 10px 6px;
-    text-align: center;
-  }
+  .pm-stat { background: var(--surface2); padding: 10px 6px; text-align: center; }
 
-  .pm-stat-value {
-    font-size: 18px;
-    font-weight: 700;
-    font-family: var(--mono);
-    color: var(--text-dim);
-    display: block;
-    line-height: 1;
-  }
+  .pm-stat-value { font-size: 18px; font-weight: 700; font-family: var(--mono); color: var(--text-dim); display: block; line-height: 1; }
 
-  .pm-stat-label {
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-    margin-top: 4px;
-    display: block;
-  }
+  .pm-stat-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-top: 4px; display: block; }
 
   .pm-stat.pm-stat-rate .pm-stat-value { color: var(--accent); text-shadow: 0 0 8px var(--accent); }
   .pm-stat.pm-stat-wins .pm-stat-value { color: var(--win); text-shadow: 0 0 6px var(--win); }
 
-  .pm-favorite {
-    margin-top: 8px;
-    padding: 8px 12px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 0.06em;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .pm-favorite { margin-top: 8px; padding: 8px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); font-size: 10px; color: var(--text-dim); letter-spacing: 0.06em; display: flex; align-items: center; gap: 8px; }
 
   .pm-favorite::before { content: '▶'; color: var(--accent); font-size: 8px; text-shadow: 0 0 6px var(--accent); }
 
   /* ── Forms ── */
   .form-group { margin-bottom: 14px; }
 
-  .form-group label {
-    display: block;
-    font-size: 9px;
-    font-weight: 700;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    margin-bottom: 6px;
-  }
+  .form-group label { display: block; font-size: 9px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 6px; }
 
   .form-group label::before { content: '> '; color: var(--accent-dim); }
 
   .form-group input,
   .form-group select,
-  .form-group textarea {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border-hi);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: var(--font);
-    font-size: 12px;
-    padding: 8px 10px;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    outline: none;
-    letter-spacing: 0.04em;
-  }
+  .form-group textarea { width: 100%; background: var(--bg); border: 1px solid var(--border-hi); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 12px; padding: 8px 10px; transition: border-color 0.15s, box-shadow 0.15s; outline: none; letter-spacing: 0.04em; }
 
   .form-group input:focus,
   .form-group select:focus,
-  .form-group textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 8px var(--accent-glow);
-  }
+  .form-group textarea:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
 
   .form-group textarea { resize: vertical; min-height: 70px; }
   .form-hint { font-size: 10px; color: var(--text-faint); margin-top: 4px; letter-spacing: 0.04em; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
   /* ── Image upload zone ── */
-  .img-upload-zone {
-    width: 100%;
-    height: 120px;
-    border: 1px dashed var(--border-hi);
-    border-radius: var(--radius);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
-    overflow: hidden;
-    position: relative;
-    background: var(--bg);
-  }
+  .img-upload-zone { width: 100%; height: 120px; border: 1px dashed var(--border-hi); border-radius: var(--radius); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.15s, background 0.15s; overflow: hidden; position: relative; background: var(--bg); }
 
   .img-upload-zone:hover { border-color: var(--accent); background: var(--accent-glow2); }
   .img-upload-zone img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -1500,21 +559,7 @@
   .img-upload-zone.has-image:hover::after { content: '[ CHANGE IMAGE ]'; background: rgba(0,0,0,0.7); display: grid; place-items: center; font-size: 11px; color: var(--accent); font-family: var(--font); font-weight: 700; letter-spacing: 0.14em; text-shadow: 0 0 8px var(--accent); }
 
   /* ── Avatar upload ── */
-  .avatar-upload-zone {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    border: 1px dashed var(--border-hi);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    overflow: hidden;
-    position: relative;
-    background: var(--bg);
-    flex-shrink: 0;
-    transition: border-color 0.15s;
-  }
+  .avatar-upload-zone { width: 90px; height: 90px; border-radius: 50%; border: 1px dashed var(--border-hi); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; position: relative; background: var(--bg); flex-shrink: 0; transition: border-color 0.15s; }
 
   .avatar-upload-zone:hover { border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
   .avatar-upload-zone img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -1528,22 +573,7 @@
   /* ── Result selector ── */
   .result-selector { display: flex; gap: 8px; }
 
-  .result-option {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid var(--border-hi);
-    border-radius: var(--radius);
-    text-align: center;
-    cursor: pointer;
-    font-size: 11px;
-    font-weight: 700;
-    font-family: var(--font);
-    letter-spacing: 0.18em;
-    transition: all 0.15s;
-    background: transparent;
-    color: var(--text-dim);
-    text-transform: uppercase;
-  }
+  .result-option { flex: 1; padding: 8px; border: 1px solid var(--border-hi); border-radius: var(--radius); text-align: center; cursor: pointer; font-size: 11px; font-weight: 700; font-family: var(--font); letter-spacing: 0.18em; transition: all 0.15s; background: transparent; color: var(--text-dim); text-transform: uppercase; }
 
   .result-option[data-val="win"]:hover,
   .result-option[data-val="win"].selected { background: var(--win-bg); border-color: var(--win); color: var(--win); text-shadow: 0 0 8px var(--win); box-shadow: 0 0 10px rgba(0,255,112,0.15); }
@@ -1562,38 +592,11 @@
   .field-row:last-child { border-bottom: none; }
   .field-row:hover { background: var(--surface2); }
   /* custom themed checkbox toggle replaces native input[type=checkbox] */
-  .field-checkbox-btn {
-    flex-shrink: 0;
-    width: 34px;
-    padding: 3px 0;
-    background: transparent;
-    border: 1px solid var(--border-hi);
-    border-radius: var(--radius);
-    color: var(--text-faint);
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.12s, color 0.12s, background 0.12s, box-shadow 0.12s, transform 0.1s;
-  }
-  .field-checkbox-btn:hover {
-    border-color: var(--accent-dim);
-    color: var(--text-dim);
-    box-shadow: 0 2px 8px rgba(0,255,112,0.08);
-  }
+  .field-checkbox-btn { flex-shrink: 0; width: 34px; padding: 3px 0; background: transparent; border: 1px solid var(--border-hi); border-radius: var(--radius); color: var(--text-faint); font-family: var(--mono); font-size: 11px; letter-spacing: 0; text-align: center; cursor: pointer; transition: border-color 0.12s, color 0.12s, background 0.12s, box-shadow 0.12s, transform 0.1s; }
+  .field-checkbox-btn:hover { border-color: var(--accent-dim); color: var(--text-dim); box-shadow: 0 2px 8px rgba(0,255,112,0.08); }
   .field-checkbox-btn:active { transform: scale(0.88); }
-  .field-checkbox-btn.on {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-glow);
-    text-shadow: 0 0 6px var(--accent);
-    box-shadow: 0 0 8px var(--accent-glow), 0 2px 10px rgba(0,255,112,0.1);
-  }
-  .field-checkbox-btn.on:hover {
-    background: rgba(0,255,112,0.14);
-    box-shadow: 0 0 14px var(--accent-glow), 0 2px 14px rgba(0,255,112,0.15);
-  }
+  .field-checkbox-btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); text-shadow: 0 0 6px var(--accent); box-shadow: 0 0 8px var(--accent-glow), 0 2px 10px rgba(0,255,112,0.1); }
+  .field-checkbox-btn.on:hover { background: rgba(0,255,112,0.14); box-shadow: 0 0 14px var(--accent-glow), 0 2px 14px rgba(0,255,112,0.15); }
   .field-label-text { flex: 1; font-size: 12px; cursor: pointer; color: var(--text); letter-spacing: 0.04em; }
   .field-type-badge { font-size: 9px; padding: 1px 5px; border-radius: var(--radius); background: var(--bg); color: var(--text-faint); border: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.1em; font-family: var(--mono); }
   .field-row input[type="text"] { flex: 1; padding: 5px 8px; font-size: 12px; background: var(--bg); border: 1px solid var(--border-hi); border-radius: var(--radius); color: var(--text); outline: none; font-family: var(--font); letter-spacing: 0.04em; }
@@ -1618,117 +621,35 @@
   /* ── Auth Modal ── */
   #auth-modal .modal { max-width: 400px; }
 
-  .auth-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border-hi);
-    margin-bottom: 18px;
-  }
+  .auth-tabs { display: flex; border-bottom: 1px solid var(--border-hi); margin-bottom: 18px; }
 
-  .auth-tab {
-    flex: 1;
-    padding: 9px;
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    font-family: var(--font);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    cursor: pointer;
-    transition: color 0.15s, border-color 0.15s, text-shadow 0.15s;
-    margin-bottom: -1px;
-  }
+  .auth-tab { flex: 1; padding: 9px; background: none; border: none; border-bottom: 2px solid transparent; font-family: var(--font); font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-dim); cursor: pointer; transition: color 0.15s, border-color 0.15s, text-shadow 0.15s; margin-bottom: -1px; }
 
-  .auth-tab.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-    text-shadow: 0 0 8px var(--accent);
-  }
+  .auth-tab.active { color: var(--accent); border-bottom-color: var(--accent); text-shadow: 0 0 8px var(--accent); }
 
   .auth-tab:hover:not(.active) { color: var(--text); }
 
   .pw-input-row { display: flex; align-items: stretch; gap: 0; }
-  .pw-input-row input {
-    flex: 1; border-right: none !important;
-    border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;
-  }
-  .pw-toggle {
-    background: var(--surface2); border: 1px solid var(--border-hi);
-    border-left: none; color: var(--text-faint);
-    font-size: 13px; padding: 0 10px; cursor: pointer;
-    transition: color 0.15s, background 0.15s; flex-shrink: 0;
-    position: relative;
-  }
+  .pw-input-row input { flex: 1; border-right: none !important; border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; }
+  .pw-toggle { background: var(--surface2); border: 1px solid var(--border-hi); border-left: none; color: var(--text-faint); font-size: 13px; padding: 0 10px; cursor: pointer; transition: color 0.15s, background 0.15s; flex-shrink: 0; position: relative; }
   .pw-toggle:hover { color: var(--accent); background: var(--accent-glow2); }
-  .pw-toggle.closed::after {
-    content: '';
-    position: absolute;
-    width: 2px; height: 65%;
-    top: 17%; left: 50%;
-    transform: translateX(-50%) rotate(40deg);
-    background: currentColor;
-    pointer-events: none;
-  }
+  .pw-toggle.closed::after { content: ''; position: absolute; width: 2px; height: 65%; top: 17%; left: 50%; transform: translateX(-50%) rotate(40deg); background: currentColor; pointer-events: none; }
 
-  #forgot-pw-btn {
-    background: none; border: none; padding: 0;
-    color: var(--text-faint); font-size: 9px; font-family: var(--font);
-    letter-spacing: 0.1em; cursor: pointer; text-decoration: underline;
-    text-underline-offset: 2px; transition: color 0.15s;
-    display: inline-block; margin-top: 4px;
-  }
+  #forgot-pw-btn { background: none; border: none; padding: 0; color: var(--text-faint); font-size: 9px; font-family: var(--font); letter-spacing: 0.1em; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; transition: color 0.15s; display: inline-block; margin-top: 4px; }
   #forgot-pw-btn:hover { color: var(--accent); }
 
-  .auth-error {
-    color: var(--loss);
-    font-size: 11px;
-    margin-top: 8px;
-    letter-spacing: 0.06em;
-    min-height: 18px;
-    text-shadow: 0 0 6px rgba(255,40,64,0.3);
-  }
+  .auth-error { color: var(--loss); font-size: 11px; margin-top: 8px; letter-spacing: 0.06em; min-height: 18px; text-shadow: 0 0 6px rgba(255,40,64,0.3); }
 
-  .auth-tagline {
-    font-size: 10px;
-    color: var(--text-faint);
-    letter-spacing: 0.08em;
-    margin-bottom: 20px;
-    line-height: 1.6;
-  }
+  .auth-tagline { font-size: 10px; color: var(--text-faint); letter-spacing: 0.08em; margin-bottom: 20px; line-height: 1.6; }
 
   /* ── Sync badge ── */
-  #sync-badge {
-    font-size: 9px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    padding: 3px 9px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border-hi);
-    color: var(--text-faint);
-    font-family: var(--font);
-    transition: color 0.3s, border-color 0.3s;
-    white-space: nowrap;
-    display: none;
-  }
+  #sync-badge { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; padding: 3px 9px; border-radius: var(--radius); border: 1px solid var(--border-hi); color: var(--text-faint); font-family: var(--font); transition: color 0.3s, border-color 0.3s; white-space: nowrap; display: none; }
 
-  #sync-badge.sb-syncing {
-    color: var(--accent);
-    border-color: var(--accent-dim);
-    text-shadow: 0 0 6px var(--accent);
-    animation: pulse-sync 1s ease-in-out infinite;
-  }
+  #sync-badge.sb-syncing { color: var(--accent); border-color: var(--accent-dim); text-shadow: 0 0 6px var(--accent); animation: pulse-sync 1s ease-in-out infinite; }
 
-  #sync-badge.sb-synced {
-    color: var(--accent);
-    border-color: var(--accent-dim);
-  }
+  #sync-badge.sb-synced { color: var(--accent); border-color: var(--accent-dim); }
 
-  #sync-badge.sb-error {
-    color: var(--loss);
-    border-color: var(--loss);
-  }
+  #sync-badge.sb-error { color: var(--loss); border-color: var(--loss); }
 
   @keyframes pulse-sync {
     0%, 100% { opacity: 1; }
@@ -1748,13 +669,10 @@
 
   #add-game-btn:active, .filter-chip:active { transform: scale(0.97); }
 
-  .result-option { transition: all 0.15s; }
   .result-option:active { transform: scale(0.96); }
 
   /* Subtle glow pulse on active game's accent border */
-  .game-item.active {
-    animation: active-game-pulse 2.5s ease-in-out infinite alternate;
-  }
+  .game-item.active { animation: active-game-pulse 2.5s ease-in-out infinite alternate; }
 
   @keyframes active-game-pulse {
     from { box-shadow: inset 2px 0 12px var(--accent-glow2); }
@@ -1763,224 +681,67 @@
 
   /* Go-online / sign-out links in profile modal */
   #go-online-btn,
-  #signout-btn {
-    background: none;
-    border: none;
-    color: var(--text-faint);
-    font-size: 9px;
-    font-family: var(--font);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    cursor: pointer;
-    padding: 4px 6px;
-    transition: color 0.15s;
-    margin-right: auto;
-  }
+  #signout-btn { background: none; border: none; color: var(--text-faint); font-size: 9px; font-family: var(--font); letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; padding: 4px 6px; transition: color 0.15s; margin-right: auto; }
 
   #go-online-btn:hover { color: var(--accent); }
   #signout-btn:hover { color: var(--loss); }
 
   /* ── Share banner ── */
-  #share-banner {
-    background: var(--surface2);
-    border-bottom: 1px solid var(--accent-dim);
-    padding: 7px 20px;
-    display: none;
-    align-items: center;
-    gap: 10px;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    color: var(--accent);
-    text-shadow: 0 0 8px var(--accent);
-    flex-shrink: 0;
-  }
+  #share-banner { background: var(--surface2); border-bottom: 1px solid var(--accent-dim); padding: 7px 20px; display: none; align-items: center; gap: 10px; font-size: 10px; letter-spacing: 0.12em; color: var(--accent); text-shadow: 0 0 8px var(--accent); flex-shrink: 0; }
 
-  #share-banner .share-ro-badge {
-    color: var(--text-faint);
-    font-size: 9px;
-    letter-spacing: 0.14em;
-    border: 1px solid var(--border-hi);
-    padding: 2px 7px;
-    border-radius: var(--radius);
-  }
+  #share-banner .share-ro-badge { color: var(--text-faint); font-size: 9px; letter-spacing: 0.14em; border: 1px solid var(--border-hi); padding: 2px 7px; border-radius: var(--radius); }
 
-  #share-back-btn {
-    margin-left: auto;
-    background: transparent;
-    border: 1px solid var(--border-hi);
-    color: var(--text-dim);
-    font-family: var(--font);
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    padding: 4px 10px;
-    cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
-  }
+  #share-back-btn { margin-left: auto; background: transparent; border: 1px solid var(--border-hi); color: var(--text-dim); font-family: var(--font); font-size: 10px; letter-spacing: 0.1em; padding: 4px 10px; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
 
   #share-back-btn:hover { border-color: var(--accent); color: var(--accent); }
 
   /* ── Run comment ── */
-  .run-comment {
-    margin-top: 6px;
-    padding: 6px 10px;
-    border-left: 2px solid var(--border-hi);
-    font-size: 11px;
-    color: var(--text-dim);
-    font-style: italic;
-    letter-spacing: 0.03em;
-    line-height: 1.55;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
+  .run-comment { margin-top: 6px; padding: 6px 10px; border-left: 2px solid var(--border-hi); font-size: 11px; color: var(--text-dim); font-style: italic; letter-spacing: 0.03em; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
 
-  .run-comment::before {
-    content: '// ';
-    color: var(--accent-dim);
-    font-style: normal;
-    font-size: 10px;
-  }
+  .run-comment::before { content: '// '; color: var(--accent-dim); font-style: normal; font-size: 10px; }
 
   /* ── Builds in right panel ── */
   .rp-builds-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
 
-  .build-card {
-    border: 1px solid var(--border-hi);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
+  .build-card { border: 1px solid var(--border-hi); border-radius: var(--radius); overflow: hidden; }
 
-  .build-card-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 10px;
-    cursor: pointer;
-    background: var(--bg);
-    transition: background 0.12s;
-  }
+  .build-card-header { display: flex; align-items: center; gap: 8px; padding: 7px 10px; cursor: pointer; background: var(--bg); transition: background 0.12s; }
 
   .build-card-header:hover { background: var(--surface2); }
 
-  .build-card-name {
-    flex: 1;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  .build-card-name { flex: 1; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   .build-card-name::before { content: '▸ '; color: var(--accent-dim); font-size: 9px; }
   .build-card.open .build-card-name::before { content: '▾ '; color: var(--accent); }
 
-  .build-card-del {
-    background: none;
-    border: none;
-    color: var(--text-faint);
-    font-size: 11px;
-    cursor: pointer;
-    padding: 2px 5px;
-    font-family: var(--font);
-    line-height: 1;
-    flex-shrink: 0;
-    transition: color 0.12s;
-  }
+  .build-card-del { background: none; border: none; color: var(--text-faint); font-size: 11px; cursor: pointer; padding: 2px 5px; font-family: var(--font); line-height: 1; flex-shrink: 0; transition: color 0.12s; }
 
   .build-card-del:hover { color: var(--loss); }
 
-  .build-editor {
-    display: none;
-    flex-direction: column;
-    gap: 8px;
-    padding: 10px 10px 12px;
-    background: var(--surface2);
-    border-top: 1px solid var(--border);
-  }
+  .build-editor { display: none; flex-direction: column; gap: 8px; padding: 10px 10px 12px; background: var(--surface2); border-top: 1px solid var(--border); }
 
   .build-card.open .build-editor { display: flex; }
 
   .build-field-group { display: flex; flex-direction: column; gap: 4px; }
 
-  .build-field-label {
-    font-size: 8px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-  }
+  .build-field-label { font-size: 8px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint); }
 
   .build-field-label::before { content: '> '; color: var(--accent-dim); }
 
-  .build-field-input {
-    background: var(--bg);
-    border: 1px solid var(--border-hi);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: var(--font);
-    font-size: 11px;
-    padding: 5px 8px;
-    outline: none;
-    width: 100%;
-    letter-spacing: 0.03em;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    resize: vertical;
-  }
+  .build-field-input { background: var(--bg); border: 1px solid var(--border-hi); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 11px; padding: 5px 8px; outline: none; width: 100%; letter-spacing: 0.03em; transition: border-color 0.15s, box-shadow 0.15s; resize: vertical; }
 
-  .build-field-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 6px var(--accent-glow);
-  }
+  .build-field-input:focus { border-color: var(--accent); box-shadow: 0 0 6px var(--accent-glow); }
 
-  .build-preview {
-    font-size: 10px;
-    color: var(--text-faint);
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  .build-preview { font-size: 10px; color: var(--text-faint); letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* Share button in profile modal */
-  #share-profile-btn {
-    background: none;
-    border: none;
-    color: var(--text-faint);
-    font-size: 9px;
-    font-family: var(--font);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    cursor: pointer;
-    padding: 4px 6px;
-    transition: color 0.15s;
-  }
+  #share-profile-btn { background: none; border: none; color: var(--text-faint); font-size: 9px; font-family: var(--font); letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; padding: 4px 6px; transition: color 0.15s; }
 
   #share-profile-btn:hover { color: var(--accent); }
 
   /* ── Settings button ── */
-  #settings-btn {
-    position: fixed;
-    top: 12px;
-    right: 16px;
-    z-index: 500;
-    background: none;
-    border: 1px solid var(--border-hi);
-    color: var(--text-dim);
-    font-family: var(--font);
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    padding: 5px 11px;
-    cursor: pointer;
-    transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
-  }
-  #settings-btn:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-    box-shadow: 0 0 8px var(--accent-glow);
-  }
+  #settings-btn { position: fixed; top: 12px; right: 16px; z-index: 500; background: none; border: 1px solid var(--border-hi); color: var(--text-dim); font-family: var(--font); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; padding: 5px 11px; cursor: pointer; transition: color 0.15s, border-color 0.15s, box-shadow 0.15s; }
+  #settings-btn:hover { color: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
 
   /* ── Settings modal ── */
   #settings-modal .modal { max-width: 440px; }
@@ -1988,172 +749,41 @@
   .settings-section { margin-bottom: 28px; }
   .settings-section:last-child { margin-bottom: 0; }
 
-  .settings-section-title {
-    font-size: 9px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 7px;
-    margin-bottom: 16px;
-  }
+  .settings-section-title { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border); padding-bottom: 7px; margin-bottom: 16px; }
 
-  .settings-msg {
-    font-size: 11px;
-    letter-spacing: 0.07em;
-    margin-top: 8px;
-    min-height: 16px;
-  }
+  .settings-msg { font-size: 11px; letter-spacing: 0.07em; margin-top: 8px; min-height: 16px; }
   .settings-msg.ok  { color: var(--accent); }
   .settings-msg.err { color: var(--loss); }
 
-  #settings-offline-notice {
-    text-align: center;
-    padding: 24px 0;
-    color: var(--text-dim);
-    font-size: 12px;
-    letter-spacing: 0.1em;
-  }
+  #settings-offline-notice { text-align: center; padding: 24px 0; color: var(--text-dim); font-size: 12px; letter-spacing: 0.1em; }
 
   /* ── Appearance settings ── */
-  .cw-layout {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    margin-top: 8px;
-  }
-  .color-wheel-wrap {
-    position: relative;
-    width: 140px;
-    height: 140px;
-    flex-shrink: 0;
-    cursor: crosshair;
-    border-radius: 50%;
-  }
+  .cw-layout { display: flex; gap: 16px; align-items: center; margin-top: 8px; }
+  .color-wheel-wrap { position: relative; width: 140px; height: 140px; flex-shrink: 0; cursor: crosshair; border-radius: 50%; }
   #settings-color-wheel { display: block; border-radius: 50%; }
-  .cw-selector-dot {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    border: 2px solid #fff;
-    box-shadow: 0 0 5px rgba(0,0,0,0.9), 0 0 8px rgba(255,255,255,0.3);
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    transition: left 0.1s, top 0.1s;
-  }
-  .cw-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
-  }
-  .cw-swatch {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border-hi);
-    box-shadow: 0 0 10px currentColor;
-  }
-  .cw-hue-label {
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 0.08em;
-  }
+  .cw-selector-dot { position: absolute; width: 10px; height: 10px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 5px rgba(0,0,0,0.9), 0 0 8px rgba(255,255,255,0.3); transform: translate(-50%, -50%); pointer-events: none; }
+  .cw-controls { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+  .cw-swatch { width: 48px; height: 48px; border-radius: var(--radius); border: 1px solid var(--border-hi); box-shadow: 0 0 10px currentColor; }
+  .cw-hue-label { font-size: 10px; color: var(--text-dim); letter-spacing: 0.08em; }
 
   /* ── Background image ── */
-  .bg-upload-zone {
-    border: 1px dashed var(--border-hi);
-    border-radius: var(--radius);
-    padding: 14px;
-    text-align: center;
-    cursor: pointer;
-    color: var(--text-dim);
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    transition: border-color 0.15s, color 0.15s;
-    margin-top: 8px;
-  }
+  .bg-upload-zone { border: 1px dashed var(--border-hi); border-radius: var(--radius); padding: 14px; text-align: center; cursor: pointer; color: var(--text-dim); font-size: 11px; letter-spacing: 0.08em; transition: border-color 0.15s, color 0.15s; margin-top: 8px; }
   .bg-upload-zone:hover { border-color: var(--accent); color: var(--accent); }
-  .bg-img-preview {
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .bg-img-thumb {
-    width: 88px;
-    height: 50px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border-hi);
-    background-size: cover;
-    background-position: center;
-    flex-shrink: 0;
-  }
+  .bg-img-preview { margin-top: 8px; display: flex; align-items: center; gap: 10px; }
+  .bg-img-thumb { width: 88px; height: 50px; border-radius: var(--radius); border: 1px solid var(--border-hi); background-size: cover; background-position: center; flex-shrink: 0; }
 
   /* custom bg layer behind the app */
-  #app-bg {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-  #app-bg::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.58);
-  }
+  #app-bg { display: none; position: fixed; inset: 0; z-index: -1; background-size: cover; background-position: center; background-repeat: no-repeat; }
+  #app-bg::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.58); }
 
-  #bg-canvas {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    width: 100%;
-    height: 100%;
-    display: none;
-    pointer-events: none;
-    opacity: 0.85;
-  }
+  #bg-canvas { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; display: none; pointer-events: none; opacity: 0.85; }
   #bg-canvas.active { display: block; }
 
   /* Effect picker chips */
-  .bg-effect-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 6px;
-  }
-  .bg-effect-chip {
-    padding: 5px 11px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    font-family: var(--font);
-    background: transparent;
-    border: 1px solid var(--border-hi);
-    border-radius: var(--radius);
-    color: var(--text-dim);
-    cursor: pointer;
-    transition: all 0.18s cubic-bezier(.4,.2,.2,1);
-  }
-  .bg-effect-chip:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-    text-shadow: 0 0 6px var(--accent);
-    transform: translateY(-1px);
-  }
-  .bg-effect-chip.active {
-    background: var(--accent-glow);
-    color: var(--accent);
-    border-color: var(--accent);
-    text-shadow: 0 0 8px var(--accent);
-    box-shadow: 0 0 10px var(--accent-glow);
-  }
+  .bg-effect-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .bg-effect-chip { padding: 5px 11px; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; font-family: var(--font); background: transparent; border: 1px solid var(--border-hi); border-radius: var(--radius); color: var(--text-dim); cursor: pointer; transition: all 0.18s cubic-bezier(.4,.2,.2,1); }
+  .bg-effect-chip:hover { color: var(--accent); border-color: var(--accent); text-shadow: 0 0 6px var(--accent); transform: translateY(-1px); }
+  .bg-effect-chip.active { background: var(--accent-glow); color: var(--accent); border-color: var(--accent); text-shadow: 0 0 8px var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
 </style>
 </head>
 <body>
@@ -2182,6 +812,7 @@
     <div class="profile-info">
       <div class="profile-name" id="sidebar-display-name">PLAYER</div>
       <div class="profile-sub" id="sidebar-profile-sub">&gt;&gt; edit_profile</div>
+      <div class="profile-tag" id="sidebar-profile-tag" style="display:none"></div>
       <div class="profile-stats-row" id="sidebar-profile-stats-row">
         <div class="profile-stat">
           <span class="profile-stat-value" id="pstat-games">0</span>
@@ -2235,8 +866,32 @@
       <div id="topbar-game-icon"><span id="topbar-icon-initials"></span></div>
       <span id="topbar-title"></span>
       <button class="btn btn-ghost btn-sm" id="open-game-settings-btn">[ ⚙ game settings ]</button>
+      <button id="topbar-watch-btn" style="display:none" title="File watcher — click to connect save folder">
+        <span class="watcher-dot" id="topbar-watcher-dot"></span>
+        <span id="topbar-watcher-label">connect files</span>
+      </button>
+      <button id="topbar-run-btn" title="Track current run — click to start/stop">
+        <span class="run-indicator-dot" id="topbar-run-dot"></span>
+        <span id="topbar-run-label">▶ run</span>
+      </button>
       <span id="sync-badge"></span>
     </div>
+
+    <div id="run-live-banner">
+      <span id="rlb-dot"></span>
+      <span id="rlb-status">// live //</span>
+      <span id="rlb-game"></span>
+      <span id="rlb-timer">0:00</span>
+      <button id="rlb-end-btn">[ end run ]</button>
+    </div>
+
+    <div id="run-start-prompt">
+      <span id="rsp-dot"></span>
+      <span id="rsp-label">watcher active</span>
+      <span id="rsp-game"></span>
+      <button id="rsp-start-btn">[ ▶ start run ]</button>
+    </div>
+
     <button class="btn btn-primary" id="new-run-btn">+ New Run</button>
 
     <div id="stats-strip">
@@ -2245,6 +900,7 @@
       <div class="stat-card stat-loss"><div class="stat-value" id="stat-losses">0</div><div class="stat-label">Losses</div></div>
       <div class="stat-card stat-rate"><div class="stat-value" id="stat-winrate">—</div><div class="stat-label">Win Rate</div></div>
       <div class="stat-card"><div class="stat-value" id="stat-streak">—</div><div class="stat-label">Streak</div></div>
+      <div class="stat-card"><div class="stat-value" id="stat-best-streak">—</div><div class="stat-label">Best W</div></div>
     </div>
 
     <div id="view-tabs">
@@ -2349,14 +1005,20 @@
         <option value="ror2">Risk of Rain 2</option>
         <option value="sts2">Slay the Spire 2</option>
         <option value="megabonk">Megabonk</option>
+        <option value="generic">Generic / Custom</option>
       </select>
     </div>
     <div id="rp-watcher-block" style="display:none">
       <div class="watcher-hint" id="rp-watcher-hint"></div>
+      <div id="rp-server-cmd" style="display:none;margin:6px 0 4px">
+        <code id="rp-server-cmd-text" style="font-size:10px;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border-hi);padding:4px 8px;border-radius:2px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">powershell -ExecutionPolicy Bypass -File server.ps1</code>
+        <button id="rp-copy-server-cmd" class="fields-add-btn" style="margin-top:4px;width:100%">⎘ copy server command</button>
+      </div>
       <div class="watcher-row">
         <div class="watcher-dot" id="rp-watcher-dot"></div>
         <span class="watcher-label" id="rp-watcher-label">no folder selected</span>
       </div>
+      <div class="watcher-folder-name" id="rp-folder-name"></div>
       <div class="fields-add-row">
         <button class="fields-add-btn" id="rp-select-folder-btn">⊕ select save folder</button>
       </div>
@@ -2402,6 +1064,15 @@
       <div class="form-group" style="margin-top:14px">
         <label>Bio</label>
         <textarea id="pm-bio" placeholder="// tell your story... build preferences, play style, goals..."></textarea>
+      </div>
+
+      <div class="form-group" style="margin-top:10px">
+        <label>Player Tag <span class="form-hint" style="margin:0;font-size:0.75em;opacity:0.6">4 chars · unique ID</span></label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" id="pm-tag" maxlength="4" placeholder="AUTO" autocomplete="off"
+            style="width:72px;text-transform:uppercase;font-family:var(--font-mono);letter-spacing:0.12em;text-align:center">
+          <span id="pm-tag-error" style="color:var(--danger,#e05);font-size:0.8em"></span>
+        </div>
       </div>
 
       <hr class="pm-divider">
@@ -2523,6 +1194,30 @@
         </div>
       </div>
     </div>
+      <hr class="pm-divider" style="margin-top:18px">
+      <div class="gm-file-section">
+        <div class="gm-file-label">game file integration <span class="gm-file-optional">// optional</span></div>
+        <select id="gm-game-type" style="width:100%;margin-bottom:8px">
+          <option value="">// manual only — no file detection</option>
+          <option value="hades">Hades</option>
+          <option value="hades2">Hades II</option>
+          <option value="ror2">Risk of Rain 2</option>
+          <option value="sts2">Slay the Spire 2</option>
+          <option value="megabonk">Megabonk</option>
+          <option value="generic">Generic / Custom</option>
+        </select>
+        <div id="gm-path-hint" class="gm-path-hint" style="display:none">
+          <div class="gm-path-desc" id="gm-path-desc"></div>
+          <div class="gm-path-row">
+            <span class="gm-path-label">save folder:</span>
+            <span class="gm-path-value" id="gm-path-value"></span>
+            <button class="gm-path-copy" id="gm-path-copy" title="Copy path">⎘</button>
+          </div>
+        </div>
+        <button id="gm-connect-btn" class="gm-connect-btn" type="button">⬡ Connect Game Files</button>
+        <div class="gm-connect-hint" id="gm-connect-hint"></div>
+      </div>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" data-close="game-modal">Cancel</button>
       <button class="btn btn-primary" id="save-game-btn">[ Save ]</button>
@@ -2610,6 +1305,11 @@
 </div>
 
 <!-- Auto-run detection toast -->
+<div id="run-started-flash">
+  <span id="rsf-dot"></span>
+  <span id="rsf-label">▶ run started</span>
+</div>
+
 <div id="auto-run-toast">
   <div id="auto-run-toast-icon">◈</div>
   <div id="auto-run-toast-body">
@@ -2617,7 +1317,8 @@
     <div id="auto-run-toast-sub"></div>
   </div>
   <div class="toast-actions">
-    <button class="btn btn-primary btn-sm" id="auto-run-log-btn">[ log run ]</button>
+    <button class="btn btn-primary btn-sm" id="auto-run-quick-btn">[ quick log ]</button>
+    <button class="btn btn-ghost btn-sm" id="auto-run-log-btn">[ review ]</button>
     <button class="btn btn-ghost btn-sm" id="auto-run-dismiss-btn">[ dismiss ]</button>
   </div>
 </div>
@@ -2635,45 +1336,48 @@
     <div class="modal-body">
 
       <!-- Appearance — always visible regardless of auth state -->
-      <div class="settings-section">
+      <div class="settings-section" id="settings-appearance-section">
         <div class="settings-section-title">// appearance</div>
+        <p id="settings-appearance-readonly" class="form-hint" style="display:none;margin-bottom:12px">// appearance is set by the profile owner</p>
 
-        <div class="form-group">
-          <label>Lighting Color</label>
-          <div class="cw-layout">
-            <div class="color-wheel-wrap" id="cw-wrap">
-              <canvas id="settings-color-wheel" width="140" height="140"></canvas>
-              <div class="cw-selector-dot" id="cw-selector-dot"></div>
+        <div id="settings-appearance-controls">
+          <div class="form-group">
+            <label>Lighting Color</label>
+            <div class="cw-layout">
+              <div class="color-wheel-wrap" id="cw-wrap">
+                <canvas id="settings-color-wheel" width="140" height="140"></canvas>
+                <div class="cw-selector-dot" id="cw-selector-dot"></div>
+              </div>
+              <div class="cw-controls">
+                <div class="cw-swatch" id="cw-swatch"></div>
+                <div class="cw-hue-label" id="cw-hue-label">hue: 145°</div>
+                <button class="btn btn-ghost btn-sm" id="cw-reset-btn">[ Default ]</button>
+              </div>
             </div>
-            <div class="cw-controls">
-              <div class="cw-swatch" id="cw-swatch"></div>
-              <div class="cw-hue-label" id="cw-hue-label">hue: 145°</div>
-              <button class="btn btn-ghost btn-sm" id="cw-reset-btn">[ Default ]</button>
+          </div>
+
+          <div class="form-group" style="margin-top:18px">
+            <label>Background Effect</label>
+            <div class="bg-effect-row" id="bg-effect-row">
+              <button class="bg-effect-chip" data-fx="none">None</button>
+              <button class="bg-effect-chip" data-fx="rain">Matrix Rain</button>
+              <button class="bg-effect-chip" data-fx="grid">Pulse Grid</button>
+              <button class="bg-effect-chip" data-fx="wave">Wave Scan</button>
+              <button class="bg-effect-chip" data-fx="pulse">Radial Pulse</button>
+              <button class="bg-effect-chip" data-fx="starfield">Starfield</button>
             </div>
+            <p class="form-hint" style="margin-top:6px">animations adapt to your lighting color — saved to your profile</p>
           </div>
-        </div>
 
-        <div class="form-group" style="margin-top:18px">
-          <label>Background Effect</label>
-          <div class="bg-effect-row" id="bg-effect-row">
-            <button class="bg-effect-chip" data-fx="none">None</button>
-            <button class="bg-effect-chip" data-fx="rain">Matrix Rain</button>
-            <button class="bg-effect-chip" data-fx="grid">Pulse Grid</button>
-            <button class="bg-effect-chip" data-fx="wave">Wave Scan</button>
-            <button class="bg-effect-chip" data-fx="pulse">Radial Pulse</button>
-            <button class="bg-effect-chip" data-fx="starfield">Starfield</button>
+          <div class="form-group" style="margin-top:18px">
+            <label>Background Image</label>
+            <div class="bg-upload-zone" id="bg-upload-zone">⬡ click to upload</div>
+            <div class="bg-img-preview" id="bg-img-preview" style="display:none">
+              <div class="bg-img-thumb" id="bg-img-thumb"></div>
+              <button class="btn btn-ghost btn-sm" id="bg-clear-btn">[ Remove ]</button>
+            </div>
+            <p class="form-hint" style="margin-top:6px">jpeg · png · webp — static, fills behind the terminal (combines with effect)</p>
           </div>
-          <p class="form-hint" style="margin-top:6px">animations adapt to your lighting color</p>
-        </div>
-
-        <div class="form-group" style="margin-top:18px">
-          <label>Background Image</label>
-          <div class="bg-upload-zone" id="bg-upload-zone">⬡ click to upload</div>
-          <div class="bg-img-preview" id="bg-img-preview" style="display:none">
-            <div class="bg-img-thumb" id="bg-img-thumb"></div>
-            <button class="btn btn-ghost btn-sm" id="bg-clear-btn">[ Remove ]</button>
-          </div>
-          <p class="form-hint" style="margin-top:6px">jpeg · png · webp — static, fills behind the terminal (combines with effect)</p>
         </div>
       </div>
 
@@ -2739,6 +1443,9 @@
 
 <script>
 // ── Supabase ──────────────────────────────────────────────────────────────────
+// SB_ANON is the public anon key — intentionally client-side visible.
+// Security is enforced by Row Level Security (RLS) policies on the DB, not by hiding this key.
+// Never put the service_role key here.
 const SB_URL  = 'https://wbbfkyzdmpnyiizifijz.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiYmZreXpkbXBueWlpemlmaWp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NDQ0NTEsImV4cCI6MjA5MjQyMDQ1MX0.vwy06QlB7PcmHn2FXEZ_LBiF_lsa5TRWOgQsnnobFdg';
 let sb = null;
@@ -2772,16 +1479,17 @@ async function loadFromSupabase() {
       db.profile.avatar      = prof.avatar || null;
       db.profile.bio         = prof.bio    || '';
       db.profile.currentGame = prof.current_game_id || null;
+      db.profile.tag         = prof.tag    || null;
+      if (!db.settings) db.settings = {};
+      if (prof.accent_hue != null) db.settings.accentHue = prof.accent_hue;
+      if (prof.accent_sat != null) db.settings.accentSat = prof.accent_sat;
+      if (prof.bg_effect)          db.settings.bgEffect  = prof.bg_effect;
     }
-    if (games && games.length) {
-      db.games = games.map(g => ({
-        id: g.id, name: g.name, icon: g.icon || null, fields: g.fields || [],
-        builds: (g.builds?.list) || [], buildCustomFields: (g.builds?.customFields) || [],
-      }));
-    }
-    if (runs && runs.length) {
-      db.runs = runs.map(r => ({ id: r.id, gameId: r.game_id, result: r.result, date: r.date, notes: r.notes || '', comment: r.comment || '', tags: r.tags || [], fields: r.fields || {}, buildId: r.build_id || null }));
-    }
+    db.games = (games && games.length) ? games.map(g => ({
+      id: g.id, name: g.name, icon: g.icon || null, fields: g.fields || [],
+      builds: (g.builds?.list) || [], buildCustomFields: (g.builds?.customFields) || [],
+    })) : [];
+    db.runs = (runs && runs.length) ? runs.map(r => ({ id: r.id, gameId: r.game_id, result: r.result, date: r.date, notes: r.notes || '', comment: r.comment || '', tags: r.tags || [], fields: r.fields || {}, buildId: r.build_id || null })) : [];
     save(db);
     setSyncBadge('synced', '✓ synced');
   } catch(e) {
@@ -2790,27 +1498,113 @@ async function loadFromSupabase() {
   }
 }
 
+// ── Input limits, sanitization, rate limiting ─────────────────────────────────
+const LIMITS = {
+  profileName: 64, bio: 500, gameName: 64,
+  notes: 2000, comment: 2000, fieldValue: 256, tagLabel: 32, tagCount: 20,
+  fieldsPerGame: 20, buildsPerGame: 50, buildCustomFields: 10,
+};
+
+function _clamp(s, max) { return typeof s === 'string' ? s.slice(0, max) : ''; }
+
+function _sanitizeProfile(p) {
+  const tag = p.tag ? p.tag.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4) : null;
+  return {
+    name:        _clamp(p.name || 'PLAYER', LIMITS.profileName),
+    bio:         _clamp(p.bio  || '',       LIMITS.bio),
+    tag:         (tag && tag.length === 4) ? tag : null,
+    currentGame: typeof p.currentGame === 'string' ? p.currentGame : null,
+    avatar:      p.avatar || null,
+  };
+}
+
+function _sanitizeGame(g) {
+  return {
+    ...g,
+    name: _clamp(g.name || '', LIMITS.gameName),
+    fields: (Array.isArray(g.fields) ? g.fields : []).slice(0, LIMITS.fieldsPerGame),
+    builds: (Array.isArray(g.builds) ? g.builds : []).slice(0, LIMITS.buildsPerGame).map(b => ({
+      ...b,
+      name:     _clamp(b.name     || '', 64),
+      items:    _clamp(b.items    || '', 1000),
+      bans:     _clamp(b.bans     || '', 500),
+      strategy: _clamp(b.strategy || '', 1000),
+    })),
+    buildCustomFields: (Array.isArray(g.buildCustomFields) ? g.buildCustomFields : [])
+      .slice(0, LIMITS.buildCustomFields),
+  };
+}
+
+function _sanitizeRun(r) {
+  const result  = ['win', 'loss', 'abandoned'].includes(r.result) ? r.result : null;
+  const date    = /^\d{4}-\d{2}-\d{2}$/.test(r.date || '') ? r.date : null;
+  const tags    = (Array.isArray(r.tags) ? r.tags : [])
+    .filter(t => typeof t === 'string').map(t => _clamp(t.trim(), LIMITS.tagLabel))
+    .filter(Boolean).slice(0, LIMITS.tagCount);
+  const fields  = {};
+  if (r.fields && typeof r.fields === 'object') {
+    Object.entries(r.fields).forEach(([k, v]) => {
+      if (typeof k === 'string' && typeof v === 'string')
+        fields[k.slice(0, 32)] = _clamp(v, LIMITS.fieldValue);
+    });
+  }
+  return { ...r, result, date, notes: _clamp(r.notes || '', LIMITS.notes),
+    comment: _clamp(r.comment || '', LIMITS.comment), tags, fields };
+}
+
+class _RateLimiter {
+  constructor(max, windowMs) { this.max = max; this.windowMs = windowMs; this.log = []; }
+  allow() {
+    const now = Date.now();
+    this.log = this.log.filter(t => now - t < this.windowMs);
+    if (this.log.length >= this.max) return false;
+    this.log.push(now);
+    return true;
+  }
+}
+const _syncLimiter = new _RateLimiter(60, 60_000); // 60 writes / minute
+
 async function syncProfile() {
-  if (!sbUser) return;
+  if (!sbUser || !_syncLimiter.allow()) return;
+  const p = _sanitizeProfile(db.profile);
   try {
-    await sb.from('profiles').upsert({ id: sbUser.id, name: db.profile.name, avatar: db.profile.avatar || null, bio: db.profile.bio || '', current_game_id: db.profile.currentGame || null });
-  } catch(e) { console.error('syncProfile', e); }
+    await sb.from('profiles').upsert({
+      id: sbUser.id,
+      name: p.name,
+      avatar: p.avatar,
+      bio: p.bio,
+      current_game_id: p.currentGame || null,
+      accent_hue: db.settings?.accentHue ?? 145,
+      accent_sat: db.settings?.accentSat ?? 1,
+      bg_effect:  db.settings?.bgEffect  || 'none',
+      tag: p.tag,
+    });
+  } catch(e) {
+    if (e?.code === '23505') throw Object.assign(e, { _tagConflict: true });
+    console.error('syncProfile', e);
+  }
 }
 
 async function syncGame(game) {
-  if (!sbUser) return;
+  if (!sbUser || !_syncLimiter.allow()) return;
+  const g = _sanitizeGame(game);
   try {
     await sb.from('games').upsert({
-      id: game.id, user_id: sbUser.id, name: game.name, icon: game.icon || null, fields: game.fields || [],
-      builds: { list: game.builds || [], customFields: game.buildCustomFields || [] },
+      id: g.id, user_id: sbUser.id, name: g.name, icon: g.icon || null, fields: g.fields,
+      builds: { list: g.builds, customFields: g.buildCustomFields || [] },
     });
   } catch(e) { console.error('syncGame', e); }
 }
 
 async function syncRun(run) {
-  if (!sbUser) return;
+  if (!sbUser || !_syncLimiter.allow()) return;
+  const r = _sanitizeRun(run);
   try {
-    await sb.from('runs').upsert({ id: run.id, game_id: run.gameId, user_id: sbUser.id, result: run.result, date: run.date, notes: run.notes || '', comment: run.comment || '', tags: run.tags || [], fields: run.fields || {}, build_id: run.buildId || null });
+    await sb.from('runs').upsert({
+      id: r.id, game_id: r.gameId, user_id: sbUser.id,
+      result: r.result, date: r.date, notes: r.notes, comment: r.comment,
+      tags: r.tags, fields: r.fields, build_id: r.buildId || null,
+    });
   } catch(e) { console.error('syncRun', e); }
 }
 
@@ -2827,6 +1621,14 @@ async function deleteRunFromSb(runId) {
 }
 
 // ── Auth helpers ──────────────────────────────────────────────────────────────
+function bindPwToggle(toggleId, inputId) {
+  document.getElementById(toggleId).addEventListener('click', function() {
+    const inp = document.getElementById(inputId);
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    this.classList.toggle('closed', inp.type === 'password');
+  });
+}
+
 let authMode = 'in'; // 'in' | 'up'
 
 function switchAuthTab(mode) {
@@ -2843,17 +1645,8 @@ function switchAuthTab(mode) {
 document.getElementById('auth-tab-in').addEventListener('click', () => switchAuthTab('in'));
 document.getElementById('auth-tab-up').addEventListener('click', () => switchAuthTab('up'));
 
-// Password visibility toggles
-document.getElementById('pw-toggle').addEventListener('click', function() {
-  const inp = document.getElementById('auth-password');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  this.classList.toggle('closed', inp.type === 'password');
-});
-document.getElementById('pw-toggle-confirm').addEventListener('click', function() {
-  const inp = document.getElementById('auth-confirm');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  this.classList.toggle('closed', inp.type === 'password');
-});
+bindPwToggle('pw-toggle',         'auth-password');
+bindPwToggle('pw-toggle-confirm', 'auth-confirm');
 
 // Forgot password
 document.getElementById('forgot-pw-btn').addEventListener('click', async () => {
@@ -2951,8 +1744,9 @@ document.getElementById('auth-skip-btn').addEventListener('click', () => {
 });
 
 async function doSignOut() {
-  if (sb) await sb.auth.signOut();
+  try { if (sb) await sb.auth.signOut(); } catch(e) { console.error('signOut', e); }
   sbUser = null;
+  isReadOnly = false;
   _authBusy = false;
   db = defaultDB();
   save(db);
@@ -3048,7 +1842,7 @@ function resizeImage(file, maxPx) {
 
 function setImgZone(zone, src) {
   zone.querySelectorAll('img').forEach(i => i.remove());
-  if (src) {
+  if (src && isSafeImgSrc(src)) {
     zone.classList.add('has-image');
     const img = document.createElement('img');
     img.src = src;
@@ -3058,12 +1852,11 @@ function setImgZone(zone, src) {
   }
 }
 
-
 // ── Icon rendering ────────────────────────────────────────────────────────────
 function applyGameIcon(el, game) {
   el.querySelectorAll('img').forEach(i => i.remove());
   const initial = el.querySelector('.rp-icon-initial') || el.querySelector('span') || el;
-  if (game.icon) {
+  if (game.icon && isSafeImgSrc(game.icon)) {
     const img = document.createElement('img');
     img.src = game.icon;
     el.prepend(img);
@@ -3079,7 +1872,7 @@ function applyRpIcon(iconSrc, gameName) {
   const initial = document.getElementById('rp-icon-initial');
   const hover   = zone.querySelector('.rp-icon-hover');
   zone.querySelectorAll('img').forEach(i => i.remove());
-  if (iconSrc) {
+  if (iconSrc && isSafeImgSrc(iconSrc)) {
     const img = document.createElement('img');
     img.src = iconSrc;
     zone.insertBefore(img, initial);
@@ -3093,8 +1886,11 @@ function applyRpIcon(iconSrc, gameName) {
 
 // ── Profile ───────────────────────────────────────────────────────────────────
 function renderSidebarProfile() {
-  const { name, avatar, bio, currentGame } = db.profile;
+  const { name, avatar, bio, currentGame, tag } = db.profile;
   document.getElementById('sidebar-display-name').textContent = (name || 'PLAYER').toUpperCase();
+  const tagEl = document.getElementById('sidebar-profile-tag');
+  if (tag) { tagEl.textContent = '#' + tag; tagEl.style.display = ''; }
+  else tagEl.style.display = 'none';
 
   const subEl = document.getElementById('sidebar-profile-sub');
   if (currentGame) {
@@ -3118,7 +1914,7 @@ function renderSidebarProfile() {
   const wrap    = document.getElementById('sidebar-avatar');
   const initial = document.getElementById('sidebar-avatar-initials');
   wrap.querySelectorAll('img').forEach(i => i.remove());
-  if (avatar) {
+  if (avatar && isSafeImgSrc(avatar)) {
     const img = document.createElement('img');
     img.src = avatar;
     wrap.prepend(img);
@@ -3143,10 +1939,16 @@ function openProfileModal() {
   // Show sign-out and share only when authenticated
   document.getElementById('go-online-btn').style.display    = sbUser ? 'none' : '';
   document.getElementById('signout-btn').style.display      = sbUser ? '' : 'none';
-  document.getElementById('share-profile-btn').style.display = sbUser ? '' : 'none';
+  const _shareBtn = document.getElementById('share-profile-btn');
+  _shareBtn.style.display  = sbUser ? '' : 'none';
+  _shareBtn.disabled       = false;
+  _shareBtn.textContent    = '[ share profile ]';
+  _shareBtn.style.color    = '';
   const p = db.profile;
   document.getElementById('pm-name').value = p.name || '';
   document.getElementById('pm-bio').value  = p.bio  || '';
+  document.getElementById('pm-tag').value  = p.tag  || '';
+  document.getElementById('pm-tag-error').textContent = '';
 
   const cgSel = document.getElementById('pm-current-game');
   cgSel.innerHTML = '<option value="">// none selected</option>';
@@ -3208,13 +2010,25 @@ document.getElementById('clear-avatar-btn').addEventListener('click', () => {
   setImgZone(document.getElementById('avatar-upload-zone'), null);
 });
 
-document.getElementById('save-profile-btn').addEventListener('click', () => {
+document.getElementById('save-profile-btn').addEventListener('click', async () => {
+  const tagRaw = document.getElementById('pm-tag').value.trim().toUpperCase();
+  const tagErr = document.getElementById('pm-tag-error');
+  tagErr.textContent = '';
+  if (tagRaw && !/^[A-Z0-9]{4}$/.test(tagRaw)) {
+    tagErr.textContent = '// 4 letters/digits only';
+    return;
+  }
   db.profile.name        = document.getElementById('pm-name').value.trim() || 'PLAYER';
   db.profile.bio         = document.getElementById('pm-bio').value.trim();
   db.profile.currentGame = document.getElementById('pm-current-game').value || null;
   if (pendingAvatar !== undefined) db.profile.avatar = pendingAvatar;
+  if (tagRaw) db.profile.tag = tagRaw;
   save(db);
-  syncProfile();
+  try {
+    await syncProfile();
+  } catch(e) {
+    if (e?._tagConflict) { tagErr.textContent = '// tag taken'; return; }
+  }
   renderSidebarProfile();
   closeModal('profile-modal');
 });
@@ -3302,6 +2116,7 @@ function renderGameView() {
   runsArea.style.display   = isRuns ? 'block' : 'none';
   buildsView.style.display = isRuns ? 'none' : 'block';
 
+  updateTopbarWatcher(game.id);
   renderStats(game);
   if (isRuns) renderRuns(game);
   else renderBuildsView(game);
@@ -3413,13 +2228,6 @@ function renderBuildsView(game) {
           notes.className = 'bv-run-notes';
           notes.textContent = run.notes || run.comment || '';
           row.append(badge, date, notes);
-          if (!isReadOnly) {
-            const editBtn = document.createElement('button');
-            editBtn.className = 'btn btn-ghost btn-sm';
-            editBtn.textContent = '[ edit ]';
-            editBtn.addEventListener('click', () => openRunModal(run.id));
-            row.appendChild(editBtn);
-          }
           runsList.appendChild(row);
         });
     }
@@ -3436,19 +2244,29 @@ function renderStats(game) {
   const losses = runs.filter(r => r.result === 'loss').length;
   const rate   = runs.length ? Math.round(wins / runs.length * 100) + '%' : '—';
 
-  let streak = 0, sType = null;
-  [...runs].sort((a,b) => (b.date||'').localeCompare(a.date||'')).forEach(r => {
-    if (!sType) { sType = r.result; streak = 1; }
-    else if (r.result === sType) streak++;
-  });
-  const streakLabel = streak && sType
-    ? `${streak}${sType === 'win' ? 'W' : sType === 'loss' ? 'L' : 'Q'}` : '—';
+  const sorted = [...runs].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  let curStreak = 0, curType = null;
+  for (const r of sorted) {
+    if (!curType) { curType = r.result; curStreak = 1; }
+    else if (r.result === curType) curStreak++;
+    else break;
+  }
+  const streakLabel = curStreak && curType
+    ? `${curStreak}${curType === 'win' ? 'W' : curType === 'loss' ? 'L' : 'Q'}` : '—';
 
-  document.getElementById('stat-total').textContent   = runs.length;
-  document.getElementById('stat-wins').textContent    = wins;
-  document.getElementById('stat-losses').textContent  = losses;
-  document.getElementById('stat-winrate').textContent = rate;
-  document.getElementById('stat-streak').textContent  = streakLabel;
+  let bestWin = 0, winRun = 0;
+  [...runs].sort((a,b) => (a.date||'').localeCompare(b.date||'')).forEach(r => {
+    if (r.result === 'win') { winRun++; if (winRun > bestWin) bestWin = winRun; }
+    else winRun = 0;
+  });
+  const bestLabel = bestWin ? `${bestWin}W` : '—';
+
+  document.getElementById('stat-total').textContent       = runs.length;
+  document.getElementById('stat-wins').textContent        = wins;
+  document.getElementById('stat-losses').textContent      = losses;
+  document.getElementById('stat-winrate').textContent     = rate;
+  document.getElementById('stat-streak').textContent      = streakLabel;
+  document.getElementById('stat-best-streak').textContent = bestLabel;
 }
 
 // ── Runs grid ─────────────────────────────────────────────────────────────────
@@ -3493,10 +2311,9 @@ function renderRuns(game) {
       <div class="run-details">${pills}${tags}</div>
       ${run.notes ? `<div class="run-notes">${esc(run.notes)}</div>` : ''}
       ${run.comment ? `<div class="run-comment">${esc(run.comment)}</div>` : ''}
-      ${!isReadOnly ? `<div class="run-actions"><button class="btn btn-ghost btn-sm edit-run-btn">[ edit ]</button><button class="btn btn-ghost btn-sm delete-run-card-btn">[ delete ]</button></div>` : ''}
+      ${!isReadOnly ? `<div class="run-actions"><button class="btn btn-ghost btn-sm delete-run-card-btn">[ delete ]</button></div>` : ''}
     `;
     if (!isReadOnly) {
-      card.querySelector('.edit-run-btn').addEventListener('click', () => openRunModal(run.id));
       card.querySelector('.delete-run-card-btn').addEventListener('click', () => {
         if (!confirm('DELETE this run?')) return;
         db.runs = db.runs.filter(r => r.id !== run.id);
@@ -3847,6 +2664,25 @@ function openGameModal(gameId = null) {
   modalGenericLabels = {};
   active.filter(f => f.builtin).forEach(f => { modalGenericLabels[f.id] = f.label; });
 
+  document.getElementById('gm-game-type').value = game?.gameType || '';
+  updateGmPathHint(game?.gameType || '');
+  const connectBtn  = document.getElementById('gm-connect-btn');
+  const connectHint = document.getElementById('gm-connect-hint');
+  const alreadyWatching = game && watchers[game.id]?.active;
+  const hasPicker = ('showDirectoryPicker' in window);
+  const isMbGame  = game?.gameType === 'megabonk';
+  if (alreadyWatching) {
+    connectBtn.textContent = isMbGame ? '⬡ Server Connected' : '⬡ Files Connected';
+    connectBtn.className   = 'gm-connect-btn connected';
+  } else if (!hasPicker && !isMbGame && game?.gameType) {
+    connectBtn.textContent = '// watcher requires Brave, Chrome, Edge, or Opera GX';
+    connectBtn.className   = 'gm-connect-btn unavailable';
+  } else {
+    connectBtn.textContent = isMbGame ? '⬡ Test Server Connection' : '⬡ Connect Game Files';
+    connectBtn.className   = 'gm-connect-btn';
+  }
+  connectHint.textContent = '';
+
   renderFieldsEditor();
   openModal('game-modal');
 }
@@ -3972,14 +2808,16 @@ document.getElementById('save-game-btn').addEventListener('click', () => {
   modalCustomFields.filter(cf => cf.label.trim()).forEach(cf =>
     fields.push({ id: cf.id, label: cf.label.trim(), type: 'text', builtin: false }));
 
+  const gameType = document.getElementById('gm-game-type').value || null;
+
   let savedGame;
   if (editingGameId) {
     const g = db.games.find(g => g.id === editingGameId);
-    g.name = name; g.fields = fields;
+    g.name = name; g.fields = fields; g.gameType = gameType;
     if (pendingGameIcon !== undefined) g.icon = pendingGameIcon;
     savedGame = g;
   } else {
-    savedGame = { id: uid(), name, icon: pendingGameIcon ?? null, fields };
+    savedGame = { id: uid(), name, icon: pendingGameIcon ?? null, fields, gameType };
     db.games.push(savedGame);
   }
   save(db);
@@ -3989,6 +2827,93 @@ document.getElementById('save-game-btn').addEventListener('click', () => {
   renderSidebarProfile();
   if (editingGameId && editingGameId === activeGameId) { renderGameView(); renderRightPanel(); }
   if (!editingGameId) selectGame(db.games[db.games.length - 1].id);
+});
+
+document.getElementById('gm-connect-btn').addEventListener('click', async () => {
+  const hint     = document.getElementById('gm-connect-hint');
+  const gameType = document.getElementById('gm-game-type').value;
+  const btn      = document.getElementById('gm-connect-btn');
+
+  if (!gameType) {
+    hint.textContent = '// pick a game type above first';
+    document.getElementById('gm-game-type').focus();
+    return;
+  }
+
+  const name = document.getElementById('gm-name').value.trim();
+  if (!name) { alert('Enter a game name first.'); return; }
+
+  const fields = [];
+  GENERIC_FIELDS.forEach(gf => {
+    if (modalEnabledGeneric.has(gf.id)) {
+      const custom = (modalGenericLabels[gf.id] || '').trim();
+      fields.push({ id: gf.id, label: custom || gf.label, type: gf.type, builtin: true });
+    }
+  });
+  modalCustomFields.filter(cf => cf.label.trim()).forEach(cf =>
+    fields.push({ id: cf.id, label: cf.label.trim(), type: 'text', builtin: false }));
+
+  let targetId = editingGameId;
+  if (editingGameId) {
+    const g = db.games.find(g => g.id === editingGameId);
+    g.name = name; g.fields = fields; g.gameType = gameType;
+    if (pendingGameIcon !== undefined) g.icon = pendingGameIcon;
+    syncGame(g);
+  } else {
+    const newGame = { id: uid(), name, icon: pendingGameIcon ?? null, fields, gameType };
+    db.games.push(newGame);
+    targetId = newGame.id;
+    editingGameId = targetId;
+    syncGame(newGame);
+  }
+  save(db);
+
+  if (gameType === 'megabonk') {
+    hint.textContent = '// testing server connection...';
+    try {
+      const res  = await fetch('http://localhost:3400/api/megabonk', { cache: 'no-store' });
+      const data = await res.json();
+      if (data.error) {
+        hint.textContent = '// server reached but files not found — launch Megabonk first';
+        return;
+      }
+      if (!watchers[targetId]) watchers[targetId] = {};
+      watchers[targetId].gameType = gameType;
+      ensureMegabonkKillsField(targetId);
+      await startWatcher(targetId);
+      btn.textContent = '⬡ Server Connected';
+      btn.className   = 'gm-connect-btn connected';
+      hint.textContent = '// watching via localhost:3400';
+    } catch {
+      hint.textContent = '// server not running — start server.ps1 first';
+    }
+    return;
+  }
+
+  if (!('showDirectoryPicker' in window)) {
+    hint.textContent = '// file watcher not supported — use Brave, Chrome, Edge, or Opera GX';
+    return;
+  }
+  try {
+    hint.textContent = '// opening folder picker...';
+    const handle = await window.showDirectoryPicker({ mode: 'read' });
+    if (!watchers[targetId]) watchers[targetId] = {};
+    watchers[targetId].dirHandle = handle;
+    watchers[targetId].gameType  = gameType;
+    await saveWatchHandle(targetId, handle);
+    await startWatcher(targetId);
+    btn.textContent = '⬡ Files Connected';
+    btn.className   = 'gm-connect-btn connected';
+    const meta = GAME_TYPE_META[gameType] || {};
+    hint.textContent = '// watching · ' + (meta.label || gameType);
+  } catch(e) {
+    if (e.name !== 'AbortError') {
+      hint.textContent = '// error — try again';
+      console.error('gm-connect-btn', e);
+    } else {
+      hint.textContent = '';
+    }
+  }
 });
 
 function promptDeleteGame(gameId, fromModal = false) {
@@ -4013,7 +2938,8 @@ function promptDeleteGame(gameId, fromModal = false) {
 // ── Run modal ─────────────────────────────────────────────────────────────────
 function openRunModal(runId = null, prefill = {}) {
   if (!activeGameId) return;
-  editingRunId = runId;
+  if (runId) return;  // editing disabled — runs are logged automatically or via new-run
+  editingRunId = null;
   const run  = runId ? db.runs.find(r => r.id === runId) : null;
   const game = db.games.find(g => g.id === activeGameId);
 
@@ -4166,11 +3092,31 @@ document.getElementById('sort-select').addEventListener('change', e => {
 // ── Game file integration ─────────────────────────────────────────────────────
 
 const GAME_TYPE_META = {
-  hades:    { label: 'Hades',            hint: 'Point to your Hades save folder.\nDefault: %USERPROFILE%\\Saved Games\\Hades' },
-  hades2:   { label: 'Hades II',         hint: 'Point to your Hades II save folder.\nDefault: %USERPROFILE%\\Saved Games\\Hades II' },
-  ror2:     { label: 'Risk of Rain 2',   hint: 'Point to your RoR2 profile folder.\nDefault: %AppData%\\..\\LocalLow\\Hopoo Games\\Risk of Rain 2' },
-  sts2:     { label: 'Slay the Spire 2', hint: 'Point to your StS2 saves folder.\nDefault: %AppData%\\SlayTheSpire2\\steam\\<id>\\profile1' },
-  megabonk: { label: 'Megabonk',         hint: 'Point to your Megabonk save folder.\nDefault: %AppData%\\..\\LocalLow\\vedinad\\Megabonk' },
+  hades:    { label: 'Hades',            hint: 'Looks for Profile0.sav — point to your Hades save folder.\nDefault: %USERPROFILE%\\Saved Games\\Hades' },
+  hades2:   { label: 'Hades II',         hint: 'Looks for Profile0.sav — point to your Hades II save folder.\nDefault: %USERPROFILE%\\Saved Games\\Hades II' },
+  ror2:     { label: 'Risk of Rain 2',   hint: 'Looks for UserProfile.xml — point to your RoR2 UserProfiles folder in Steam userdata.\nDefault: %ProgramFiles(x86)%\\Steam\\userdata\\<steam id>\\632360\\remote\\UserProfiles' },
+  sts2:     { label: 'Slay the Spire 2', hint: 'Scans for .run files — point to your STS2 steam saves folder.\nDefault: %APPDATA%\\SlayTheSpire2\\steam\\<your steam id>' },
+  megabonk: { label: 'Megabonk',         hint: 'Uses local server — save files are encrypted and in a system folder the browser cannot access.\nRun server.ps1 first: powershell -ExecutionPolicy Bypass -File server.ps1', serverMode: true },
+  generic:  { label: 'Generic',          hint: 'Point to your game\'s save folder. Any file change detected here will trigger a run prompt.' },
+};
+
+const ROR2_BODY_NAMES = {
+  CommandoBody:     'Commando',
+  HuntressBody:     'Huntress',
+  Bandit2Body:      'Bandit',
+  ToolbotBody:      'MUL-T',
+  EngiBody:         'Engineer',
+  MageBody:         'Artificer',
+  MercBody:         'Mercenary',
+  TreebotBody:      'REX',
+  LoaderBody:       'Loader',
+  CrocoBody:        'Acrid',
+  CaptainBody:      'Captain',
+  RailgunnerBody:   'Railgunner',
+  VoidSurvivorBody: 'Void Fiend',
+  SeekerBody:       'Seeker',
+  FalseSonBody:     'False Son',
+  ChefBody:         'Chef',
 };
 
 const watchers = {}; // gameId → { dirHandle, gameType, lastState, interval, active }
@@ -4208,10 +3154,12 @@ async function loadWatchHandle(gameId) {
 // ── Per-game file readers ──────────────────────────────────────────────────────
 async function readGameState(dirHandle, gameType) {
   try {
-    if (gameType === 'hades' || gameType === 'hades2') return await readHadesState(dirHandle);
+    if (gameType === 'hades')  return await readHadesState(dirHandle);
+    if (gameType === 'hades2') return await readHades2State(dirHandle);
     if (gameType === 'ror2')     return await readRoR2State(dirHandle);
     if (gameType === 'sts2')     return await readSTS2State(dirHandle);
-    if (gameType === 'megabonk') return await readMegabonkState(dirHandle);
+    if (gameType === 'megabonk') return await readMegabonkState();
+    if (gameType === 'generic')  return await readGenericState(dirHandle);
   } catch(e) { /* permission denied or file not found — skip silently */ }
   return null;
 }
@@ -4226,6 +3174,44 @@ async function readHadesState(dirHandle) {
     if (/Profile\d+_Temp\.sav/i.test(name)) hasTempFile = true;
   }
   return { savMtime, hasTempFile };
+}
+
+// Hades 2 weapon IDs found in the binary save file (Lua-serialised strings)
+const HADES2_WEAPONS = {
+  WeaponStaff:   "Witch's Staff",
+  WeaponDagger:  'Sister Blades',
+  WeaponAxe:     'Moonstone Axe',
+  WeaponTorch:   'Umbral Flames',
+  WeaponSkull:   'Argent Skull',
+  WeaponSpear:   'Nocturnal Arms',
+};
+
+async function extractHades2Weapon(file) {
+  // Scan up to 2 MB of the binary save for ASCII weapon ID strings.
+  // Keys/strings in the Lua-binary format appear as raw UTF-8, so a simple
+  // indexOf search on a latin-1 decoded buffer is sufficient.
+  try {
+    const buf  = await file.slice(0, 2 * 1024 * 1024).arrayBuffer();
+    const text = new TextDecoder('latin1').decode(buf);
+    for (const [id, name] of Object.entries(HADES2_WEAPONS)) {
+      if (text.includes(id)) return name;
+    }
+  } catch { /* ignore — can't read binary */ }
+  return null;
+}
+
+async function readHades2State(dirHandle) {
+  let savMtime = 0, hasTempFile = false, weapon = null;
+  for await (const [name, handle] of dirHandle.entries()) {
+    if (handle.kind !== 'file') continue;
+    if (/^Profile0\.sav$/i.test(name)) {
+      const f = await handle.getFile();
+      savMtime = f.lastModified;
+      weapon = await extractHades2Weapon(f);
+    }
+    if (/Profile\d+_Temp\.sav/i.test(name)) hasTempFile = true;
+  }
+  return { savMtime, hasTempFile, weapon };
 }
 
 async function readRoR2State(dirHandle) {
@@ -4249,21 +3235,30 @@ async function readRoR2State(dirHandle) {
     const el = doc.querySelector(tag) || doc.querySelector(`fields ${tag}`);
     return el ? (parseFloat(el.textContent) || 0) : 0;
   };
+  const s = tag => {
+    const el = doc.querySelector(tag);
+    return el ? el.textContent.trim() : '';
+  };
+  // Several XML paths that different RoR2 versions use for last-played survivor
+  const lastBody = s('lastSeenSurvivorBodyName') || s('selectedBodyName') || s('lastBodyName') || s('preferredSurvivorBodyName') || '';
   return {
-    runsFinished:  n('totalRunsFinished'),
-    deaths:        n('totalDeaths'),
-    stagesCleared: n('highestStagesCompleted'),
+    runsFinished: n('totalRunsFinished'),
+    deaths:       n('totalDeaths'),
+    // Cumulative counters — delta between reads gives per-run values
+    totalStages:  n('totalStagesCompleted'),
+    totalKills:   n('totalKills') || n('totalMonstersKilled') || n('totalKillCount'),
+    lastBody,
   };
 }
 
 async function readSTS2State(dirHandle) {
-  let latestMtime = 0, runCount = 0;
+  let latestMtime = 0, runCount = 0, latestHandle = null;
   async function scanForRuns(dir, depth = 0) {
     for await (const [name, handle] of dir.entries()) {
       if (handle.kind === 'file' && name.endsWith('.run')) {
         const f = await handle.getFile();
         runCount++;
-        if (f.lastModified > latestMtime) latestMtime = f.lastModified;
+        if (f.lastModified > latestMtime) { latestMtime = f.lastModified; latestHandle = handle; }
       }
       if (handle.kind === 'directory' && depth < 3) {
         await scanForRuns(handle, depth + 1).catch(() => {});
@@ -4271,7 +3266,14 @@ async function readSTS2State(dirHandle) {
     }
   }
   await scanForRuns(dirHandle);
-  return { latestMtime, runCount };
+  let lastRun = null;
+  if (latestHandle) {
+    try {
+      const text = await (await latestHandle.getFile()).text();
+      lastRun = JSON.parse(text);
+    } catch { lastRun = null; }
+  }
+  return { latestMtime, runCount, lastRun };
 }
 
 // Flexible key-pick helper — searches an object (one level deep, plus common nests) for
@@ -4297,41 +3299,57 @@ function pickStat(obj, ...needles) {
   return undefined;
 }
 
-function megabonkSummary(data) {
-  if (!data || typeof data !== 'object') return {};
+// Extract per-run kill count from a stats.json delta.
+// Tries a dedicated last-run field first; falls back to cumulative delta.
+function extractMegabonkKills(prevData, currData) {
+  if (!currData) return null;
+  if (currData && typeof currData === 'object')
+    console.log('[megabonk] stats keys+values:', Object.entries(currData).map(([k,v]) => `${k}=${typeof v === 'object' ? '(obj)' : v}`).join(', '));
   const num = (v) => (typeof v === 'number' ? v : (typeof v === 'string' && v.trim() !== '' && !isNaN(+v) ? +v : undefined));
-  return {
-    totalRuns:   num(pickStat(data, 'totalrun', 'runscount', 'runsplayed', 'gamesplayed', 'totalgames')),
-    totalWins:   num(pickStat(data, 'totalwin', 'wins', 'runscompleted', 'runscomplete', 'victories')),
-    totalDeaths: num(pickStat(data, 'totaldeath', 'deaths', 'runslost', 'losses')),
-    lastChar:    pickStat(data, 'lastcharacter', 'lastsurvivor', 'currentcharacter', 'character', 'survivor'),
-    lastLevel:   num(pickStat(data, 'lastlevel', 'level', 'highestlevel', 'maxlevel')),
-    lastTime:    num(pickStat(data, 'lasttime', 'lastduration', 'runtime', 'duration', 'time')),
-    lastKills:   num(pickStat(data, 'lastkill', 'kills', 'kilcount', 'enemieskilled')),
-    lastDiff:    pickStat(data, 'lastdifficulty', 'difficulty'),
-  };
+  const n = (...keys) => { const v = pickStat(currData, ...keys); return num(v); };
+  const lastK = n('lastkill', 'lastkills', 'runkills', 'killsthisrun', 'currentrunkills', 'bonks', 'lastbonks', 'runbonks');
+  if (lastK != null) return lastK;
+  const CUMUL = ['totalkill', 'kills', 'kilcount', 'enemieskilled', 'killcount', 'enemykills', 'totalenemieskilled', 'totalbonks', 'bonkcount'];
+  const np = (...keys) => { const v = prevData ? pickStat(prevData, ...keys) : undefined; return num(v); };
+  const currTotal = n(...CUMUL);
+  const prevTotal = np(...CUMUL);
+  if (currTotal != null && prevTotal != null && currTotal > prevTotal) return currTotal - prevTotal;
+  return null;
 }
 
-let _megabonkLogged = false;
-async function readMegabonkState(dirHandle) {
-  for await (const [name, handle] of dirHandle.entries()) {
+async function readMegabonkState() {
+  try {
+    const res = await fetch('http://localhost:3400/api/megabonk', { cache: 'no-store' });
+    if (!res.ok) return null;
+    const d = await res.json();
+    if (d.error) return null;
+    return {
+      statsSize:  d.statsSize,
+      statsMtime: d.statsMtime,
+      progSize:   d.progSize,
+    };
+  } catch { return null; }
+}
+
+async function getMegabonkKillsFromOCR() {
+  try {
+    const res = await fetch('http://localhost:3400/api/megabonk/ocr', { cache: 'no-store' });
+    if (!res.ok) return null;
+    const d = await res.json();
+    if (d.kills != null) console.log('[megabonk/ocr] kills detected:', d.kills, '| raw text:', d.ocrText);
+    else console.log('[megabonk/ocr] no kills parsed | raw text:', d.ocrText, '| error:', d.error);
+    return d.kills ?? null;
+  } catch { return null; }
+}
+
+async function readGenericState(dirHandle) {
+  let latestMtime = 0;
+  for await (const [, handle] of dirHandle.entries()) {
     if (handle.kind !== 'file') continue;
-    if (name.toLowerCase() === 'stats.json' || name.toLowerCase() === 'progression.json') {
-      const f = await handle.getFile();
-      try {
-        const data = JSON.parse(await f.text());
-        if (!_megabonkLogged) {
-          _megabonkLogged = true;
-          console.log('[megabonk] stats.json top-level keys:', Object.keys(data || {}));
-          console.log('[megabonk] parsed summary:', megabonkSummary(data));
-        }
-        return { mtime: f.lastModified, data, summary: megabonkSummary(data) };
-      } catch {
-        return { mtime: f.lastModified, data: null, summary: {} };
-      }
-    }
+    const f = await handle.getFile();
+    if (f.lastModified > latestMtime) latestMtime = f.lastModified;
   }
-  return null;
+  return { latestMtime };
 }
 
 // Format seconds → "MM:SS" (or "H:MM:SS" if ≥ 1h)
@@ -4349,53 +3367,177 @@ function fmtDuration(seconds) {
 function detectRunEnd(gameType, prev, curr) {
   if (!prev || !curr) return null;
 
-  if (gameType === 'hades' || gameType === 'hades2') {
+  if (gameType === 'hades') {
     // Temp save vanished + main save updated → run ended (died or escaped)
     if (prev.hasTempFile && !curr.hasTempFile && curr.savMtime !== prev.savMtime)
-      return { result: null };  // binary save — can't read win/loss
-    // Main save updated without temp → menu save or post-run save
+      return { result: null };  // binary save — can't determine win/loss
+    // Fallback: save updated while never in a run (short runs may miss temp file)
     if (!prev.hasTempFile && !curr.hasTempFile && curr.savMtime !== prev.savMtime)
       return { result: null };
     return null;
   }
 
+  if (gameType === 'hades2') {
+    // Only trigger when temp file disappears — avoids false positives from menu autosaves
+    if (prev.hasTempFile && !curr.hasTempFile && curr.savMtime !== prev.savMtime) {
+      const fields = {};
+      if (curr.weapon) fields.char = curr.weapon;
+      return { result: null, fields };  // binary save — can't determine win/loss
+    }
+    return null;
+  }
+
   if (gameType === 'ror2') {
-    if (curr.runsFinished > prev.runsFinished) return { result: 'win',  stages: curr.stagesCleared };
-    if (curr.deaths       > prev.deaths)       return { result: 'loss' };
+    const survivor = ROR2_BODY_NAMES[curr.lastBody] || (curr.lastBody ? curr.lastBody.replace(/Body$/, '') : null);
+    const fields = {};
+    if (survivor) fields.char = survivor;
+    // Use cumulative stat deltas for per-run values (highestStagesCompleted is all-time best, not useful)
+    const stagesDelta = curr.totalStages - prev.totalStages;
+    const killsDelta  = curr.totalKills  - prev.totalKills;
+    if (stagesDelta > 0) fields.floor = String(stagesDelta);
+    if (killsDelta  > 0) fields.score = String(killsDelta);
+    if (curr.runsFinished > prev.runsFinished) return { result: 'win',  fields };
+    if (curr.deaths       > prev.deaths)       return { result: 'loss', fields };
     return null;
   }
 
   if (gameType === 'sts2') {
-    if (curr.runCount > prev.runCount || curr.latestMtime !== prev.latestMtime)
-      return { result: null };
+    if (curr.runCount > prev.runCount || curr.latestMtime !== prev.latestMtime) {
+      const r = curr.lastRun;
+      const result = r?.victory === true ? 'win' : r?.victory === false ? 'loss' : null;
+      const fields = {};
+      if (r?.character_chosen) fields.char = r.character_chosen.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      if (r?.floor_reached   != null) fields.floor = String(r.floor_reached);
+      if (r?.ascension_level != null) fields.diff  = 'Ascension ' + r.ascension_level;
+      if (r?.score           != null) fields.score = String(r.score);
+      return { result, fields };
+    }
     return null;
   }
 
   if (gameType === 'megabonk') {
-    if (curr.mtime === prev.mtime) return null;
-    const ps = prev.summary || {};
-    const cs = curr.summary || {};
-    const inc = (a, b) => (typeof a === 'number' && typeof b === 'number' && b > a);
+    // Detect any write to stats.json (size OR mtime changed) → run ended (death)
+    // stats.json is encrypted; kill data unavailable — duration is captured by the watcher timer
+    const changed = curr.statsSize !== prev?.statsSize || curr.statsMtime !== prev?.statsMtime;
+    if (!curr.statsSize || !changed) return null;
+    return { result: null, fields: {} };
+  }
 
-    let result = null;
-    if (inc(ps.totalWins, cs.totalWins)) result = 'win';
-    else if (inc(ps.totalDeaths, cs.totalDeaths)) result = 'loss';
-    else if (inc(ps.totalRuns, cs.totalRuns)) result = null;
-    else return null;  // mtime changed but no run-counter delta — likely a settings save
-
-    const fields = {};
-    if (cs.lastChar)  fields.char     = String(cs.lastChar);
-    if (cs.lastDiff)  fields.diff     = String(cs.lastDiff);
-    if (typeof cs.lastLevel === 'number') fields.floor    = String(cs.lastLevel);
-    if (typeof cs.lastKills === 'number') fields.score    = String(cs.lastKills);
-    if (typeof cs.lastTime  === 'number') fields.duration = fmtDuration(cs.lastTime);
-    if (typeof cs.totalRuns === 'number') fields.runnum   = String(cs.totalRuns);
-
-    return { result, fields };
+  if (gameType === 'generic') {
+    if (curr.latestMtime !== prev.latestMtime) return { result: null };
+    return null;
   }
 
   return null;
 }
+
+// Returns true when a run-start signal is detected (used to auto-trigger the in-progress indicator)
+function detectRunStart(gameType, prev, curr) {
+  if (!prev || !curr) return false;
+  // Hades/II: temp save appearing = entered a run
+  if (gameType === 'hades' || gameType === 'hades2')
+    return !prev.hasTempFile && curr.hasTempFile;
+  return false;
+}
+
+// ── Run-in-progress tracker ────────────────────────────────────────────────────
+let _runTimerInterval = null;
+
+function startRunInProgress(gameId) {
+  const w = watchers[gameId];
+  if (!w) return;
+  w.runInProgress  = true;
+  w.runStartTime   = Date.now();
+  clearInterval(_runTimerInterval);
+  _runTimerInterval = setInterval(() => updateTopbarRunBtn(gameId), 1000);
+  updateTopbarRunBtn(gameId);
+  _showRunStartedFlash();
+}
+
+function _showRunStartedFlash() {
+  const flash = document.getElementById('run-started-flash');
+  if (!flash) return;
+  flash.style.animation = 'none';
+  flash.style.display   = 'flex';
+  void flash.offsetWidth;
+  flash.style.animation = 'flash-slide-in 0.25s ease';
+  clearTimeout(flash._t);
+  flash._t = setTimeout(() => {
+    flash.style.animation = 'flash-slide-out 0.35s ease forwards';
+    flash._t2 = setTimeout(() => { flash.style.display = 'none'; flash.style.animation = ''; }, 350);
+  }, 2200);
+}
+
+function stopRunInProgress(gameId) {
+  const w = watchers[gameId];
+  if (w) { w.runInProgress = false; w.runStartTime = null; }
+  clearInterval(_runTimerInterval);
+  _runTimerInterval = null;
+  updateTopbarRunBtn(gameId);
+}
+
+function updateTopbarRunBtn(gameId) {
+  const btn    = document.getElementById('topbar-run-btn');
+  const dot    = document.getElementById('topbar-run-dot');
+  const label  = document.getElementById('topbar-run-label');
+  const banner = document.getElementById('run-live-banner');
+  const prompt = document.getElementById('run-start-prompt');
+  if (!btn) return;
+  const w    = watchers[gameId];
+  const game = db.games.find(g => g.id === gameId);
+  // Only show when watcher is active and game has a type
+  if (!w?.active || !game?.gameType || isReadOnly) {
+    btn.style.display    = 'none';
+    banner.style.display = 'none';
+    if (prompt) prompt.style.display = 'none';
+    return;
+  }
+  btn.style.display = 'flex';
+  if (w.runInProgress && w.runStartTime) {
+    const elapsed = Math.floor((Date.now() - w.runStartTime) / 1000);
+    const m = Math.floor(elapsed / 60);
+    const s = elapsed % 60;
+    const fmt = `${m}:${String(s).padStart(2,'0')}`;
+    dot.className      = 'run-indicator-dot active';
+    label.textContent  = `■ ${fmt}`;
+    btn.classList.add('active');
+    btn.title = 'Run in progress — click to end';
+    banner.style.display = 'flex';
+    document.getElementById('rlb-timer').textContent = fmt;
+    document.getElementById('rlb-game').textContent  = '// ' + (game.name || '').toUpperCase();
+    if (prompt) prompt.style.display = 'none';
+  } else {
+    dot.className      = 'run-indicator-dot';
+    label.textContent  = '▶ run';
+    btn.classList.remove('active');
+    btn.title = 'Track current run — click to start';
+    banner.style.display = 'none';
+    if (prompt) {
+      prompt.style.display = 'flex';
+      const rspGame = document.getElementById('rsp-game');
+      if (rspGame) rspGame.textContent = '// ' + (game.name || '').toUpperCase();
+    }
+  }
+}
+
+document.getElementById('topbar-run-btn').addEventListener('click', () => {
+  if (!activeGameId) return;
+  const w = watchers[activeGameId];
+  if (!w?.active) return;
+  if (w.runInProgress) stopRunInProgress(activeGameId);
+  else startRunInProgress(activeGameId);
+});
+
+document.getElementById('rlb-end-btn').addEventListener('click', () => {
+  if (activeGameId) stopRunInProgress(activeGameId);
+});
+
+document.getElementById('rsp-start-btn').addEventListener('click', () => {
+  if (!activeGameId) return;
+  const w = watchers[activeGameId];
+  if (!w?.active || w.runInProgress) return;
+  startRunInProgress(activeGameId);
+});
 
 // ── Toast ──────────────────────────────────────────────────────────────────────
 let pendingAutoRun = null;
@@ -4410,7 +3552,7 @@ function showRunToast(gameId, detected) {
   const extras = [
     f.char     ? f.char                  : null,
     f.floor    ? 'lvl ' + f.floor        : null,
-    f.duration ? f.duration              : (detected.stages ? 'stage ' + detected.stages : null),
+    f.duration ? f.duration              : null,
     f.score    ? f.score + ' kills'      : null,
   ].filter(Boolean).join(' · ');
   document.getElementById('auto-run-toast-sub').textContent =
@@ -4427,6 +3569,20 @@ function dismissRunToast() {
   clearTimeout(toastDismissTimer);
 }
 
+document.getElementById('auto-run-quick-btn').addEventListener('click', () => {
+  if (!pendingAutoRun) return;
+  const { gameId, result, fields } = pendingAutoRun;
+  dismissRunToast();
+  if (gameId !== activeGameId) selectGame(gameId);
+  const run = { id: uid(), gameId, result: result || null, date: new Date().toISOString().slice(0,10), notes: '', comment: '', tags: [], fields: fields || {}, buildId: null };
+  db.runs.push(run);
+  save(db);
+  syncRun(run);
+  renderSidebar();
+  renderSidebarProfile();
+  renderGameView();
+});
+
 document.getElementById('auto-run-log-btn').addEventListener('click', () => {
   if (!pendingAutoRun) return;
   const { gameId, result, fields } = pendingAutoRun;
@@ -4440,19 +3596,49 @@ document.getElementById('auto-run-dismiss-btn').addEventListener('click', dismis
 // ── Watcher engine ─────────────────────────────────────────────────────────────
 async function startWatcher(gameId) {
   const w = watchers[gameId];
-  if (!w?.dirHandle || !w.gameType) return;
+  const isMegabonk = w?.gameType === 'megabonk';
+  if (!w?.gameType) return;
+  if (!isMegabonk && !w?.dirHandle) return;
   stopWatcher(gameId);
   w.lastState = await readGameState(w.dirHandle, w.gameType);
   w.active = true;
   renderWatcherBlock(gameId, w.gameType);
+  if (gameId === activeGameId) updateTopbarWatcher(gameId);
+  // Megabonk: auto-start run timer immediately (no explicit run-start signal from files)
+  if (isMegabonk) startRunInProgress(gameId);
   w.interval = setInterval(async () => {
     try {
-      const perm = await w.dirHandle.queryPermission({ mode: 'read' });
-      if (perm !== 'granted') { stopWatcher(gameId); renderWatcherBlock(gameId, w.gameType); return; }
+      if (!isMegabonk) {
+        const perm = await w.dirHandle.queryPermission({ mode: 'read' });
+        if (perm !== 'granted') { stopWatcher(gameId); renderWatcherBlock(gameId, w.gameType); if (gameId === activeGameId) updateTopbarWatcher(gameId); return; }
+      }
       const curr = await readGameState(w.dirHandle, w.gameType);
       if (!curr) return;
       const hit = detectRunEnd(w.gameType, w.lastState, curr);
-      if (hit) showRunToast(gameId, hit);
+      if (hit) {
+        // Megabonk: attach run duration before clearing the timer
+        if (isMegabonk && w.runStartTime) {
+          const durSec = Math.round((Date.now() - w.runStartTime) / 1000);
+          if (durSec >= 10) {
+            if (!hit.fields) hit.fields = {};
+            hit.fields.duration = fmtDuration(durSec);
+          }
+        }
+        // Megabonk: OCR the death screen for kill count before showing toast
+        if (isMegabonk) {
+          const kills = await getMegabonkKillsFromOCR();
+          if (kills != null) {
+            if (!hit.fields) hit.fields = {};
+            hit.fields.score = String(kills);
+          }
+        }
+        stopRunInProgress(gameId);
+        showRunToast(gameId, hit);
+        // Megabonk: auto-restart timer for the next run
+        if (isMegabonk) startRunInProgress(gameId);
+      } else if (!w.runInProgress && detectRunStart(w.gameType, w.lastState, curr)) {
+        startRunInProgress(gameId);
+      }
       w.lastState = curr;
     } catch(e) { console.error('watcher tick', e); }
   }, 3000);
@@ -4464,32 +3650,113 @@ function stopWatcher(gameId) {
   clearInterval(w.interval);
   w.interval = null;
   w.active = false;
+  stopRunInProgress(gameId);
 }
+
+// ── Topbar watcher pill ────────────────────────────────────────────────────────
+function updateTopbarWatcher(gameId) {
+  const btn   = document.getElementById('topbar-watch-btn');
+  const dot   = document.getElementById('topbar-watcher-dot');
+  const label = document.getElementById('topbar-watcher-label');
+  if (!btn) return;
+  const game = db.games.find(g => g.id === gameId);
+  if (!game?.gameType || isReadOnly) { btn.style.display = 'none'; return; }
+  if (game.gameType !== 'megabonk' && !('showDirectoryPicker' in window)) { btn.style.display = 'none'; return; }
+  btn.style.display = 'flex';
+  const w = watchers[gameId];
+  if (w?.active) {
+    dot.className   = 'watcher-dot active';
+    label.textContent = 'watching';
+    btn.classList.add('active');
+  } else {
+    dot.className   = 'watcher-dot inactive';
+    label.textContent = w?.dirHandle ? 'paused' : 'connect files';
+    btn.classList.remove('active');
+  }
+  updateTopbarRunBtn(gameId);
+}
+
+document.getElementById('topbar-watch-btn').addEventListener('click', async () => {
+  if (!activeGameId) return;
+  const w = watchers[activeGameId];
+  if (w?.active) return; // already watching — button is just a status indicator when active
+  if (!('showDirectoryPicker' in window)) return;
+  const game = db.games.find(g => g.id === activeGameId);
+  if (!game?.gameType) return;
+  try {
+    const handle = await window.showDirectoryPicker({ mode: 'read' });
+    if (!watchers[activeGameId]) watchers[activeGameId] = {};
+    watchers[activeGameId].dirHandle = handle;
+    watchers[activeGameId].gameType  = game.gameType;
+    await saveWatchHandle(activeGameId, handle);
+    await startWatcher(activeGameId);
+    updateTopbarWatcher(activeGameId);
+    renderWatcherBlock(activeGameId, game.gameType);
+  } catch(e) {
+    if (e.name !== 'AbortError') console.error('topbar folder picker', e);
+  }
+});
 
 // ── Watcher UI in right panel ──────────────────────────────────────────────────
 function renderWatcherBlock(gameId, gameType) {
-  const block = document.getElementById('rp-watcher-block');
-  const hint  = document.getElementById('rp-watcher-hint');
-  const dot   = document.getElementById('rp-watcher-dot');
-  const label = document.getElementById('rp-watcher-label');
+  const block      = document.getElementById('rp-watcher-block');
+  const hint       = document.getElementById('rp-watcher-hint');
+  const dot        = document.getElementById('rp-watcher-dot');
+  const label      = document.getElementById('rp-watcher-label');
+  const folderName = document.getElementById('rp-folder-name');
   if (!block) return;
 
   if (!gameType) { block.style.display = 'none'; return; }
   block.style.display = '';
 
   const meta = GAME_TYPE_META[gameType] || {};
-  hint.textContent = meta.hint || '';
+  const hintLines = (meta.hint || '').split('\n');
+  hint.textContent = hintLines[0] || '';
 
   const w = watchers[gameId];
+  const isMegabonk = gameType === 'megabonk';
+  const hasPicker = ('showDirectoryPicker' in window);
+  const selectBtn = document.getElementById('rp-select-folder-btn');
+  if (selectBtn) {
+    if (isMegabonk) {
+      selectBtn.textContent = '⊕ test server connection';
+      selectBtn.style.display = '';
+    } else if (!hasPicker) {
+      selectBtn.style.display = 'none';
+    } else {
+      selectBtn.textContent = '⊕ select save folder';
+      selectBtn.style.display = '';
+    }
+  }
+  const serverCmd = document.getElementById('rp-server-cmd');
+  if (serverCmd) serverCmd.style.display = isMegabonk ? '' : 'none';
+
   if (w?.active) {
     dot.className = 'watcher-dot active';
     label.textContent = 'watching — ' + meta.label;
+  } else if (isMegabonk) {
+    dot.className = 'watcher-dot inactive';
+    label.textContent = 'server not running — start server.ps1';
+  } else if (!hasPicker && !isMegabonk) {
+    dot.className = 'watcher-dot inactive';
+    label.textContent = '// watcher requires Brave, Chrome, Edge, or Opera GX';
   } else if (w?.dirHandle) {
     dot.className = 'watcher-dot inactive';
-    label.textContent = 'folder set — click save to activate';
+    label.textContent = 'paused — permission required on reload';
   } else {
     dot.className = 'watcher-dot inactive';
     label.textContent = 'no folder selected';
+  }
+
+  if (folderName) {
+    if (isMegabonk) {
+      folderName.textContent = '⚡ via localhost:3400';
+      folderName.classList.add('visible');
+    } else {
+      const name = w?.dirHandle?.name;
+      folderName.textContent = name ? '📁 ' + name : '';
+      folderName.classList.toggle('visible', !!name);
+    }
   }
 }
 
@@ -4499,19 +3766,87 @@ document.getElementById('rp-game-type').addEventListener('change', e => {
   renderWatcherBlock(activeGameId, e.target.value);
 });
 
-// Select folder button
+function updateGmPathHint(gameType) {
+  const meta      = GAME_TYPE_META[gameType] || {};
+  const block     = document.getElementById('gm-path-hint');
+  const descEl    = document.getElementById('gm-path-desc');
+  const valueEl   = document.getElementById('gm-path-value');
+
+  if (!gameType || !meta.hint) { block.style.display = 'none'; return; }
+
+  const lines = meta.hint.split('\n');
+  const desc  = lines[0] || '';
+  const path  = (lines[1] || '').replace(/^Default:\s*/i, '');
+
+  descEl.textContent  = desc;
+  valueEl.textContent = path || '// any folder in your game directory';
+  block.style.display = '';
+}
+
+document.getElementById('gm-path-copy').addEventListener('click', () => {
+  const val = document.getElementById('gm-path-value').textContent;
+  navigator.clipboard.writeText(val).then(() => {
+    const btn = document.getElementById('gm-path-copy');
+    const orig = btn.textContent;
+    btn.textContent = '✓';
+    setTimeout(() => btn.textContent = orig, 1200);
+  }).catch(() => {});
+});
+
+document.getElementById('gm-game-type').addEventListener('change', e => {
+  updateGmPathHint(e.target.value);
+  const btn = document.getElementById('gm-connect-btn');
+  const hasPicker = ('showDirectoryPicker' in window);
+  const isMb = e.target.value === 'megabonk';
+  document.getElementById('gm-connect-hint').textContent = '';
+  if (!hasPicker && !isMb && e.target.value) {
+    btn.className   = 'gm-connect-btn unavailable';
+    btn.textContent = '// watcher requires Brave, Chrome, Edge, or Opera GX';
+  } else {
+    btn.className   = 'gm-connect-btn';
+    btn.textContent = isMb ? '⬡ Test Server Connection' : '⬡ Connect Game Files';
+  }
+});
+
+// Select folder / server-test button
 document.getElementById('rp-select-folder-btn').addEventListener('click', async () => {
   if (!activeGameId) return;
-  if (!('showDirectoryPicker' in window)) {
-    alert('File System Access API is not supported in this browser.\nUse Chrome or Edge for game integration.');
+  const gameType = document.getElementById('rp-game-type').value;
+  if (!gameType) {
+    document.getElementById('rp-game-type').focus();
     return;
   }
+
+  if (gameType === 'megabonk') {
+    try {
+      const res  = await fetch('http://localhost:3400/api/megabonk', { cache: 'no-store' });
+      const data = await res.json();
+      if (data.error) {
+        alert('Server responded but Megabonk files not found:\n' + data.error + '\n\nMake sure Megabonk has been launched at least once.');
+        return;
+      }
+      if (!watchers[activeGameId]) watchers[activeGameId] = {};
+      watchers[activeGameId].gameType = gameType;
+      const game = db.games.find(g => g.id === activeGameId);
+      if (game && game.gameType !== gameType) { game.gameType = gameType; save(db); syncGame(game); }
+      ensureMegabonkKillsField(activeGameId);
+      await startWatcher(activeGameId);
+      renderWatcherBlock(activeGameId, gameType);
+      updateTopbarWatcher(activeGameId);
+    } catch {
+      alert('Cannot reach local server.\n\nStart it first:\n  powershell -ExecutionPolicy Bypass -File server.ps1');
+    }
+    return;
+  }
+
+  if (!('showDirectoryPicker' in window)) return;
   try {
     const handle = await window.showDirectoryPicker({ mode: 'read' });
-    const gameType = document.getElementById('rp-game-type').value;
     if (!watchers[activeGameId]) watchers[activeGameId] = {};
     watchers[activeGameId].dirHandle = handle;
     watchers[activeGameId].gameType  = gameType;
+    const game = db.games.find(g => g.id === activeGameId);
+    if (game && game.gameType !== gameType) { game.gameType = gameType; save(db); syncGame(game); }
     await saveWatchHandle(activeGameId, handle);
     await startWatcher(activeGameId);
     renderWatcherBlock(activeGameId, gameType);
@@ -4520,11 +3855,45 @@ document.getElementById('rp-select-folder-btn').addEventListener('click', async 
   }
 });
 
+document.getElementById('rp-copy-server-cmd').addEventListener('click', () => {
+  const cmd = document.getElementById('rp-server-cmd-text').textContent;
+  navigator.clipboard.writeText(cmd).then(() => {
+    const btn = document.getElementById('rp-copy-server-cmd');
+    const orig = btn.textContent;
+    btn.textContent = '✓ copied';
+    setTimeout(() => btn.textContent = orig, 1400);
+  }).catch(() => {});
+});
+
+// Ensure a Megabonk game has auto-tracked fields: Kills (OCR) and Duration (timer).
+function ensureMegabonkKillsField(gameId) {
+  const game = db.games.find(g => g.id === gameId);
+  if (!game) return;
+  if (!game.fields) game.fields = [];
+  let dirty = false;
+  if (!game.fields.some(f => f.id === 'score')) {
+    game.fields.push({ id: 'score', label: 'Kills', type: 'number', builtin: true });
+    dirty = true;
+  }
+  if (!game.fields.some(f => f.id === 'duration')) {
+    game.fields.push({ id: 'duration', label: 'Duration', type: 'text', builtin: true });
+    dirty = true;
+  }
+  if (dirty) { save(db); syncGame(game); }
+}
+
 // Restore watchers from IndexedDB on startup
 async function initWatchers() {
-  if (!('showDirectoryPicker' in window)) return;
   for (const game of db.games) {
     if (!game.gameType) continue;
+    if (game.gameType === 'megabonk') {
+      if (!watchers[game.id]) watchers[game.id] = {};
+      watchers[game.id].gameType = game.gameType;
+      ensureMegabonkKillsField(game.id);
+      await startWatcher(game.id);
+      continue;
+    }
+    if (!('showDirectoryPicker' in window)) continue;
     try {
       const handle = await loadWatchHandle(game.id);
       if (!handle) continue;
@@ -4561,6 +3930,9 @@ document.addEventListener('keydown', e => {
 function esc(s) {
   return String(s ?? '')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function isSafeImgSrc(s) {
+  return typeof s === 'string' && (s.startsWith('data:image/') || s.startsWith('blob:'));
 }
 function today() { return new Date().toISOString().slice(0,10); }
 
@@ -4612,8 +3984,13 @@ async function generateShareLink() {
     const { error } = await sb.from('share_tokens').insert({ token, user_id: sbUser.id });
     if (error) throw error;
     const url = window.location.origin + window.location.pathname + '#share/' + token;
-    await navigator.clipboard.writeText(url);
-    btn.textContent = '[ link copied! ]';
+    try {
+      await navigator.clipboard.writeText(url);
+      btn.textContent = '[ link copied! ]';
+    } catch {
+      prompt('Copy this share link:', url);
+      btn.textContent = '[ link ready! ]';
+    }
     btn.style.color = 'var(--win)';
   } catch(e) {
     console.error('generateShareLink', e);
@@ -4639,6 +4016,10 @@ async function loadSharedProfile(token) {
       db.profile.avatar      = data.profile.avatar || null;
       db.profile.bio         = data.profile.bio || '';
       db.profile.currentGame = data.profile.current_game_id || null;
+      if (!db.settings) db.settings = {};
+      db.settings.accentHue = data.profile.accent_hue ?? 145;
+      db.settings.accentSat = data.profile.accent_sat ?? 1;
+      db.settings.bgEffect  = data.profile.bg_effect  || 'none';
     }
     db.games = (data.games || []).map(g => ({
       id: g.id, name: g.name, icon: g.icon || null, fields: g.fields || [],
@@ -4668,6 +4049,15 @@ async function loadSharedProfile(token) {
 document.getElementById('share-back-btn').addEventListener('click', () => {
   history.replaceState(null, '', window.location.pathname);
   window.location.reload();
+});
+
+window.addEventListener('hashchange', async () => {
+  const m = window.location.hash.match(/^#share\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
+  if (!m) return;
+  db = defaultDB();
+  isReadOnly = false;
+  const ok = await loadSharedProfile(m[1]);
+  if (ok) bootUI();
 });
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
@@ -4716,8 +4106,8 @@ function bootUI() {
 }
 
 (async () => {
-  // Share-link mode: #share/<token>
-  const shareMatch = window.location.hash.match(/^#share\/(.+)$/);
+  // Share-link mode: #share/<uuid>
+  const shareMatch = window.location.hash.match(/^#share\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
   if (shareMatch) {
     db = defaultDB();
     const ok = await loadSharedProfile(shareMatch[1]);
@@ -4745,7 +4135,7 @@ function bootUI() {
 
   sb.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session) {
-      if (_authBusy) return;
+      if (_authBusy || sbUser?.id === session.user.id) return;
       sbUser = session.user;
       await loadFromSupabase();
       closeModal('auth-modal');
@@ -4779,6 +4169,8 @@ function openSettingsModal() {
   const hasAuth = !!(sbUser && sb);
   document.getElementById('settings-account-section').style.display = hasAuth ? '' : 'none';
   document.getElementById('settings-offline-notice').style.display  = hasAuth ? 'none' : '';
+  document.getElementById('settings-appearance-controls').style.display = isReadOnly ? 'none' : '';
+  document.getElementById('settings-appearance-readonly').style.display  = isReadOnly ? '' : 'none';
   openModal('settings-modal');
   // reset wheel so it re-initialises with current saved hue each open
   const cwCanvas = document.getElementById('settings-color-wheel');
@@ -4859,27 +4251,10 @@ document.getElementById('settings-pw-btn').addEventListener('click', async () =>
   btn.textContent = '[ Update Password ]'; btn.disabled = false;
 });
 
-// Password visibility toggles
-document.getElementById('settings-email-pw-toggle').addEventListener('click', function() {
-  const inp = document.getElementById('settings-email-pw');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  this.classList.toggle('closed', inp.type === 'password');
-});
-document.getElementById('settings-pw-toggle').addEventListener('click', function() {
-  const inp = document.getElementById('settings-pw-new');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  this.classList.toggle('closed', inp.type === 'password');
-});
-document.getElementById('settings-pw-confirm-toggle').addEventListener('click', function() {
-  const inp = document.getElementById('settings-pw-confirm');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  this.classList.toggle('closed', inp.type === 'password');
-});
-document.getElementById('settings-pw-current-toggle').addEventListener('click', function() {
-  const inp = document.getElementById('settings-pw-current');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  this.classList.toggle('closed', inp.type === 'password');
-});
+bindPwToggle('settings-email-pw-toggle',  'settings-email-pw');
+bindPwToggle('settings-pw-toggle',        'settings-pw-new');
+bindPwToggle('settings-pw-confirm-toggle','settings-pw-confirm');
+bindPwToggle('settings-pw-current-toggle','settings-pw-current');
 
 document.getElementById('settings-pw-email-btn').addEventListener('click', async () => {
   const msgEl = document.getElementById('settings-pw-msg');
@@ -5297,33 +4672,50 @@ function makeStarfieldFx() {
 }
 
 // ── Color wheel canvas ────────────────────────────────────────────────────────
+function _cwHue2Rgb(p, q, t) {
+  if (t < 0) t += 1; if (t > 1) t -= 1;
+  if (t < 1/6) return p + (q-p)*6*t;
+  if (t < 1/2) return q;
+  if (t < 2/3) return p + (q-p)*(2/3-t)*6;
+  return p;
+}
+function _cwHslToRgb(h, s, l) {
+  // h: 0-360, s/l: 0-1 → [r,g,b] 0-255
+  h /= 360;
+  if (s === 0) { const v = Math.round(l*255); return [v,v,v]; }
+  const q = l < 0.5 ? l*(1+s) : l+s-l*s, p = 2*l-q;
+  return [
+    Math.round(_cwHue2Rgb(p,q,h+1/3)*255),
+    Math.round(_cwHue2Rgb(p,q,h)*255),
+    Math.round(_cwHue2Rgb(p,q,h-1/3)*255),
+  ];
+}
+
 function drawColorWheel(canvas) {
   const ctx = canvas.getContext('2d');
-  const cx = canvas.width / 2, cy = canvas.height / 2;
-  const r  = Math.min(cx, cy) - 1;
-  // draw hue+saturation wheel: each slice gets a radial gradient white→hue
-  for (let deg = 0; deg < 360; deg++) {
-    const startA = (deg - 0.5) * Math.PI / 180;
-    const endA   = (deg + 1.5) * Math.PI / 180;
-    const grad   = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-    grad.addColorStop(0,   'rgba(255,255,255,1)');
-    grad.addColorStop(0.15,'rgba(255,255,255,0.6)');
-    grad.addColorStop(1,   `hsl(${deg},100%,50%)`);
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, r, startA, endA);
-    ctx.closePath();
-    ctx.fillStyle = grad;
-    ctx.fill();
+  const w = canvas.width, h = canvas.height;
+  const cx = w/2, cy = h/2, r = Math.min(cx,cy) - 1;
+  const img = ctx.createImageData(w, h);
+  const data = img.data;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const dx = x-cx, dy = y-cy;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist > r) continue;
+      const hue = ((Math.atan2(dy,dx)*180/Math.PI)+360) % 360;
+      const sat = dist/r;
+      const [rr,gg,bb] = _cwHslToRgb(hue, sat, 0.5);
+      const i = (y*w+x)*4;
+      data[i]=rr; data[i+1]=gg; data[i+2]=bb; data[i+3]=255;
+    }
   }
-  // dark outer ring
-  const ring = ctx.createRadialGradient(cx, cy, r - 6, cx, cy, r);
-  ring.addColorStop(0, 'rgba(0,0,0,0)');
-  ring.addColorStop(1, 'rgba(0,0,0,0.35)');
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.fillStyle = ring;
-  ctx.fill();
+  ctx.putImageData(img, 0, 0);
+  // subtle dark vignette at the edge
+  const ring = ctx.createRadialGradient(cx,cy,r*0.88,cx,cy,r);
+  ring.addColorStop(0,'rgba(0,0,0,0)');
+  ring.addColorStop(1,'rgba(0,0,0,0.28)');
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.fillStyle = ring; ctx.fill();
 }
 
 function cwUpdateDot(canvas, dot, h, s) {
@@ -5376,15 +4768,20 @@ function initColorWheel() {
     if (!db.settings) db.settings = {};
     db.settings.accentHue = cwH;
     db.settings.accentSat = cwS;
+  }
+
+  function commitCwColor() {
     save(db);
+    syncProfile();
   }
 
   let dragging = false;
   canvas.addEventListener('mousedown', e => { dragging = true; pickFromEvent(e); });
   window.addEventListener('mousemove', e => { if (dragging) pickFromEvent(e); });
-  window.addEventListener('mouseup',   ()  => { dragging = false; });
+  window.addEventListener('mouseup', () => { if (dragging) { dragging = false; commitCwColor(); } });
   canvas.addEventListener('touchstart', e => { pickFromEvent(e.touches[0]); }, { passive: true });
   canvas.addEventListener('touchmove',  e => { pickFromEvent(e.touches[0]); e.preventDefault(); }, { passive: false });
+  canvas.addEventListener('touchend', () => commitCwColor());
 }
 
 document.getElementById('cw-reset-btn').addEventListener('click', () => {
@@ -5392,6 +4789,7 @@ document.getElementById('cw-reset-btn').addEventListener('click', () => {
   db.settings.accentHue = 145;
   db.settings.accentSat = 1;
   save(db);
+  syncProfile();
   applyAccentHue(145, 1);
   const canvas = document.getElementById('settings-color-wheel');
   const dot    = document.getElementById('cw-selector-dot');
@@ -5440,6 +4838,7 @@ document.getElementById('bg-effect-row').addEventListener('click', e => {
   if (!db.settings) db.settings = {};
   db.settings.bgEffect = fx;
   save(db);
+  syncProfile();
   applyBgEffect(fx);
   syncBgEffectChips();
 });
@@ -5456,19 +4855,10 @@ function syncBgPreview(dataUrl) {
   }
 }
 
-document.getElementById('recovery-pw-toggle').addEventListener('click', function() {
-  const inp = document.getElementById('recovery-pw-new');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  this.classList.toggle('closed', inp.type === 'password');
-});
-document.getElementById('recovery-pw-confirm-toggle').addEventListener('click', function() {
-  const inp = document.getElementById('recovery-pw-confirm');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  this.classList.toggle('closed', inp.type === 'password');
-});
+bindPwToggle('recovery-pw-toggle',        'recovery-pw-new');
+bindPwToggle('recovery-pw-confirm-toggle','recovery-pw-confirm');
 
 </script>
-
 
 </body>
 </html>

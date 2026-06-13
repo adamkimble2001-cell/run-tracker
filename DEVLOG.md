@@ -1,6 +1,6 @@
 # RUN_TRACKER.EXE — Dev Log
 
-All work completed across this Claude session.
+Complete architectural record of all work across sessions 1–10+. For next steps, see [[TODO]]. For Claude context, see [[CLAUDE]]. For Megabonk OCR testing, see [[MEGABONK-OCR-TEST]].
 
 ---
 
@@ -156,12 +156,19 @@ No Python or Node.js available on the system (Windows Store stub intercepts `pyt
 
 ```
 hollow's mind/
-├── .claude/
-│   └── launch.json          # preview server config
-└── roguelite-tracker/
-    ├── index.html           # entire application (HTML + CSS + JS)
-    ├── server.ps1           # PowerShell TCP dev server
-    └── DEVLOG.md            # this file
+├── .mcp.json                              ← Supabase MCP server config
+├── .agents/skills/
+│   ├── supabase/                          ← Supabase agent skill
+│   └── supabase-postgres-best-practices/  ← Postgres Best Practices skill
+└── Projects/roguelite-tracker/
+    ├── index.html                         ← entire app (~6050 lines, HTML + CSS + JS)
+    ├── server.ps1                         ← PowerShell TCP dev server (port 3400)
+    ├── CLAUDE.md                          ← Claude Code guidance, schema, line map
+    ├── DEVLOG.md                          ← this file — complete dev history
+    ├── TODO.md                            ← current next steps and open items
+    ├── roguelite-landing-page.md          ← notes on the marketing landing page
+    ├── MEGABONK-OCR-TEST.md              ← step-by-step OCR kill tracking test
+    └── SESS SUM 1–10.md                  ← per-session raw notes (superseded by DEVLOG)
 ```
 
 ---
@@ -233,6 +240,185 @@ runs      (id TEXT PK, game_id → games, user_id, result, date, notes, tags JSO
 - `.result-option`: `:active` scale(0.96)
 - `#profile-section`: smooth background transition
 - Sync badge pulse animation (`@keyframes pulse-sync`) on syncing state
+
+---
+
+---
+
+### 8. Appearance System (Settings Modal)
+
+New `// appearance` section added to Settings modal (visible offline and online).
+
+**HSL Color Wheel:**
+- `<canvas id="settings-color-wheel" width="140" height="140">` with pixel-by-pixel `ImageData` HSL→RGB rendering (no banding)
+- Drag picks hue (angle from center) + saturation (radius), updates 14 CSS custom properties live via `applyAccentHue(h, s)`
+- Selector dot, swatch preview, reset to default green (145°, 100%)
+- Persisted to `db.settings.accentHue` / `db.settings.accentSat` in localStorage
+- `--scanline-tint` extracted to a CSS variable so it follows the accent color
+
+**Background Image:**
+- `<div id="app-bg">` fixed fullscreen layer at `z-index:-1` with 58% black overlay for readability
+- Upload zone in Settings; thumbnail preview with `[ Remove ]` button
+- Stored in `localStorage['rlt_bgimg']` (separate from `rlt_v2`) to avoid bloating main DB
+
+---
+
+### 9. Background Animations, Modal Overhaul, Polish (Sessions 8–9)
+
+**Background Canvas Animations:**
+- `<canvas id="bg-canvas">` at `z-index:-1`; 5 selectable effects via chip row in Settings
+- Effects: `rain` (Matrix Katakana), `grid` (Pulse Grid), `wave` (Wave Scan), `pulse` (Radial Pulse), `starfield` (Warp Streaks)
+- All read `db.settings.accentHue/Sat` every frame; `applyBgEffect(name)` cancels old RAF + starts new
+- Persisted in `db.settings.bgEffect`
+
+**Transparency Pass:**
+- Topbar, stats strip, filter bar, run cards, build cards all converted to `rgba` + `backdrop-filter:blur` so animations show through
+
+**Game Settings → Popup Modal:**
+- Right panel converted from persistent sidebar (272px) to a modal (`#game-settings-modal`) triggered by `[ ⚙ game settings ]` in topbar
+- `renderRightPanel()` populates data but no longer auto-shows
+
+**Layout Changes:**
+- `[ + New Run ]` moved to `position:fixed; bottom:24px; right:24px` with accent glow
+- `#sync-badge` gets `margin-left:auto` in topbar
+
+**Delete Run from Grid:**
+- `[ delete ]` button on every run card; confirms → removes from `db.runs` → `save(db)` → `deleteRunFromSb` → re-renders
+
+**Edit Build from Builds Tab:**
+- `[ edit build ]` in each build card header → sets `rpExpandedBuildId` → opens game settings modal scrolled to that build
+
+**Modal Entrance Animations:**
+- `.modal-overlay`: `opacity` transition + `backdrop-filter:blur(2px)`
+- `.modal`: `translateY(8px) scale(0.985)` → `translateY(0) scale(1)` on `.open`
+
+**Supabase migration applied:**
+```sql
+ALTER TABLE runs ADD COLUMN IF NOT EXISTS build_id text;
+```
+
+---
+
+### 10. Player Tags, Security, Generic Watcher (Session 9)
+
+**Player Tag System:**
+- Every user gets a unique 4-char `[A-Z0-9]` tag (excludes confusable chars 0/O/1/I/L)
+- `assign_profile_tag` BEFORE INSERT trigger auto-assigns; user can edit in profile modal
+- Sidebar shows `#XXXX` in accent monospace below display name
+- `23505` error caught on save → `// tag taken` inline
+
+**Input Sanitization + Rate Limiting:**
+- `_sanitizeProfile/Game/Run` clamp all field lengths and whitelist-validate before every Supabase write
+- `_RateLimiter` class (sliding window): `_syncLimiter = new _RateLimiter(60, 60_000)` — 60 writes/min, checked at top of every sync function
+
+**Security Hardening:**
+- CSP meta tag added: `connect-src` locked to Supabase URL, `script-src` allows only jsdelivr.net, `frame-src`/`object-src` blocked
+- All `innerHTML` injections confirmed to use `esc()` — audited clean
+- Megabonk debug console logs removed
+
+**Generic File Watcher:**
+- `generic` game type added to `GAME_TYPE_META` and both game-type selects
+- `readGenericState(dirHandle)` — returns `{ latestMtime }` from max `lastModified` across all top-level files
+- `detectRunEnd` generic branch fires `{ result: null }` on mtime change; user quick-logs or reviews manually
+
+**Add Game Modal — Inline File Connect:**
+- Game type select + path hint + `⬡ Connect Game Files` button added directly to Add Game modal
+- Eliminates need to open game settings after adding a game
+
+**Pending Supabase SQL (must be run manually):**
+```sql
+-- Block 1: Tag column
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS tag TEXT;
+ALTER TABLE profiles ADD CONSTRAINT profiles_tag_key UNIQUE (tag);
+-- + gen_profile_tag() function + assign_profile_tag trigger + backfill
+
+-- Block 2: DB-level CHECK constraints
+-- profiles: name_len, bio_len, tag_format
+-- games: name_len, fields_size, builds_size
+-- runs: result_valid, date_format, notes_len, comment_len, tags_count, fields_size
+```
+
+---
+
+### 11. RoR2 Deltas + Hades 2 Weapon Detection (Session 10)
+
+**Risk of Rain 2 — Delta-Based Tracking:**
+- `readRoR2State` now reads cumulative counters (`totalStagesCompleted`, `totalKills` / `totalMonstersKilled` / `totalKillCount`) instead of `highestStagesCompleted`
+- `detectRunEnd` for `ror2` computes deltas: `stagesDelta = curr.totalStages - prev.totalStages`, `killsDelta = curr.totalKills - prev.totalKills`
+- Pre-fills `fields.floor` (stages this run) and `fields.score` (kills this run)
+- Caveat: XML tag names need verification against a real `UserProfile.xml`
+
+**Hades 2 — Separate Reader + Weapon Pre-Fill:**
+- `readHades2State(dirHandle)` split from `readHadesState`; calls `extractHades2Weapon(file)`
+- `extractHades2Weapon` reads up to 2 MB of `Profile0.sav` as latin-1, searches for `HADES2_WEAPONS` key strings (`WeaponStaff`, `WeaponDagger`, `WeaponAxe`, `WeaponTorch`, `WeaponSkull`, `WeaponSpear`) → maps to display names
+- Detection now fires **only** when temp file disappears (false-positive second branch removed)
+- Caveat: weapon ID strings unconfirmed against a real Hades 2 save
+
+**Symbols added:**
+| Symbol | Purpose |
+|--------|---------|
+| `HADES2_WEAPONS` | Map of weapon ID string → display name |
+| `extractHades2Weapon(file)` | Binary scan of Profile0.sav |
+| `readHades2State(dirHandle)` | Hades 2 reader (separate from Hades 1) |
+
+---
+
+### 12. Megabonk Kills + OCR Tracking (Session 10+)
+
+**Kill Detection:**
+- `server.ps1` parses `stats.json` as JSON (`-Depth 10`) and returns full `statsData` object
+- `extractMegabonkKills()` tries a per-run kill field first, falls back to cumulative delta between watcher states
+- `ensureMegabonkKillsField()` guarantees a `Kills` field (id: `score`) on any Megabonk game at connect + startup
+
+**Run Editing Removed:**
+- `[ edit ]` button removed from run cards and builds view rows
+- `openRunModal` hard-blocks edit calls — runs are now create-only (delete still available)
+
+**Raw statsData in Watcher State:**
+- Watcher stores full parsed `stats.json` object so delta calculation always has prev vs. curr values for accurate kill counting
+
+---
+
+### 13. Browser Compatibility + server.ps1 BOM Fix (Session 11)
+
+**Problem:** App was Chromium-only (Chrome/Edge) due to `showDirectoryPicker` (File System Access API). Firefox, Brave, Opera GX users hit confusing `alert()` dialogs or saw a broken UI.
+
+**Note:** Brave and Opera GX already had full support — they are Chromium-based. Only Firefox is genuinely incompatible with the file watcher. Megabonk uses a localhost `fetch` instead, so it works in all browsers without any changes.
+
+**CSS added (after `.gm-connect-btn.connected:hover`):**
+```css
+.gm-connect-btn.unavailable { border-color: var(--border-hi); color: var(--text-faint); cursor: default; opacity: 0.75; font-size: 0.78em; letter-spacing: 0.04em; }
+.gm-connect-btn.unavailable:hover { background: transparent; box-shadow: none; }
+```
+
+**`renderWatcherBlock` changes:**
+- Added `const hasPicker = ('showDirectoryPicker' in window);`
+- `rp-select-folder-btn` is now hidden (`display: none`) in Firefox for non-Megabonk games; shown normally in Chromium
+- Added `!hasPicker && !isMegabonk` branch to the dot/label state machine: shows `// watcher requires Brave, Chrome, Edge, or Opera GX` instead of "no folder selected"
+
+**`openGameModal` connect button init:**
+- On modal open, if `!hasPicker` and game type is set and not Megabonk → renders with `.unavailable` class and browser requirement text immediately, rather than appearing active and failing on click
+
+**`gm-game-type` change handler:**
+- Switching to a non-Megabonk type in Firefox instantly applies `.unavailable` state to the connect button (no waiting for a click)
+
+**`gm-connect-btn` click guard:**
+- Updated inline hint from `// requires Chrome or Edge` → `// file watcher not supported — use Brave, Chrome, Edge, or Opera GX`
+
+**`topbar-watch-btn` click:**
+- Removed `alert('File System Access API is not supported...')` → silent return (button is meaningless in Firefox and should not pop a dialog)
+- Removed `alert('Set the game type in game settings first...')` → silent return + focus
+
+**`rp-select-folder-btn` click:**
+- Removed `alert('Select a game type above first.')` → silent return + focus (button is hidden in Firefox anyway; this is just a safety guard)
+- Removed `alert('File System Access API is not supported in this browser...')` → silent return (redundant with button being hidden)
+
+**`server.ps1` UTF-8 BOM fix (same session):**
+- Root cause: file saved without BOM. PowerShell 5.1 read it as CP1252. Em dash (`—`, bytes `E2 80 94`) decoded as `â€"` where `0x94` = RIGHT DOUBLE QUOTATION MARK in CP1252, prematurely closing string literals. Caused 4 cascading parse errors.
+- Fix: re-saved with `New-Object System.Text.UTF8Encoding($true)` via `[System.IO.File]::WriteAllText()` — adds UTF-8 BOM so PS5.1 reads it correctly.
+- All WinRT type-loading syntax (`[TypeName, Assembly, ContentType=WindowsRuntime]`) is valid PS5.1 — was a red herring during debugging.
+
+**CLAUDE.md updated:** "Chrome/Edge only" note replaced with accurate Chromium browser list; Known limits section updated to match.
 
 ---
 
