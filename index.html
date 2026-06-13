@@ -2238,11 +2238,7 @@ function renderBuildsView(game) {
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 function renderStats(game) {
-  // Only count runs that belong to this game
-  const runs   = db.runs.filter(r => r.gameId === game.id);
-  const wins   = runs.filter(r => r.result === 'win').length;
-  const losses = runs.filter(r => r.result === 'loss').length;
-  const rate   = runs.length ? Math.round(wins / runs.length * 100) + '%' : '—';
+  const { runs, wins, losses, rate } = getGameStats(game.id);
 
   const sorted = [...runs].sort((a,b) => (b.date||'').localeCompare(a.date||''));
   let curStreak = 0, curType = null;
@@ -2329,6 +2325,83 @@ function renderRuns(game) {
   });
 }
 
+// ── Shared helpers ────────────────────────────────────────────────────────────
+function getGameStats(gameId) {
+  const runs   = db.runs.filter(r => r.gameId === gameId);
+  const wins   = runs.filter(r => r.result === 'win').length;
+  const losses = runs.filter(r => r.result === 'loss').length;
+  const rate   = runs.length ? Math.round(wins / runs.length * 100) + '%' : '—';
+  return { runs, wins, losses, rate };
+}
+
+function renderGenericFieldsList(containerId, enabledSet, labelsObj) {
+  const list = document.getElementById(containerId);
+  list.innerHTML = '';
+  GENERIC_FIELDS.forEach(gf => {
+    const row = document.createElement('div');
+    row.className = 'field-row';
+    const isOn = enabledSet.has(gf.id);
+    const cb = document.createElement('button');
+    cb.className = 'field-checkbox-btn' + (isOn ? ' on' : '');
+    cb.textContent = isOn ? '[✓]' : '[ ]';
+    cb.title = isOn ? 'Disable field' : 'Enable field';
+    cb.addEventListener('click', () => {
+      const nowOn = cb.classList.toggle('on');
+      cb.textContent = nowOn ? '[✓]' : '[ ]';
+      cb.title = nowOn ? 'Disable field' : 'Enable field';
+      if (nowOn) enabledSet.add(gf.id);
+      else       enabledSet.delete(gf.id);
+    });
+    const input = document.createElement('input');
+    input.type  = 'text';
+    input.value = labelsObj[gf.id] ?? gf.label;
+    input.placeholder = gf.label;
+    input.title = 'Default: ' + gf.label;
+    const reset = document.createElement('button');
+    reset.className = 'field-reset-btn';
+    reset.textContent = '↺';
+    reset.title = 'Reset to default (' + gf.label + ')';
+    const updateResetVis = () => {
+      const v = input.value.trim();
+      reset.style.display = (v && v !== gf.label) ? 'inline-block' : 'none';
+    };
+    input.addEventListener('input', () => { labelsObj[gf.id] = input.value; updateResetVis(); });
+    reset.addEventListener('click', () => {
+      input.value = gf.label;
+      labelsObj[gf.id] = gf.label;
+      updateResetVis();
+      input.focus();
+    });
+    updateResetVis();
+    const badge = document.createElement('span');
+    badge.className = 'field-type-badge';
+    badge.textContent = gf.type;
+    row.append(cb, input, reset, badge);
+    list.appendChild(row);
+  });
+}
+
+function renderCustomFieldList(containerId, fieldsArr, onDelete) {
+  const list = document.getElementById(containerId);
+  list.innerHTML = '';
+  fieldsArr.forEach((cf, idx) => {
+    const row = document.createElement('div');
+    row.className = 'field-row';
+    const input = document.createElement('input');
+    input.type  = 'text';
+    input.value = cf.label;
+    input.placeholder = 'field label...';
+    input.addEventListener('input', () => { fieldsArr[idx].label = input.value; });
+    const del = document.createElement('button');
+    del.className = 'field-del-btn';
+    del.textContent = '✕';
+    del.title = 'Remove';
+    del.addEventListener('click', () => { fieldsArr.splice(idx, 1); onDelete(); });
+    row.append(input, del);
+    list.appendChild(row);
+  });
+}
+
 // ── Right Panel ───────────────────────────────────────────────────────────────
 function renderRightPanel() {
   const toggleBtn = document.getElementById('open-game-settings-btn');
@@ -2348,10 +2421,7 @@ function renderRightPanel() {
   document.getElementById('rp-name').value = game.name;
 
   // Stats (only this game's runs)
-  const runs   = db.runs.filter(r => r.gameId === game.id);
-  const wins   = runs.filter(r => r.result === 'win').length;
-  const losses = runs.filter(r => r.result === 'loss').length;
-  const rate   = runs.length ? Math.round(wins / runs.length * 100) + '%' : '—';
+  const { runs, wins, losses, rate } = getGameStats(game.id);
   document.getElementById('rp-stat-total').textContent  = runs.length;
   document.getElementById('rp-stat-wins').textContent   = wins;
   document.getElementById('rp-stat-losses').textContent = losses;
@@ -2379,83 +2449,12 @@ function renderRightPanel() {
 }
 
 function renderRpFields() {
-  const genList = document.getElementById('rp-generic-list');
-  genList.innerHTML = '';
-  GENERIC_FIELDS.forEach(gf => {
-    const row = document.createElement('div');
-    row.className = 'field-row';
-
-    const isOn = rpEnabledGeneric.has(gf.id);
-    const cb = document.createElement('button');
-    cb.className = 'field-checkbox-btn' + (isOn ? ' on' : '');
-    cb.textContent = isOn ? '[✓]' : '[ ]';
-    cb.title = isOn ? 'Disable field' : 'Enable field';
-    cb.addEventListener('click', () => {
-      const nowOn = cb.classList.toggle('on');
-      cb.textContent = nowOn ? '[✓]' : '[ ]';
-      cb.title = nowOn ? 'Disable field' : 'Enable field';
-      if (nowOn) rpEnabledGeneric.add(gf.id);
-      else       rpEnabledGeneric.delete(gf.id);
-    });
-
-    const input = document.createElement('input');
-    input.type  = 'text';
-    input.value = rpGenericLabels[gf.id] ?? gf.label;
-    input.placeholder = gf.label;
-    input.title = 'Default: ' + gf.label;
-
-    const reset = document.createElement('button');
-    reset.className = 'field-reset-btn';
-    reset.textContent = '↺';
-    reset.title = 'Reset to default (' + gf.label + ')';
-    const updateResetVis = () => {
-      const v = input.value.trim();
-      reset.style.display = (v && v !== gf.label) ? 'inline-block' : 'none';
-    };
-    input.addEventListener('input', () => {
-      rpGenericLabels[gf.id] = input.value;
-      updateResetVis();
-    });
-    reset.addEventListener('click', () => {
-      input.value = gf.label;
-      rpGenericLabels[gf.id] = gf.label;
-      updateResetVis();
-      input.focus();
-    });
-    updateResetVis();
-
-    const badge = document.createElement('span');
-    badge.className = 'field-type-badge';
-    badge.textContent = gf.type;
-
-    row.append(cb, input, reset, badge);
-    genList.appendChild(row);
-  });
+  renderGenericFieldsList('rp-generic-list', rpEnabledGeneric, rpGenericLabels);
   renderRpCustomList();
 }
 
 function renderRpCustomList() {
-  const list = document.getElementById('rp-custom-list');
-  list.innerHTML = '';
-  rpCustomFields.forEach((cf, idx) => {
-    const row = document.createElement('div');
-    row.className = 'field-row';
-
-    const input = document.createElement('input');
-    input.type  = 'text';
-    input.value = cf.label;
-    input.placeholder = 'field label...';
-    input.addEventListener('input', () => { rpCustomFields[idx].label = input.value; });
-
-    const del = document.createElement('button');
-    del.className = 'field-del-btn';
-    del.textContent = '✕';
-    del.title = 'Remove';
-    del.addEventListener('click', () => { rpCustomFields.splice(idx, 1); renderRpCustomList(); });
-
-    row.append(input, del);
-    list.appendChild(row);
-  });
+  renderCustomFieldList('rp-custom-list', rpCustomFields, renderRpCustomList);
 }
 
 function renderRpBuilds() {
@@ -2688,83 +2687,12 @@ function openGameModal(gameId = null) {
 }
 
 function renderFieldsEditor() {
-  const genList = document.getElementById('generic-fields-list');
-  genList.innerHTML = '';
-  GENERIC_FIELDS.forEach(gf => {
-    const row = document.createElement('div');
-    row.className = 'field-row';
-
-    const isOn = modalEnabledGeneric.has(gf.id);
-    const cb = document.createElement('button');
-    cb.className = 'field-checkbox-btn' + (isOn ? ' on' : '');
-    cb.textContent = isOn ? '[✓]' : '[ ]';
-    cb.title = isOn ? 'Disable field' : 'Enable field';
-    cb.addEventListener('click', () => {
-      const nowOn = cb.classList.toggle('on');
-      cb.textContent = nowOn ? '[✓]' : '[ ]';
-      cb.title = nowOn ? 'Disable field' : 'Enable field';
-      if (nowOn) modalEnabledGeneric.add(gf.id);
-      else       modalEnabledGeneric.delete(gf.id);
-    });
-
-    const input = document.createElement('input');
-    input.type  = 'text';
-    input.value = modalGenericLabels[gf.id] ?? gf.label;
-    input.placeholder = gf.label;
-    input.title = 'Default: ' + gf.label;
-
-    const reset = document.createElement('button');
-    reset.className = 'field-reset-btn';
-    reset.textContent = '↺';
-    reset.title = 'Reset to default (' + gf.label + ')';
-    const updateResetVis = () => {
-      const v = input.value.trim();
-      reset.style.display = (v && v !== gf.label) ? 'inline-block' : 'none';
-    };
-    input.addEventListener('input', () => {
-      modalGenericLabels[gf.id] = input.value;
-      updateResetVis();
-    });
-    reset.addEventListener('click', () => {
-      input.value = gf.label;
-      modalGenericLabels[gf.id] = gf.label;
-      updateResetVis();
-      input.focus();
-    });
-    updateResetVis();
-
-    const badge = document.createElement('span');
-    badge.className = 'field-type-badge';
-    badge.textContent = gf.type;
-
-    row.append(cb, input, reset, badge);
-    genList.appendChild(row);
-  });
+  renderGenericFieldsList('generic-fields-list', modalEnabledGeneric, modalGenericLabels);
   renderCustomFieldsList();
 }
 
 function renderCustomFieldsList() {
-  const list = document.getElementById('custom-fields-list');
-  list.innerHTML = '';
-  modalCustomFields.forEach((cf, idx) => {
-    const row = document.createElement('div');
-    row.className = 'field-row';
-
-    const input = document.createElement('input');
-    input.type  = 'text';
-    input.value = cf.label;
-    input.placeholder = 'field label...';
-    input.addEventListener('input', () => { modalCustomFields[idx].label = input.value; });
-
-    const del = document.createElement('button');
-    del.className = 'field-del-btn';
-    del.textContent = '✕';
-    del.title = 'Remove';
-    del.addEventListener('click', () => { modalCustomFields.splice(idx, 1); renderCustomFieldsList(); });
-
-    row.append(input, del);
-    list.appendChild(row);
-  });
+  renderCustomFieldList('custom-fields-list', modalCustomFields, renderCustomFieldsList);
 }
 
 document.getElementById('add-custom-field-btn').addEventListener('click', () => {
@@ -2940,15 +2868,14 @@ function openRunModal(runId = null, prefill = {}) {
   if (!activeGameId) return;
   if (runId) return;  // editing disabled — runs are logged automatically or via new-run
   editingRunId = null;
-  const run  = runId ? db.runs.find(r => r.id === runId) : null;
   const game = db.games.find(g => g.id === activeGameId);
 
-  document.getElementById('run-modal-title').textContent  = run ? 'Edit Run' : 'New Run';
-  document.getElementById('delete-run-btn').style.display = run ? 'inline-flex' : 'none';
-  document.getElementById('rm-date').value    = run?.date    || today();
-  document.getElementById('rm-notes').value   = run?.notes   || prefill.notes   || '';
-  document.getElementById('rm-comment').value = run?.comment || '';
-  document.getElementById('rm-tags').value    = (run?.tags || []).join(', ');
+  document.getElementById('run-modal-title').textContent  = 'New Run';
+  document.getElementById('delete-run-btn').style.display = 'none';
+  document.getElementById('rm-date').value    = today();
+  document.getElementById('rm-notes').value   = prefill.notes   || '';
+  document.getElementById('rm-comment').value = '';
+  document.getElementById('rm-tags').value    = '';
 
   // Build selector — show only if the game has saved builds
   const builds = game?.builds || [];
@@ -2962,9 +2889,9 @@ function openRunModal(runId = null, prefill = {}) {
     opt.textContent = b.name || '(unnamed build)';
     buildSel.appendChild(opt);
   });
-  buildSel.value = run?.buildId || '';
+  buildSel.value = '';
 
-  selectedResult = run?.result || prefill.result || 'loss';
+  selectedResult = prefill.result || 'loss';
   document.querySelectorAll('.result-option').forEach(b =>
     b.classList.toggle('selected', b.dataset.val === selectedResult));
 
@@ -2985,7 +2912,7 @@ function openRunModal(runId = null, prefill = {}) {
       inp.type  = f.type === 'number' ? 'number' : 'text';
       inp.id    = 'rf-' + f.id;
       inp.placeholder = f.label.toLowerCase() + '...';
-      inp.value = (run?.fields || {})[f.id] || (prefill.fields || {})[f.id] || '';
+      inp.value = (prefill.fields || {})[f.id] || '';
       fg.append(lbl, inp);
       row.appendChild(fg);
     }
@@ -3276,47 +3203,6 @@ async function readSTS2State(dirHandle) {
   return { latestMtime, runCount, lastRun };
 }
 
-// Flexible key-pick helper — searches an object (one level deep, plus common nests) for
-// the first key whose lowercased name includes any of the given substrings.
-function pickStat(obj, ...needles) {
-  if (!obj || typeof obj !== 'object') return undefined;
-  const scan = (o) => {
-    for (const k of Object.keys(o)) {
-      const lk = k.toLowerCase();
-      if (needles.some(n => lk.includes(n))) return o[k];
-    }
-    return undefined;
-  };
-  let v = scan(obj);
-  if (v !== undefined) return v;
-  // Try common nests
-  for (const nest of ['stats', 'progression', 'data', 'lastRun', 'last_run', 'recentRun']) {
-    if (obj[nest] && typeof obj[nest] === 'object') {
-      v = scan(obj[nest]);
-      if (v !== undefined) return v;
-    }
-  }
-  return undefined;
-}
-
-// Extract per-run kill count from a stats.json delta.
-// Tries a dedicated last-run field first; falls back to cumulative delta.
-function extractMegabonkKills(prevData, currData) {
-  if (!currData) return null;
-  if (currData && typeof currData === 'object')
-    console.log('[megabonk] stats keys+values:', Object.entries(currData).map(([k,v]) => `${k}=${typeof v === 'object' ? '(obj)' : v}`).join(', '));
-  const num = (v) => (typeof v === 'number' ? v : (typeof v === 'string' && v.trim() !== '' && !isNaN(+v) ? +v : undefined));
-  const n = (...keys) => { const v = pickStat(currData, ...keys); return num(v); };
-  const lastK = n('lastkill', 'lastkills', 'runkills', 'killsthisrun', 'currentrunkills', 'bonks', 'lastbonks', 'runbonks');
-  if (lastK != null) return lastK;
-  const CUMUL = ['totalkill', 'kills', 'kilcount', 'enemieskilled', 'killcount', 'enemykills', 'totalenemieskilled', 'totalbonks', 'bonkcount'];
-  const np = (...keys) => { const v = prevData ? pickStat(prevData, ...keys) : undefined; return num(v); };
-  const currTotal = n(...CUMUL);
-  const prevTotal = np(...CUMUL);
-  if (currTotal != null && prevTotal != null && currTotal > prevTotal) return currTotal - prevTotal;
-  return null;
-}
-
 async function readMegabonkState() {
   try {
     const res = await fetch('http://localhost:3400/api/megabonk', { cache: 'no-store' });
@@ -3574,7 +3460,7 @@ document.getElementById('auto-run-quick-btn').addEventListener('click', () => {
   const { gameId, result, fields } = pendingAutoRun;
   dismissRunToast();
   if (gameId !== activeGameId) selectGame(gameId);
-  const run = { id: uid(), gameId, result: result || null, date: new Date().toISOString().slice(0,10), notes: '', comment: '', tags: [], fields: fields || {}, buildId: null };
+  const run = { id: uid(), gameId, result: result || null, date: today(), notes: '', comment: '', tags: [], fields: fields || {}, buildId: null };
   db.runs.push(run);
   save(db);
   syncRun(run);
