@@ -422,6 +422,41 @@ ALTER TABLE profiles ADD CONSTRAINT profiles_tag_key UNIQUE (tag);
 
 ---
 
+### 14. Supabase Migrations + Code Cleanup (Session 11+)
+
+**Supabase SQL Migrations (run via Management REST API with PAT):**
+
+- **Block 1 — Tag column + trigger:**
+  - `ALTER TABLE profiles ADD COLUMN tag TEXT` + `UNIQUE` constraint
+  - `gen_profile_tag()` — generates a unique 4-char `[A-Z0-9]` tag (charset excludes confusable 0/O/1/I/L); uses `_tag` local variable to avoid name collision with `profiles.tag` column; loops up to 100 attempts
+  - `assign_profile_tag` — BEFORE INSERT trigger; sets `NEW.tag` via `gen_profile_tag()` if null
+  - Backfilled existing profile: `UPDATE profiles SET tag = gen_profile_tag() WHERE tag IS NULL` → assigned `22XK`
+
+- **Block 2 — DB-level CHECK constraints:**
+  - `profiles`: `chk_profiles_name_len` (≤50), `chk_profiles_bio_len` (≤300), `chk_profiles_tag_format` (`^[A-Z0-9]{4}$`)
+  - `games`: `chk_games_name_len` (≤80)
+  - `runs`: `chk_runs_result` (`IN ('win','loss','quit')`), `chk_runs_date_format` (`^[0-9]{4}-[0-9]{2}-[0-9]{2}$`), `chk_runs_notes_len` (≤1000), `chk_runs_comment_len` (≤500)
+
+- **Block 3 — Function search_path fix:**
+  - `ALTER FUNCTION public.update_updated_at() SET search_path = public` — resolves Supabase linter warning about mutable search_path
+
+**Code Cleanup (−114 lines net):**
+
+- Extracted `getGameStats(gameId)`, `renderGenericFieldsList(containerId, enabledSet, labelsObj)`, `renderCustomFieldList(containerId, fieldsArr, onDelete)` as shared helpers
+- Collapsed 4 near-duplicate field renderer functions (`renderRpFields`, `renderRpCustomList`, `renderFieldsEditor`, `renderCustomFieldsList`) to delegate to the shared helpers
+- `openRunModal` dead code removed — `if (runId) return` at top meant `run` was always null; simplified to direct new-run initialization
+- `extractMegabonkKills` and `pickStat` removed — dead code replaced by OCR path (`getMegabonkKillsFromOCR`)
+- `today()` inline fixed in quick-log handler
+- Streak fix: `renderStats` now uses `for...of` with `break` instead of `forEach`, correctly breaking streak on result change; Best W streak card added as 6th stat
+
+**GitHub repo + Pages:**
+- Repo created: `gh repo create run-tracker --public --source=. --remote=origin --push`
+- Pages enabled via `gh api`: source branch `master`, path `/`
+- Live URL: `https://adamkimble2001-cell.github.io/run-tracker/`
+- URL added to Supabase Auth → URL Configuration allowlist
+
+---
+
 ## Known Limitations
 
 - `preview_screenshot` times out consistently in this environment (Claude Preview tool issue). The app renders correctly — confirmed via `preview_eval` and `preview_snapshot`.
