@@ -71,7 +71,7 @@ Ran a full penetration test against the live app and Supabase backend, plus a lo
 ## TODO
 
 - [ ] **Enable leaked-password protection** in Supabase → Auth → Security (requires Pro tier, ~$25/mo). Only outstanding security item.
-- [ ] **Lower auth rate limits** in Supabase → Authentication → Rate Limits (free, 2 min): sign-ups ~5/hr, sign-ins ~10/5min, OTP ~5/hr.
+- [x] **Lower auth rate limits** in Supabase → Authentication → Rate Limits — sign up/in and OTP verification set to ~10/5min. *(done 2026-06-14)*
 - [ ] Consider moving to a real static host (Netlify / Cloudflare Pages / GitHub Pages) — removes `server.ps1` and its whole attack surface; it's a static site.
 - [ ] Move image uploads (avatar/icons/bg) to Supabase Storage — base64 in DB/localStorage hits the 5 MB cap fast.
 - [ ] Optional: surface a clear UI error when a row cap is hit, instead of the generic `✗ sync failed` badge.
