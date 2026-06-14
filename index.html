@@ -1022,6 +1022,10 @@
       <div class="fields-add-row">
         <button class="fields-add-btn" id="rp-select-folder-btn">⊕ select save folder</button>
       </div>
+      <div class="fields-add-row" id="rp-ocr-test-row" style="display:none">
+        <button class="fields-add-btn" id="rp-ocr-test-btn">⊕ test OCR now</button>
+        <span id="rp-ocr-result" style="font-size:10px;color:var(--text-dim);margin-left:6px"></span>
+      </div>
     </div>
   </div>
 
@@ -3727,6 +3731,8 @@ function renderWatcherBlock(gameId, gameType) {
   }
   const serverCmd = document.getElementById('rp-server-cmd');
   if (serverCmd) serverCmd.style.display = isMegabonk ? '' : 'none';
+  const ocrRow = document.getElementById('rp-ocr-test-row');
+  if (ocrRow) ocrRow.style.display = isMegabonk ? '' : 'none';
 
   if (w?.active) {
     dot.className = 'watcher-dot active';
@@ -3860,6 +3866,29 @@ document.getElementById('rp-copy-server-cmd').addEventListener('click', () => {
     btn.textContent = '✓ copied';
     setTimeout(() => btn.textContent = orig, 1400);
   }).catch(() => {});
+});
+
+document.getElementById('rp-ocr-test-btn').addEventListener('click', async () => {
+  const btn    = document.getElementById('rp-ocr-test-btn');
+  const result = document.getElementById('rp-ocr-result');
+  btn.textContent = '// scanning...';
+  result.textContent = '';
+  try {
+    const res = await fetch('http://localhost:3400/api/megabonk/ocr', { cache: 'no-store' });
+    const d   = await res.json();
+    console.log('[OCR test] raw text:', d.ocrText);
+    console.log('[OCR test] kills:', d.kills, '| error:', d.error);
+    if (d.error && !d.ocrText) {
+      result.textContent = '// ' + d.error;
+    } else if (d.kills != null) {
+      result.textContent = `✓ ${d.kills} kills`;
+    } else {
+      result.textContent = '// no kills found — check console for raw text';
+    }
+  } catch {
+    result.textContent = '// server not reachable';
+  }
+  btn.textContent = '⊕ test OCR now';
 });
 
 // Ensure a Megabonk game has auto-tracked fields: Kills (OCR) and Duration (timer).
