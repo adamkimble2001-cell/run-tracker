@@ -3128,8 +3128,8 @@ document.getElementById('sort-select').addEventListener('change', e => {
 // ── Game file integration ─────────────────────────────────────────────────────
 
 const GAME_TYPE_META = {
-  hades:    { label: 'Hades',            hint: 'Looks for Profile0.sav — point to your Hades save folder.\nDefault: %USERPROFILE%\\Saved Games\\Hades' },
-  hades2:   { label: 'Hades II',         hint: 'Looks for Profile0.sav — point to your Hades II save folder.\nDefault: %USERPROFILE%\\Saved Games\\Hades II' },
+  hades:    { label: 'Hades',            hint: 'Looks for Profile*.sav — point to your Hades save folder.\nDefault: %USERPROFILE%\\Saved Games\\Hades' },
+  hades2:   { label: 'Hades II',         hint: 'Looks for Profile*.sav — point to your Hades II save folder.\nDefault: %USERPROFILE%\\Saved Games\\Hades II' },
   ror2:     { label: 'Risk of Rain 2',   hint: 'Looks for UserProfile.xml — point to your RoR2 UserProfiles folder in Steam userdata.\nDefault: %ProgramFiles(x86)%\\Steam\\userdata\\<steam id>\\632360\\remote\\UserProfiles' },
   sts2:     { label: 'Slay the Spire 2', hint: 'Scans for .run files — point to your STS2 steam saves folder.\nDefault: %APPDATA%\\SlayTheSpire2\\steam\\<your steam id>' },
   megabonk: { label: 'Megabonk',         hint: 'Uses local server — save files are encrypted and in a system folder the browser cannot access.\nRun server.ps1 first: powershell -ExecutionPolicy Bypass -File server.ps1', serverMode: true },
@@ -3204,8 +3204,9 @@ async function readHadesState(dirHandle) {
   let savMtime = 0, hasTempFile = false;
   for await (const [name, handle] of dirHandle.entries()) {
     if (handle.kind !== 'file') continue;
-    if (/^Profile0\.sav$/i.test(name)) {
-      const f = await handle.getFile(); savMtime = f.lastModified;
+    if (/^Profile\d+\.sav$/i.test(name)) {
+      const f = await handle.getFile();
+      if (f.lastModified > savMtime) savMtime = f.lastModified;
     }
     if (/Profile\d+_Temp\.sav/i.test(name)) hasTempFile = true;
   }
@@ -3240,10 +3241,12 @@ async function readHades2State(dirHandle) {
   let savMtime = 0, hasTempFile = false, weapon = null;
   for await (const [name, handle] of dirHandle.entries()) {
     if (handle.kind !== 'file') continue;
-    if (/^Profile0\.sav$/i.test(name)) {
+    if (/^Profile\d+\.sav$/i.test(name)) {
       const f = await handle.getFile();
-      savMtime = f.lastModified;
-      weapon = await extractHades2Weapon(f);
+      if (f.lastModified > savMtime) {
+        savMtime = f.lastModified;
+        weapon = await extractHades2Weapon(f);
+      }
     }
     if (/Profile\d+_Temp\.sav/i.test(name)) hasTempFile = true;
   }
