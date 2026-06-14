@@ -1492,6 +1492,7 @@ async function loadFromSupabase() {
     db.runs = (runs && runs.length) ? runs.map(r => ({ id: r.id, gameId: r.game_id, result: r.result, date: r.date, notes: r.notes || '', comment: r.comment || '', tags: r.tags || [], fields: r.fields || {}, buildId: r.build_id || null })) : [];
     save(db);
     setSyncBadge('synced', '✓ synced');
+    migrateLegacyImages();
   } catch(e) {
     console.error('loadFromSupabase', e);
     setSyncBadge('error', '✗ sync error');
@@ -1840,6 +1841,91 @@ function resizeImage(file, maxPx) {
   });
 }
 
+async function uploadToStorage(file, storagePath, maxPx) {
+  const blob = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > h) { if (w > maxPx) { h = h * maxPx / w; w = maxPx; } }
+        else        { if (h > maxPx) { w = w * maxPx / h; h = maxPx; } }
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        c.toBlob(b => b ? resolve(b) : reject(new Error('toBlob failed')), 'image/jpeg', 0.88);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+  const { error } = await sb.storage.from('user-media').upload(storagePath, blob, {
+    contentType: 'image/jpeg', upsert: true,
+  });
+  if (error) throw error;
+  const url = sb.storage.from('user-media').getPublicUrl(storagePath).data.publicUrl;
+  return url + '?t=' + Date.now();
+}
+
+async function migrateLegacyImages() {
+  if (!sbUser) return;
+  let dirty = false;
+
+  if (db.profile.avatar?.startsWith('data:image/')) {
+    try {
+      const res = await fetch(db.profile.avatar);
+      const blob = await res.blob();
+      const path = `${sbUser.id}/avatar`;
+      const { error } = await sb.storage.from('user-media').upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+      if (!error) {
+        db.profile.avatar = sb.storage.from('user-media').getPublicUrl(path).data.publicUrl + '?t=' + Date.now();
+        dirty = true;
+      }
+    } catch(e) { console.warn('migrate avatar', e); }
+  }
+
+  for (const g of db.games) {
+    if (g.icon?.startsWith('data:image/')) {
+      try {
+        const res = await fetch(g.icon);
+        const blob = await res.blob();
+        const path = `${sbUser.id}/icons/${g.id}`;
+        const { error } = await sb.storage.from('user-media').upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+        if (!error) {
+          g.icon = sb.storage.from('user-media').getPublicUrl(path).data.publicUrl + '?t=' + Date.now();
+          dirty = true;
+        }
+      } catch(e) { console.warn('migrate icon', g.id, e); }
+    }
+  }
+
+  const bgVal = localStorage.getItem('rlt_bgimg');
+  if (bgVal?.startsWith('data:image/')) {
+    try {
+      const res = await fetch(bgVal);
+      const blob = await res.blob();
+      const path = `${sbUser.id}/bg`;
+      const { error } = await sb.storage.from('user-media').upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+      if (!error) {
+        const url = sb.storage.from('user-media').getPublicUrl(path).data.publicUrl + '?t=' + Date.now();
+        localStorage.setItem('rlt_bgimg', url);
+        applyBgImage(url);
+        syncBgPreview(url);
+      }
+    } catch(e) { console.warn('migrate bg', e); }
+  }
+
+  if (dirty) {
+    save(db);
+    syncProfile();
+    db.games.forEach(g => syncGame(g));
+    renderSidebarProfile();
+    renderSidebar();
+  }
+}
+
 function setImgZone(zone, src) {
   zone.querySelectorAll('img').forEach(i => i.remove());
   if (src && isSafeImgSrc(src)) {
@@ -1991,13 +2077,20 @@ document.getElementById('edit-profile-btn').addEventListener('click', openProfil
 document.getElementById('avatar-upload-zone').addEventListener('click', () =>
   document.getElementById('file-avatar').click());
 
-document.getElementById('file-avatar').addEventListener('change', e => {
+document.getElementById('file-avatar').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
   e.target.value = '';
-  resizeImage(file, 300).then(dataUrl => {
-    pendingAvatar = dataUrl;
-    setImgZone(document.getElementById('avatar-upload-zone'), pendingAvatar);
-  });
+  if (sbUser) {
+    try {
+      const url = await uploadToStorage(file, `${sbUser.id}/avatar`, 300);
+      pendingAvatar = url;
+      setImgZone(document.getElementById('avatar-upload-zone'), url);
+      return;
+    } catch(err) { console.error('avatar upload', err); }
+  }
+  const dataUrl = await resizeImage(file, 300);
+  pendingAvatar = dataUrl;
+  setImgZone(document.getElementById('avatar-upload-zone'), dataUrl);
 });
 
 document.getElementById('go-online-btn').addEventListener('click', () => {
@@ -2618,13 +2711,20 @@ function saveRightPanel() {
 document.getElementById('rp-icon-zone').addEventListener('click', () =>
   document.getElementById('file-rp-icon').click());
 
-document.getElementById('file-rp-icon').addEventListener('change', e => {
+document.getElementById('file-rp-icon').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
   e.target.value = '';
-  resizeImage(file, 256).then(dataUrl => {
-    pendingRpIcon = dataUrl;
-    applyRpIcon(pendingRpIcon, document.getElementById('rp-name').value || '?');
-  });
+  if (sbUser && activeGameId) {
+    try {
+      const url = await uploadToStorage(file, `${sbUser.id}/icons/${activeGameId}`, 256);
+      pendingRpIcon = url;
+      applyRpIcon(url, document.getElementById('rp-name').value || '?');
+      return;
+    } catch(err) { console.error('rp icon upload', err); }
+  }
+  const dataUrl = await resizeImage(file, 256);
+  pendingRpIcon = dataUrl;
+  applyRpIcon(dataUrl, document.getElementById('rp-name').value || '?');
 });
 
 document.getElementById('rp-save-btn').addEventListener('click', saveRightPanel);
@@ -2647,7 +2747,7 @@ document.getElementById('rp-add-field-btn').addEventListener('click', () => {
 
 // ── Game modal ────────────────────────────────────────────────────────────────
 function openGameModal(gameId = null) {
-  editingGameId   = gameId;
+  editingGameId   = gameId || uid();
   pendingGameIcon = undefined;
   const game = gameId ? db.games.find(g => g.id === gameId) : null;
 
@@ -2705,14 +2805,22 @@ document.getElementById('add-custom-field-btn').addEventListener('click', () => 
 document.getElementById('game-icon-zone').addEventListener('click', () =>
   document.getElementById('file-game-icon').click());
 
-document.getElementById('file-game-icon').addEventListener('change', e => {
+document.getElementById('file-game-icon').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
   e.target.value = '';
-  resizeImage(file, 256).then(dataUrl => {
-    pendingGameIcon = dataUrl;
-    setImgZone(document.getElementById('game-icon-zone'), pendingGameIcon);
-    document.getElementById('clear-game-icon-btn').style.display = 'block';
-  });
+  if (sbUser) {
+    try {
+      const url = await uploadToStorage(file, `${sbUser.id}/icons/${editingGameId}`, 256);
+      pendingGameIcon = url;
+      setImgZone(document.getElementById('game-icon-zone'), url);
+      document.getElementById('clear-game-icon-btn').style.display = 'block';
+      return;
+    } catch(err) { console.error('game icon upload', err); }
+  }
+  const dataUrl = await resizeImage(file, 256);
+  pendingGameIcon = dataUrl;
+  setImgZone(document.getElementById('game-icon-zone'), dataUrl);
+  document.getElementById('clear-game-icon-btn').style.display = 'block';
 });
 
 document.getElementById('clear-game-icon-btn').addEventListener('click', e => {
@@ -2739,13 +2847,13 @@ document.getElementById('save-game-btn').addEventListener('click', () => {
   const gameType = document.getElementById('gm-game-type').value || null;
 
   let savedGame;
-  if (editingGameId) {
-    const g = db.games.find(g => g.id === editingGameId);
-    g.name = name; g.fields = fields; g.gameType = gameType;
-    if (pendingGameIcon !== undefined) g.icon = pendingGameIcon;
-    savedGame = g;
+  const existingGame = db.games.find(g => g.id === editingGameId);
+  if (existingGame) {
+    existingGame.name = name; existingGame.fields = fields; existingGame.gameType = gameType;
+    if (pendingGameIcon !== undefined) existingGame.icon = pendingGameIcon;
+    savedGame = existingGame;
   } else {
-    savedGame = { id: uid(), name, icon: pendingGameIcon ?? null, fields, gameType };
+    savedGame = { id: editingGameId, name, icon: pendingGameIcon ?? null, fields, gameType };
     db.games.push(savedGame);
   }
   save(db);
@@ -2753,8 +2861,8 @@ document.getElementById('save-game-btn').addEventListener('click', () => {
   closeModal('game-modal');
   renderSidebar();
   renderSidebarProfile();
-  if (editingGameId && editingGameId === activeGameId) { renderGameView(); renderRightPanel(); }
-  if (!editingGameId) selectGame(db.games[db.games.length - 1].id);
+  if (existingGame && editingGameId === activeGameId) { renderGameView(); renderRightPanel(); }
+  if (!existingGame) selectGame(savedGame.id);
 });
 
 document.getElementById('gm-connect-btn').addEventListener('click', async () => {
@@ -2782,16 +2890,15 @@ document.getElementById('gm-connect-btn').addEventListener('click', async () => 
     fields.push({ id: cf.id, label: cf.label.trim(), type: 'text', builtin: false }));
 
   let targetId = editingGameId;
-  if (editingGameId) {
-    const g = db.games.find(g => g.id === editingGameId);
-    g.name = name; g.fields = fields; g.gameType = gameType;
-    if (pendingGameIcon !== undefined) g.icon = pendingGameIcon;
-    syncGame(g);
+  const connectExisting = db.games.find(g => g.id === editingGameId);
+  if (connectExisting) {
+    connectExisting.name = name; connectExisting.fields = fields; connectExisting.gameType = gameType;
+    if (pendingGameIcon !== undefined) connectExisting.icon = pendingGameIcon;
+    syncGame(connectExisting);
   } else {
-    const newGame = { id: uid(), name, icon: pendingGameIcon ?? null, fields, gameType };
+    const newGame = { id: editingGameId, name, icon: pendingGameIcon ?? null, fields, gameType };
     db.games.push(newGame);
-    targetId = newGame.id;
-    editingGameId = targetId;
+    targetId = editingGameId;
     syncGame(newGame);
   }
   save(db);
@@ -3818,7 +3925,11 @@ function esc(s) {
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function isSafeImgSrc(s) {
-  return typeof s === 'string' && (s.startsWith('data:image/') || s.startsWith('blob:'));
+  return typeof s === 'string' && (
+    s.startsWith('data:image/') ||
+    s.startsWith('blob:') ||
+    s.startsWith('https://wbbfkyzdmpnyiizifijz.supabase.co/storage/')
+  );
 }
 function today() { return new Date().toISOString().slice(0,10); }
 
@@ -4691,19 +4802,20 @@ document.getElementById('file-bg-image').addEventListener('change', async e => {
   const file = e.target.files[0];
   e.target.value = '';
   if (!file) return;
-  const dataUrl = await new Promise(resolve => {
-    const reader = new FileReader();
-    reader.onload = ev => resolve(ev.target.result);
-    reader.readAsDataURL(file);
-  });
-  try {
-    localStorage.setItem('rlt_bgimg', dataUrl);
-  } catch {
-    alert('Image too large for storage — try a smaller file.');
-    return;
+  let bgVal;
+  if (sbUser) {
+    try {
+      bgVal = await uploadToStorage(file, `${sbUser.id}/bg`, 1920);
+    } catch(err) { console.error('bg upload', err); }
   }
-  applyBgImage(dataUrl);
-  syncBgPreview(dataUrl);
+  if (!bgVal) {
+    try { bgVal = await resizeImage(file, 1200); }
+    catch { return; }
+  }
+  try { localStorage.setItem('rlt_bgimg', bgVal); }
+  catch { alert('Image too large for storage — try a smaller file.'); return; }
+  applyBgImage(bgVal);
+  syncBgPreview(bgVal);
 });
 document.getElementById('bg-clear-btn').addEventListener('click', () => {
   localStorage.removeItem('rlt_bgimg');
