@@ -162,7 +162,10 @@ while ($true) {
         if ($urlPath -eq '/') { $urlPath = '/index.html' }
         Write-Host "$($parts[0]) $urlPath"
 
-        $extraHeaders = 'Access-Control-Allow-Origin: *' + "`r`n"
+        $csp = "Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://wbbfkyzdmpnyiizifijz.supabase.co; img-src 'self' data: blob: https://wbbfkyzdmpnyiizifijz.supabase.co; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self';"
+        $extraHeaders = 'Access-Control-Allow-Origin: *' + "`r`n" + $csp + "`r`n" +
+                        'X-Content-Type-Options: nosniff' + "`r`n" +
+                        'Referrer-Policy: no-referrer' + "`r`n"
 
         if ($urlPath -eq '/api/megabonk') {
             $cloudDir = Join-Path $env:USERPROFILE 'AppData\LocalLow\Ved\Megabonk\Saves\CloudDir'
@@ -207,16 +210,43 @@ while ($true) {
             $status = '200 OK'
             $ct     = 'application/json'
 
-        } else {
-            $relPath  = $urlPath.TrimStart('/').Replace('/', [IO.Path]::DirectorySeparatorChar)
-            $filePath = Join-Path $root $relPath
+        } elseif ($urlPath -eq '/api/poll') {
+            $indexFile = Join-Path $root 'index.html'
+            $mtime = if (Test-Path $indexFile) {
+                [DateTimeOffset]::new((Get-Item $indexFile).LastWriteTimeUtc).ToUnixTimeMilliseconds()
+            } else { 0 }
+            $body   = [System.Text.Encoding]::UTF8.GetBytes("{`"mtime`":$mtime}")
+            $status = '200 OK'
+            $ct     = 'application/json'
 
-            if (Test-Path $filePath -PathType Leaf) {
-                $ext      = [IO.Path]::GetExtension($filePath).ToLower()
-                $mimeType = if ($mimeMap.ContainsKey($ext)) { $mimeMap[$ext] } else { 'application/octet-stream' }
+        } else {
+            $relPath   = $urlPath.TrimStart('/').Replace('/', [IO.Path]::DirectorySeparatorChar)
+            $filePath  = Join-Path $root $relPath
+            $canonical = [System.IO.Path]::GetFullPath($filePath)
+            $rootFull  = [System.IO.Path]::GetFullPath($root) + [IO.Path]::DirectorySeparatorChar
+
+            $reqExt = [IO.Path]::GetExtension($filePath).ToLower()
+            if (-not $canonical.StartsWith($rootFull)) {
+                $body   = [System.Text.Encoding]::UTF8.GetBytes('Forbidden')
+                $status = '403 Forbidden'
+                $ct     = 'text/plain'
+            } elseif (-not $mimeMap.ContainsKey($reqExt)) {
+                # Allowlist: only serve known web assets. Blocks .ps1, .bak, .md, .jsonl, etc.
+                $body   = [System.Text.Encoding]::UTF8.GetBytes('Forbidden')
+                $status = '403 Forbidden'
+                $ct     = 'text/plain'
+            } elseif (Test-Path $filePath -PathType Leaf) {
+                $ext      = $reqExt
+                $mimeType = $mimeMap[$ext]
                 $body     = [IO.File]::ReadAllBytes($filePath)
                 $status   = '200 OK'
                 $ct       = $mimeType
+                # Inject live-reload script tag into HTML responses
+                if ($ext -eq '.html') {
+                    $html = [System.Text.Encoding]::UTF8.GetString($body)
+                    $html = $html.Replace('</body>', '<script src="/live-reload.js"></script></body>')
+                    $body = [System.Text.Encoding]::UTF8.GetBytes($html)
+                }
             } else {
                 $body   = [System.Text.Encoding]::UTF8.GetBytes("Not Found: $urlPath")
                 $status = '404 Not Found'
