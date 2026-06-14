@@ -2943,7 +2943,9 @@ document.getElementById('gm-connect-btn').addEventListener('click', async () => 
     hint.textContent = '// watching · ' + (meta.label || gameType);
   } catch(e) {
     if (e.name !== 'AbortError') {
-      hint.textContent = '// error — try again';
+      hint.textContent = e.name === 'SecurityError'
+        ? '// blocked — open via localhost:3400, not file://'
+        : `// error: ${e.message || e.name}`;
       console.error('gm-connect-btn', e);
     } else {
       hint.textContent = '';
@@ -3686,7 +3688,11 @@ document.getElementById('topbar-watch-btn').addEventListener('click', async () =
     updateTopbarWatcher(activeGameId);
     renderWatcherBlock(activeGameId, game.gameType);
   } catch(e) {
-    if (e.name !== 'AbortError') console.error('topbar folder picker', e);
+    if (e.name !== 'AbortError') {
+      console.error('topbar folder picker', e);
+      const label = document.getElementById('topbar-watcher-label');
+      if (label) label.textContent = e.name === 'SecurityError' ? 'blocked — use localhost:3400' : 'error: ' + (e.message || e.name);
+    }
   }
 });
 
