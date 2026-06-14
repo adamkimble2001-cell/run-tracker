@@ -1,6 +1,7 @@
 # Session notes / Obsidian files
 *.md
 !DEVLOG.md
+!Changelog 2026-06-14 Security Hardening.md
 
 # OS
 .DS_Store
