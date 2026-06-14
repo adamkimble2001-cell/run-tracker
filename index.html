@@ -3601,8 +3601,6 @@ async function startWatcher(gameId) {
   w.active = true;
   renderWatcherBlock(gameId, w.gameType);
   if (gameId === activeGameId) updateTopbarWatcher(gameId);
-  // Megabonk: auto-start run timer immediately (no explicit run-start signal from files)
-  if (isMegabonk) startRunInProgress(gameId);
   w.interval = setInterval(async () => {
     try {
       if (!isMegabonk) {
@@ -3631,8 +3629,6 @@ async function startWatcher(gameId) {
         }
         stopRunInProgress(gameId);
         showRunToast(gameId, hit);
-        // Megabonk: auto-restart timer for the next run
-        if (isMegabonk) startRunInProgress(gameId);
       } else if (!w.runInProgress && detectRunStart(w.gameType, w.lastState, curr)) {
         startRunInProgress(gameId);
       }
