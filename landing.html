@@ -89,7 +89,7 @@
     border-radius: var(--radius); transition: border-color .15s, transform .15s;
   }
   .card:hover { border-color: var(--border-hi); transform: translateY(-2px); }
-  .card .ico { font-size: 22px; margin-bottom: 12px; color: var(--accent); }
+  .card .ico { font-size: 36px; line-height: 1; margin-bottom: 14px; color: var(--accent); text-shadow: 0 0 16px var(--accent-glow); }
   .card h3 { font-size: 16px; color: var(--text); margin-bottom: 8px; letter-spacing: 0.02em; }
   .card p { font-size: 13.5px; color: var(--text-dim); }
 
@@ -106,10 +106,16 @@
 
   /* ── How it works ── */
   .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-  .step { border-left: 2px solid var(--accent-dim); padding: 4px 0 4px 18px; }
+  .step { border-left: 2px solid var(--accent-dim); padding: 4px 0 4px 18px; transition: border-color .15s; }
   .step .num { color: var(--accent); font-size: 13px; letter-spacing: 0.1em; margin-bottom: 6px; }
   .step h4 { font-size: 15px; color: var(--text); margin-bottom: 6px; }
   .step p { font-size: 13px; color: var(--text-dim); }
+  /* how-it-works red accent */
+  #how .sec-title { color: var(--loss); text-shadow: 0 0 16px rgba(255,40,64,0.32); }
+  #how .sec-label { color: #7a1420; }
+  #how .step { border-left-color: #7a1420; }
+  #how .step:hover { border-left-color: var(--loss); }
+  #how .step .num { color: var(--loss); text-shadow: 0 0 10px rgba(255,40,64,0.4); }
 
   /* ── Privacy ── */
   .priv-list { list-style: none; display: grid; gap: 14px; max-width: 760px; }
@@ -149,8 +155,8 @@
   <div class="wrap">
     <div class="prompt">C:\&gt; run_tracker --init</div>
     <h1>RUN_TRACKER<span class="cursor">_</span></h1>
-    <p class="sub">A run tracker for roguelites that logs itself. Point it at your save folder, play, and it detects when a run ends — then offers to log it.</p>
-    <p class="sub2">Win/loss records, build tracking, win streaks, and a shareable profile. Cloud-synced across devices.</p>
+    <p class="sub">A run tracker for roguelites that logs itself — point it at your save folder and play.</p>
+    <p class="sub2">Stats, builds, and win streaks. Cloud-synced, shareable.</p>
     <div class="hero-cta">
       <a class="btn btn-lg" href="index.html">launch terminal &gt;</a>
       <a class="btn btn-lg" href="#how" style="border-color:var(--border-hi);color:var(--text-dim);background:transparent;">how it works</a>
@@ -182,7 +188,7 @@
         <p>Save loadouts — items, bans, strategy, and your own custom fields — then see exactly which runs each build produced and how it performed.</p>
       </div>
       <div class="card">
-        <div class="ico">⌁</div>
+        <div class="ico">⊞</div>
         <h3>Custom fields per game</h3>
         <p>Every game tracks different things. Toggle built-in fields (character, floor, score, seed, duration…) or add your own to match how you play.</p>
       </div>
@@ -192,7 +198,7 @@
         <p>Sign in and your archive follows you across devices. Log offline and it syncs when you reconnect — nothing gets lost.</p>
       </div>
       <div class="card">
-        <div class="ico">⤳</div>
+        <div class="ico">↗</div>
         <h3>Shareable profile</h3>
         <p>Generate a read-only link to show off your stats, games, and builds. Your private run notes stay private — they're never included in a share.</p>
       </div>
