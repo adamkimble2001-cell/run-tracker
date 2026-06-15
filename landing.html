@@ -26,11 +26,14 @@
       radial-gradient(ellipse at top, rgba(0,255,112,0.05), transparent 60%),
       linear-gradient(transparent 0%, rgba(0,255,112,0.012) 50%, transparent 100%);
   }
-  /* CRT scanline overlay */
+  /* CRT scanline overlay — slow downward drift */
   body::before {
     content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
     background: repeating-linear-gradient(0deg, rgba(0,255,112,0.018) 0px, rgba(0,255,112,0.018) 1px, transparent 1px, transparent 3px);
+    animation: scanline-drift 0.7s linear infinite;
   }
+  @keyframes scanline-drift { from { background-position: 0 0; } to { background-position: 0 3px; } }
+  @media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
   body::after {
     content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998;
     background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%);
@@ -124,6 +127,25 @@
   .priv-list b { color: var(--text); }
   .priv-list span { color: var(--text-dim); }
 
+  /* ── Leaderboards tease ── */
+  .soon-badge { display: inline-block; margin-left: 8px; font-size: 10px; letter-spacing: 0.14em; color: #000; background: var(--accent); padding: 2px 8px; border-radius: var(--radius); vertical-align: middle; box-shadow: 0 0 12px var(--accent-glow); }
+  .lb-layout { display: grid; grid-template-columns: 1.25fr 1fr; gap: 30px; align-items: start; }
+  .lb { border: 1px solid var(--border-hi); background: var(--surface); border-radius: var(--radius); overflow: hidden; box-shadow: 0 0 26px var(--accent-glow2); }
+  .lb-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); font-size: 12px; letter-spacing: 0.08em; color: var(--text-dim); }
+  .lb-soon { color: var(--accent); border: 1px solid var(--accent-dim); padding: 1px 8px; border-radius: var(--radius); font-size: 10px; letter-spacing: 0.12em; }
+  .lb-row { display: grid; grid-template-columns: 42px 1fr auto; gap: 12px; padding: 11px 16px; align-items: center; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .lb-rank { color: var(--text-faint); }
+  .lb-row.top .lb-rank { color: var(--accent); text-shadow: 0 0 8px var(--accent-glow); }
+  .lb-tag { color: var(--text); letter-spacing: 0.05em; }
+  .lb-stat { color: var(--accent); }
+  .lb-row.you { filter: blur(2.5px); opacity: 0.65; }
+  .lb-youlabel { padding: 11px 16px; font-size: 12px; color: var(--text-faint); text-align: center; border-top: 1px dashed var(--border-hi); }
+  .lb-tracked h4 { font-size: 14px; color: var(--text); margin-bottom: 14px; letter-spacing: 0.04em; }
+  .lb-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .lb-chip { border: 1px solid var(--border); background: var(--surface2); padding: 8px 13px; border-radius: var(--radius); font-size: 13px; color: var(--text-dim); }
+  .lb-foot { margin-top: 18px; font-size: 12px; color: var(--text-faint); line-height: 1.7; }
+  @media (max-width: 760px) { .lb-layout { grid-template-columns: 1fr; gap: 24px; } }
+
   /* ── Final CTA ── */
   .final { text-align: center; }
   .final h2 { font-size: clamp(26px, 5vw, 44px); color: var(--accent); text-shadow: 0 0 18px var(--accent-glow); margin-bottom: 12px; }
@@ -145,6 +167,7 @@
       <a class="lnk" href="#games">games</a>
       <a class="lnk" href="#how">how it works</a>
       <a class="lnk" href="#privacy">privacy</a>
+      <a class="lnk" href="#leaderboards">leaderboards</a>
       <a class="btn" href="index.html">launch &gt;</a>
     </div>
   </div>
@@ -267,6 +290,37 @@
       <li><span class="chk">[✓]</span> <div><b>Read-only access to saves.</b> <span>Watchers only read your save files to detect a finished run. They never write to or modify your game.</span></div></li>
       <li><span class="chk">[✓]</span> <div><b>No tracking, no ads.</b> <span>The app loads its own code and one trusted library (integrity-checked). That's it.</span></div></li>
     </ul>
+  </div>
+</section>
+
+<!-- ── Leaderboards tease ── -->
+<section id="leaderboards">
+  <div class="wrap">
+    <div class="sec-label">// INCOMING <span class="soon-badge">SOON</span></div>
+    <h2 class="sec-title">Leaderboards, per game</h2>
+    <p class="sec-intro">Your runs already hold the numbers — soon they'll rank you. A dedicated board for every game, scored on the stat that matters most for it.</p>
+    <div class="lb-layout">
+      <div class="lb">
+        <div class="lb-head"><span>RISK_OF_RAIN_2 // FASTEST CLEAR</span><span class="lb-soon">preview</span></div>
+        <div class="lb-row top"><span class="lb-rank">01</span><span class="lb-tag">#A4F9</span><span class="lb-stat">12:48</span></div>
+        <div class="lb-row"><span class="lb-rank">02</span><span class="lb-tag">#QK20</span><span class="lb-stat">13:55</span></div>
+        <div class="lb-row"><span class="lb-rank">03</span><span class="lb-tag">#7M1X</span><span class="lb-stat">14:02</span></div>
+        <div class="lb-row you"><span class="lb-rank">07</span><span class="lb-tag">#9XK4</span><span class="lb-stat">15:31</span></div>
+        <div class="lb-youlabel">// your rank — once leaderboards land</div>
+      </div>
+      <div class="lb-tracked">
+        <h4>Stats tracked per game</h4>
+        <div class="lb-chips">
+          <div class="lb-chip">Fastest clear</div>
+          <div class="lb-chip">Highest score</div>
+          <div class="lb-chip">Longest win streak</div>
+          <div class="lb-chip">Best floor / stage</div>
+          <div class="lb-chip">Most kills</div>
+          <div class="lb-chip">Win rate</div>
+        </div>
+        <p class="lb-foot">// each game ranks on the stats that fit it — and you choose what to publish. Private runs stay private.</p>
+      </div>
+    </div>
   </div>
 </section>
 
