@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; script-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+<meta name="description" content="RUN_TRACKER.EXE — a terminal-styled roguelite run tracker. Auto-detects when a run ends, tracks stats, builds, and win streaks across Hades, Risk of Rain 2, Slay the Spire 2, Megabonk and more.">
+<title>RUN_TRACKER.EXE // roguelite run tracker</title>
+<style>
+  :root {
+    --bg: #000000; --surface: #030d06; --surface2: #07160a;
+    --border: #0c3018; --border-hi: #165c2c;
+    --accent: #00ff70; --accent-dim: #006b2e;
+    --accent-glow: rgba(0,255,112,0.12); --accent-glow2: rgba(0,255,112,0.06);
+    --win: #00ff70; --loss: #ff2840;
+    --text: #a0ffbe; --text-dim: #3d7a52; --text-faint: #1e5c35;
+    --font: 'Courier New', 'Consolas', 'Lucida Console', monospace;
+    --radius: 2px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--text); font-family: var(--font);
+    line-height: 1.6; overflow-x: hidden; position: relative;
+    background-image:
+      radial-gradient(ellipse at top, rgba(0,255,112,0.05), transparent 60%),
+      linear-gradient(transparent 0%, rgba(0,255,112,0.012) 50%, transparent 100%);
+  }
+  /* CRT scanline overlay */
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+    background: repeating-linear-gradient(0deg, rgba(0,255,112,0.018) 0px, rgba(0,255,112,0.018) 1px, transparent 1px, transparent 3px);
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%);
+  }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: var(--accent); color: #000; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* ── Nav ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .brand { font-weight: bold; letter-spacing: 0.06em; color: var(--accent); text-shadow: 0 0 8px var(--accent-glow); }
+  .brand .blink { animation: blink 1.1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .nav-links { display: flex; gap: 22px; align-items: center; font-size: 13px; }
+  .nav-links a.lnk { color: var(--text-dim); transition: color .15s; }
+  .nav-links a.lnk:hover { color: var(--accent); }
+
+  .btn {
+    display: inline-block; border: 1px solid var(--accent-dim); color: var(--accent);
+    background: var(--accent-glow2); padding: 9px 18px; border-radius: var(--radius);
+    font-family: var(--font); font-size: 13px; letter-spacing: 0.04em; cursor: pointer;
+    transition: all .15s;
+  }
+  .btn:hover { background: var(--accent); color: #000; box-shadow: 0 0 16px var(--accent-glow); border-color: var(--accent); }
+  .btn-lg { padding: 14px 30px; font-size: 15px; }
+
+  /* ── Hero ── */
+  .hero { padding: 96px 0 72px; text-align: center; position: relative; }
+  .hero .prompt { color: var(--text-faint); font-size: 13px; letter-spacing: 0.1em; margin-bottom: 18px; }
+  .hero h1 {
+    font-size: clamp(38px, 8vw, 88px); line-height: 1; letter-spacing: 0.02em;
+    color: var(--accent); text-shadow: 0 0 24px var(--accent-glow); margin-bottom: 10px;
+  }
+  .hero h1 .cursor { animation: blink 1.1s step-end infinite; font-weight: 300; }
+  .hero .sub { font-size: clamp(15px, 2.4vw, 20px); color: var(--text); max-width: 640px; margin: 0 auto 14px; }
+  .hero .sub2 { font-size: 13px; color: var(--text-dim); max-width: 600px; margin: 0 auto 36px; }
+  .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .hero-note { margin-top: 18px; font-size: 11px; color: var(--text-faint); letter-spacing: 0.06em; }
+
+  /* ── Section scaffolding ── */
+  section { padding: 64px 0; border-top: 1px solid var(--border); }
+  .sec-label { color: var(--text-faint); font-size: 12px; letter-spacing: 0.18em; margin-bottom: 8px; }
+  .sec-title { font-size: clamp(24px, 4vw, 36px); color: var(--accent); text-shadow: 0 0 12px var(--accent-glow); margin-bottom: 6px; }
+  .sec-intro { color: var(--text-dim); font-size: 14px; max-width: 620px; margin-bottom: 38px; }
+
+  /* ── Feature grid ── */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .card {
+    border: 1px solid var(--border); background: var(--surface); padding: 24px;
+    border-radius: var(--radius); transition: border-color .15s, transform .15s;
+  }
+  .card:hover { border-color: var(--border-hi); transform: translateY(-2px); }
+  .card .ico { font-size: 22px; margin-bottom: 12px; color: var(--accent); }
+  .card h3 { font-size: 16px; color: var(--text); margin-bottom: 8px; letter-spacing: 0.02em; }
+  .card p { font-size: 13.5px; color: var(--text-dim); }
+
+  /* ── Supported games ── */
+  .games-row { display: flex; flex-wrap: wrap; gap: 12px; }
+  .game-chip {
+    border: 1px solid var(--border); background: var(--surface2); padding: 12px 18px;
+    border-radius: var(--radius); font-size: 14px; color: var(--text);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .game-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .game-chip.manual .dot { background: var(--text-faint); box-shadow: none; }
+  .games-foot { margin-top: 18px; font-size: 12.5px; color: var(--text-faint); }
+
+  /* ── How it works ── */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .step { border-left: 2px solid var(--accent-dim); padding: 4px 0 4px 18px; }
+  .step .num { color: var(--accent); font-size: 13px; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .step h4 { font-size: 15px; color: var(--text); margin-bottom: 6px; }
+  .step p { font-size: 13px; color: var(--text-dim); }
+
+  /* ── Privacy ── */
+  .priv-list { list-style: none; display: grid; gap: 14px; max-width: 760px; }
+  .priv-list li { display: flex; gap: 12px; font-size: 14px; color: var(--text); }
+  .priv-list .chk { color: var(--accent); flex-shrink: 0; }
+  .priv-list b { color: var(--text); }
+  .priv-list span { color: var(--text-dim); }
+
+  /* ── Final CTA ── */
+  .final { text-align: center; }
+  .final h2 { font-size: clamp(26px, 5vw, 44px); color: var(--accent); text-shadow: 0 0 18px var(--accent-glow); margin-bottom: 12px; }
+  .final p { color: var(--text-dim); margin-bottom: 30px; }
+
+  footer { border-top: 1px solid var(--border); padding: 28px 0; }
+  .foot-inner { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--text-faint); }
+
+  @media (max-width: 560px) { .nav-links .lnk { display: none; } .hero { padding: 64px 0 48px; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-inner">
+    <div class="brand">RUN_TRACKER<span class="blink">_</span></div>
+    <div class="nav-links">
+      <a class="lnk" href="#features">features</a>
+      <a class="lnk" href="#games">games</a>
+      <a class="lnk" href="#how">how it works</a>
+      <a class="lnk" href="#privacy">privacy</a>
+      <a class="btn" href="index.html">launch &gt;</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<header class="hero">
+  <div class="wrap">
+    <div class="prompt">C:\&gt; run_tracker --init</div>
+    <h1>RUN_TRACKER<span class="cursor">_</span></h1>
+    <p class="sub">A run tracker for roguelites that logs itself. Point it at your save folder, play, and it detects when a run ends — then offers to log it.</p>
+    <p class="sub2">Win/loss records, build tracking, win streaks, and a shareable profile. Cloud-synced across devices.</p>
+    <div class="hero-cta">
+      <a class="btn btn-lg" href="index.html">launch terminal &gt;</a>
+      <a class="btn btn-lg" href="#how" style="border-color:var(--border-hi);color:var(--text-dim);background:transparent;">how it works</a>
+    </div>
+    <div class="hero-note">// no install · runs in your browser · free</div>
+  </div>
+</header>
+
+<!-- ── Features ── -->
+<section id="features">
+  <div class="wrap">
+    <div class="sec-label">// FEATURES</div>
+    <h2 class="sec-title">Track every run without the busywork</h2>
+    <p class="sec-intro">Logging runs by hand gets old fast. RUN_TRACKER watches your save files and does the tedious part for you, so the archive stays complete.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="ico">◉</div>
+        <h3>Automatic run detection</h3>
+        <p>Connect a game's save folder and RUN_TRACKER polls it while you play. When a run ends, a toast pops up to quick-log it or review the details first.</p>
+      </div>
+      <div class="card">
+        <div class="ico">▦</div>
+        <h3>Stats that build themselves</h3>
+        <p>Win rate, current streak, and best streak update as you log. Filter by win / loss / quit, and full-text search across notes, tags, and fields.</p>
+      </div>
+      <div class="card">
+        <div class="ico">⚙</div>
+        <h3>Build tracking</h3>
+        <p>Save loadouts — items, bans, strategy, and your own custom fields — then see exactly which runs each build produced and how it performed.</p>
+      </div>
+      <div class="card">
+        <div class="ico">⌁</div>
+        <h3>Custom fields per game</h3>
+        <p>Every game tracks different things. Toggle built-in fields (character, floor, score, seed, duration…) or add your own to match how you play.</p>
+      </div>
+      <div class="card">
+        <div class="ico">☁</div>
+        <h3>Cloud sync</h3>
+        <p>Sign in and your archive follows you across devices. Log offline and it syncs when you reconnect — nothing gets lost.</p>
+      </div>
+      <div class="card">
+        <div class="ico">⤳</div>
+        <h3>Shareable profile</h3>
+        <p>Generate a read-only link to show off your stats, games, and builds. Your private run notes stay private — they're never included in a share.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Supported games ── -->
+<section id="games">
+  <div class="wrap">
+    <div class="sec-label">// SUPPORTED</div>
+    <h2 class="sec-title">Save-file watchers, ready to go</h2>
+    <p class="sec-intro">These games have built-in readers that detect a finished run automatically. Anything else works too — add it as a custom game and log runs manually.</p>
+    <div class="games-row">
+      <div class="game-chip"><span class="dot"></span> Hades</div>
+      <div class="game-chip"><span class="dot"></span> Hades II</div>
+      <div class="game-chip"><span class="dot"></span> Risk of Rain 2</div>
+      <div class="game-chip"><span class="dot"></span> Slay the Spire 2</div>
+      <div class="game-chip"><span class="dot"></span> Megabonk</div>
+      <div class="game-chip manual"><span class="dot"></span> Any game (manual)</div>
+    </div>
+    <p class="games-foot">// Auto-detection uses the browser's File System Access API — available in Chromium browsers (Chrome, Edge, Brave, Opera GX). In other browsers you can still log every run manually.</p>
+  </div>
+</section>
+
+<!-- ── How it works ── -->
+<section id="how">
+  <div class="wrap">
+    <div class="sec-label">// WORKFLOW</div>
+    <h2 class="sec-title">Four steps, then it's automatic</h2>
+    <p class="sec-intro">Setup takes under a minute per game. After that you just play.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="num">01</div>
+        <h4>Add a game</h4>
+        <p>Create a game and pick its type. RUN_TRACKER shows you exactly which save folder to point at.</p>
+      </div>
+      <div class="step">
+        <div class="num">02</div>
+        <h4>Connect the folder</h4>
+        <p>One click grants read access to that folder. The handle is remembered, so it reconnects on reload.</p>
+      </div>
+      <div class="step">
+        <div class="num">03</div>
+        <h4>Play your run</h4>
+        <p>When the save shows a run has ended, a toast offers to quick-log it or open it pre-filled for review.</p>
+      </div>
+      <div class="step">
+        <div class="num">04</div>
+        <h4>Watch the stats grow</h4>
+        <p>Win rate, streaks, and per-build performance update instantly and sync to the cloud.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Privacy & security ── -->
+<section id="privacy">
+  <div class="wrap">
+    <div class="sec-label">// PRIVACY &amp; SECURITY</div>
+    <h2 class="sec-title">Your archive, your data</h2>
+    <p class="sec-intro">Built to keep your data yours — verified with a penetration test, not just claimed.</p>
+    <ul class="priv-list">
+      <li><span class="chk">[✓]</span> <div><b>Per-account isolation.</b> <span>Row-level security means no one can read or change another player's runs, games, or profile — enforced at the database, not just the UI.</span></div></li>
+      <li><span class="chk">[✓]</span> <div><b>Private notes stay private.</b> <span>Share links carry your stats, builds, and pictures — never your per-run notes or comments.</span></div></li>
+      <li><span class="chk">[✓]</span> <div><b>Read-only access to saves.</b> <span>Watchers only read your save files to detect a finished run. They never write to or modify your game.</span></div></li>
+      <li><span class="chk">[✓]</span> <div><b>No tracking, no ads.</b> <span>The app loads its own code and one trusted library (integrity-checked). That's it.</span></div></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ── Final CTA ── -->
+<section class="final">
+  <div class="wrap">
+    <h2>Start your archive</h2>
+    <p>// create an account and log your first run in under a minute</p>
+    <a class="btn btn-lg" href="index.html">launch terminal &gt;</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <div>RUN_TRACKER.EXE // roguelite run tracker</div>
+    <div>built for the grind · <span style="color:var(--accent-dim)">█</span></div>
+  </div>
+</footer>
+
+</body>
+</html>
