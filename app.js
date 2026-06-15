@@ -1831,21 +1831,26 @@ async function readGameState(dirHandle, gameType) {
     if (gameType === 'sts2')     return await readSTS2State(dirHandle);
     if (gameType === 'megabonk') return await readMegabonkState();
     if (gameType === 'generic')  return await readGenericState(dirHandle);
-  } catch(e) { /* permission denied or file not found — skip silently */ }
-  return null;
+  } catch(e) { /* permission denied or file not found */ return { found: false, reason: 'error' }; }
+  return { found: false, reason: 'error' };
 }
 
 async function readHadesState(dirHandle) {
-  let savMtime = 0, hasTempFile = false;
+  let savMtime = 0, hasTempFile = false, savName = null;
   for await (const [name, handle] of dirHandle.entries()) {
     if (handle.kind !== 'file') continue;
     if (/^Profile\d+\.sav$/i.test(name)) {
       const f = await handle.getFile();
-      if (f.lastModified > savMtime) savMtime = f.lastModified;
+      if (f.lastModified > savMtime) { savMtime = f.lastModified; savName = name; }
     }
     if (/Profile\d+_Temp\.sav/i.test(name)) hasTempFile = true;
   }
-  return { savMtime, hasTempFile };
+  return {
+    found: savMtime > 0, reason: savMtime > 0 ? null : 'nofile',
+    fileName: savName,
+    detail: savMtime > 0 ? 'updated ' + timeAgo(savMtime) : null,
+    savMtime, hasTempFile,
+  };
 }
 
 // Hades 2 weapon IDs found in the binary save file (Lua-serialised strings)
@@ -1873,19 +1878,25 @@ async function extractHades2Weapon(file) {
 }
 
 async function readHades2State(dirHandle) {
-  let savMtime = 0, hasTempFile = false, weapon = null;
+  let savMtime = 0, hasTempFile = false, weapon = null, savName = null;
   for await (const [name, handle] of dirHandle.entries()) {
     if (handle.kind !== 'file') continue;
     if (/^Profile\d+\.sav$/i.test(name)) {
       const f = await handle.getFile();
       if (f.lastModified > savMtime) {
         savMtime = f.lastModified;
+        savName = name;
         weapon = await extractHades2Weapon(f);
       }
     }
     if (/Profile\d+_Temp\.sav/i.test(name)) hasTempFile = true;
   }
-  return { savMtime, hasTempFile, weapon };
+  return {
+    found: savMtime > 0, reason: savMtime > 0 ? null : 'nofile',
+    fileName: savName,
+    detail: savMtime > 0 ? ((weapon ? weapon + ' · ' : '') + 'updated ' + timeAgo(savMtime)) : null,
+    savMtime, hasTempFile, weapon,
+  };
 }
 
 async function readRoR2State(dirHandle) {
@@ -1893,7 +1904,7 @@ async function readRoR2State(dirHandle) {
   async function findXml(dir, depth = 0) {
     for await (const [name, handle] of dir.entries()) {
       if (handle.kind === 'file' && name.toLowerCase().endsWith('.xml')) {
-        return await (await handle.getFile()).text();
+        return { text: await (await handle.getFile()).text(), name };
       }
       if (handle.kind === 'directory' && depth < 2) {
         const found = await findXml(handle, depth + 1).catch(() => null);
@@ -1902,8 +1913,9 @@ async function readRoR2State(dirHandle) {
     }
     return null;
   }
-  const xml = await findXml(dirHandle);
-  if (!xml) return null;
+  const res = await findXml(dirHandle);
+  if (!res) return { found: false, reason: 'nofile' };
+  const xml = res.text;
   const doc = new DOMParser().parseFromString(xml, 'application/xml');
   const n = tag => {
     const el = doc.querySelector(tag) || doc.querySelector(`fields ${tag}`);
@@ -1915,8 +1927,12 @@ async function readRoR2State(dirHandle) {
   };
   // Several XML paths that different RoR2 versions use for last-played survivor
   const lastBody = s('lastSeenSurvivorBodyName') || s('selectedBodyName') || s('lastBodyName') || s('preferredSurvivorBodyName') || '';
+  const runsFinished = n('totalRunsFinished');
   return {
-    runsFinished: n('totalRunsFinished'),
+    found: true, reason: null,
+    fileName: res.name,
+    detail: `${runsFinished} run${runsFinished !== 1 ? 's' : ''}` + (lastBody ? ' · last: ' + lastBody : ''),
+    runsFinished,
     deaths:       n('totalDeaths'),
     // Cumulative counters — delta between reads gives per-run values
     totalStages:  n('totalStagesCompleted'),
@@ -1926,13 +1942,13 @@ async function readRoR2State(dirHandle) {
 }
 
 async function readSTS2State(dirHandle) {
-  let latestMtime = 0, runCount = 0, latestHandle = null;
+  let latestMtime = 0, runCount = 0, latestHandle = null, latestName = null;
   async function scanForRuns(dir, depth = 0) {
     for await (const [name, handle] of dir.entries()) {
       if (handle.kind === 'file' && name.endsWith('.run')) {
         const f = await handle.getFile();
         runCount++;
-        if (f.lastModified > latestMtime) { latestMtime = f.lastModified; latestHandle = handle; }
+        if (f.lastModified > latestMtime) { latestMtime = f.lastModified; latestHandle = handle; latestName = name; }
       }
       if (handle.kind === 'directory' && depth < 3) {
         await scanForRuns(handle, depth + 1).catch(() => {});
@@ -1947,21 +1963,29 @@ async function readSTS2State(dirHandle) {
       lastRun = JSON.parse(text);
     } catch { lastRun = null; }
   }
-  return { latestMtime, runCount, lastRun };
+  return {
+    found: runCount > 0, reason: runCount > 0 ? null : 'nofile',
+    fileName: latestName,
+    detail: runCount > 0 ? `${runCount} run file${runCount !== 1 ? 's' : ''} · latest ${timeAgo(latestMtime)}` : null,
+    latestMtime, runCount, lastRun,
+  };
 }
 
 async function readMegabonkState() {
   try {
     const res = await fetch('http://localhost:3400/api/megabonk', { cache: 'no-store' });
-    if (!res.ok) return null;
+    if (!res.ok) return { found: false, reason: 'server' };
     const d = await res.json();
-    if (d.error) return null;
+    if (d.error) return { found: false, reason: 'nofile' };
     return {
+      found: true, reason: null,
+      fileName: 'stats.json',
+      detail: 'updated ' + timeAgo(d.statsMtime),
       statsSize:  d.statsSize,
       statsMtime: d.statsMtime,
       progSize:   d.progSize,
     };
-  } catch { return null; }
+  } catch { return { found: false, reason: 'server' }; }
 }
 
 async function getMegabonkKillsFromOCR() {
@@ -1976,13 +2000,19 @@ async function getMegabonkKillsFromOCR() {
 }
 
 async function readGenericState(dirHandle) {
-  let latestMtime = 0;
-  for await (const [, handle] of dirHandle.entries()) {
+  let latestMtime = 0, count = 0, latestName = null;
+  for await (const [name, handle] of dirHandle.entries()) {
     if (handle.kind !== 'file') continue;
+    count++;
     const f = await handle.getFile();
-    if (f.lastModified > latestMtime) latestMtime = f.lastModified;
+    if (f.lastModified > latestMtime) { latestMtime = f.lastModified; latestName = name; }
   }
-  return { latestMtime };
+  return {
+    found: count > 0, reason: count > 0 ? null : 'nofile',
+    fileName: latestName,
+    detail: count > 0 ? `${count} file${count !== 1 ? 's' : ''} · newest ${timeAgo(latestMtime)}` : null,
+    latestMtime,
+  };
 }
 
 // Format seconds → "MM:SS" (or "H:MM:SS" if ≥ 1h)
@@ -1994,6 +2024,30 @@ function fmtDuration(seconds) {
   const sec = s % 60;
   const pad = (n) => String(n).padStart(2, '0');
   return h ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`;
+}
+
+// Human-readable "x ago" from an epoch-ms timestamp
+function timeAgo(ms) {
+  if (!ms) return '';
+  const s = Math.max(0, Math.round((Date.now() - ms) / 1000));
+  if (s < 5)  return 'just now';
+  if (s < 60) return s + 's ago';
+  const m = Math.round(s / 60); if (m < 60) return m + 'm ago';
+  const h = Math.round(m / 60); if (h < 24) return h + 'h ago';
+  return Math.round(h / 24) + 'd ago';
+}
+
+// Did the watched save actually change between two reads? (mtime/size/counter moved)
+function _watcherStateChanged(gameType, prev, curr) {
+  if (!prev || !curr) return false;
+  switch (gameType) {
+    case 'hades': case 'hades2': return curr.savMtime  !== prev.savMtime;
+    case 'sts2':                 return curr.latestMtime !== prev.latestMtime || curr.runCount !== prev.runCount;
+    case 'megabonk':             return curr.statsMtime !== prev.statsMtime || curr.statsSize !== prev.statsSize;
+    case 'ror2':                 return curr.runsFinished !== prev.runsFinished || curr.totalStages !== prev.totalStages || curr.totalKills !== prev.totalKills;
+    case 'generic':              return curr.latestMtime !== prev.latestMtime;
+    default:                     return false;
+  }
 }
 
 // ── Run-end detection (state delta) ───────────────────────────────────────────
@@ -2233,8 +2287,14 @@ async function startWatcher(gameId) {
   if (!w?.gameType) return;
   if (!isMegabonk && !w?.dirHandle) return;
   stopWatcher(gameId);
-  w.lastState = await readGameState(w.dirHandle, w.gameType);
-  w.active = true;
+  w.lastState     = await readGameState(w.dirHandle, w.gameType);
+  w.active        = true;
+  w.lastReadAt    = Date.now();
+  w.foundFiles    = !!w.lastState?.found;
+  w.notFoundReason = w.lastState?.found ? null : (w.lastState?.reason || 'nofile');
+  w.lastFileName  = w.lastState?.fileName || null;
+  w.lastDetail    = w.lastState?.detail || null;
+  w.lastChangeAt  = null;
   renderWatcherBlock(gameId, w.gameType);
   if (gameId === activeGameId) updateTopbarWatcher(gameId);
   w.interval = setInterval(async () => {
@@ -2244,8 +2304,27 @@ async function startWatcher(gameId) {
         if (perm !== 'granted') { stopWatcher(gameId); renderWatcherBlock(gameId, w.gameType); if (gameId === activeGameId) updateTopbarWatcher(gameId); return; }
       }
       const curr = await readGameState(w.dirHandle, w.gameType);
-      if (!curr) return;
-      const hit = detectRunEnd(w.gameType, w.lastState, curr);
+      w.lastReadAt = Date.now();
+
+      // Files not found this tick → surface the warning state, skip detection.
+      if (!curr || !curr.found) {
+        w.foundFiles = false;
+        w.notFoundReason = curr?.reason || 'nofile';
+        renderWatcherBlock(gameId, w.gameType);
+        if (gameId === activeGameId) updateTopbarWatcher(gameId);
+        return;
+      }
+
+      const prevFound = !!w.lastState?.found;
+      // Flash "save updated" when the file actually changed between two good reads.
+      if (prevFound && _watcherStateChanged(w.gameType, w.lastState, curr)) w.lastChangeAt = Date.now();
+      w.foundFiles    = true;
+      w.notFoundReason = null;
+      w.lastFileName  = curr.fileName || null;
+      w.lastDetail    = curr.detail || null;
+
+      // Only run run-detection when both reads located the save (avoids spurious deltas).
+      const hit = prevFound ? detectRunEnd(w.gameType, w.lastState, curr) : null;
       if (hit) {
         // Megabonk: attach run duration before clearing the timer
         if (isMegabonk && w.runStartTime) {
@@ -2265,10 +2344,13 @@ async function startWatcher(gameId) {
         }
         stopRunInProgress(gameId);
         showRunToast(gameId, hit);
-      } else if (!w.runInProgress && detectRunStart(w.gameType, w.lastState, curr)) {
+      } else if (prevFound && !w.runInProgress && detectRunStart(w.gameType, w.lastState, curr)) {
         startRunInProgress(gameId);
       }
       w.lastState = curr;
+      // Refresh status line each tick (filename / proof / heartbeat / change-flash).
+      renderWatcherBlock(gameId, w.gameType);
+      if (gameId === activeGameId) updateTopbarWatcher(gameId);
     } catch(e) { console.error('watcher tick', e); }
   }, 3000);
 }
@@ -2293,10 +2375,14 @@ function updateTopbarWatcher(gameId) {
   if (game.gameType !== 'megabonk' && !('showDirectoryPicker' in window)) { btn.style.display = 'none'; return; }
   btn.style.display = 'flex';
   const w = watchers[gameId];
-  if (w?.active) {
+  if (w?.active && w.foundFiles) {
     dot.className   = 'watcher-dot active';
     label.textContent = 'watching';
     btn.classList.add('active');
+  } else if (w?.active && !w.foundFiles) {
+    dot.className   = 'watcher-dot warn';
+    label.textContent = 'no save found';
+    btn.classList.remove('active');
   } else {
     dot.className   = 'watcher-dot inactive';
     label.textContent = w?.dirHandle ? 'paused' : 'connect files';
@@ -2365,10 +2451,23 @@ function renderWatcherBlock(gameId, gameType) {
   if (serverCmd) serverCmd.style.display = isMegabonk ? '' : 'none';
   const ocrRow = document.getElementById('rp-ocr-test-row');
   if (ocrRow) ocrRow.style.display = isMegabonk ? '' : 'none';
+  // "test read" button: file games only (Megabonk has its own server/OCR tests)
+  const testRow = document.getElementById('rp-test-read-row');
+  if (testRow) testRow.style.display = (!isMegabonk && hasPicker && w?.dirHandle) ? '' : 'none';
 
-  if (w?.active) {
+  const detailEl = document.getElementById('rp-watcher-detail');
+  const labelName = meta.label || gameType;
+
+  if (w?.active && w.foundFiles) {
+    // ✅ Reading the save successfully
     dot.className = 'watcher-dot active';
-    label.textContent = 'watching — ' + meta.label;
+    label.textContent = 'watching ' + labelName;
+  } else if (w?.active && !w.foundFiles) {
+    // ⚠️ Polling, but the expected save isn't where we're looking
+    dot.className = 'watcher-dot warn';
+    if (isMegabonk && w.notFoundReason === 'server') label.textContent = 'server not running — start server.ps1';
+    else if (w.notFoundReason === 'error')           label.textContent = "can't read this folder — re-select it";
+    else                                             label.textContent = `no ${labelName} save found in this folder`;
   } else if (isMegabonk) {
     dot.className = 'watcher-dot inactive';
     label.textContent = 'server not running — start server.ps1';
@@ -2383,17 +2482,64 @@ function renderWatcherBlock(gameId, gameType) {
     label.textContent = 'no folder selected';
   }
 
+  // Folder / file line — show the actual file being read as proof when watching
   if (folderName) {
-    if (isMegabonk) {
-      folderName.textContent = '⚡ via localhost:3400';
+    if (isMegabonk && w?.active && w.foundFiles) {
+      folderName.textContent = '⚡ stats.json via localhost:3400';
+      folderName.classList.add('visible');
+    } else if (w?.active && w.foundFiles && w.lastFileName) {
+      folderName.textContent = '📄 ' + w.lastFileName;
       folderName.classList.add('visible');
     } else {
       const name = w?.dirHandle?.name;
-      folderName.textContent = name ? '📁 ' + name : '';
-      folderName.classList.toggle('visible', !!name);
+      folderName.textContent = name ? '📁 ' + name : (isMegabonk ? '⚡ via localhost:3400' : '');
+      folderName.classList.toggle('visible', !!name || isMegabonk);
+    }
+  }
+
+  // Proof / heartbeat / change-flash line
+  if (detailEl) {
+    const recentlyChanged = w?.lastChangeAt && (Date.now() - w.lastChangeAt) < 4000;
+    if (w?.active && w.foundFiles) {
+      const bits = [];
+      if (w.lastDetail) bits.push(w.lastDetail);
+      if (w.lastReadAt) bits.push('checked ' + timeAgo(w.lastReadAt));
+      detailEl.textContent = (recentlyChanged ? '✓ save updated · ' : '') + bits.join(' · ');
+      detailEl.className = 'watcher-detail visible' + (recentlyChanged ? ' flash' : '');
+    } else if (w?.active && !w.foundFiles && w.notFoundReason !== 'server') {
+      detailEl.textContent = '// point this at the folder that actually contains your save file';
+      detailEl.className = 'watcher-detail visible';
+    } else {
+      detailEl.textContent = '';
+      detailEl.className = 'watcher-detail';
     }
   }
 }
+
+// One-shot "test read": reports exactly what the reader finds right now.
+async function doTestRead(gameId) {
+  const w = watchers[gameId];
+  const resultEl = document.getElementById('rp-test-read-result');
+  if (!resultEl) return;
+  if (!w?.dirHandle || !w?.gameType) { resultEl.textContent = 'select a folder first'; resultEl.style.color = 'var(--text-dim)'; return; }
+  resultEl.textContent = 'reading…'; resultEl.style.color = 'var(--text-dim)';
+  const st = await readGameState(w.dirHandle, w.gameType);
+  const labelName = GAME_TYPE_META[w.gameType]?.label || w.gameType;
+  if (st && st.found) {
+    resultEl.textContent = `✓ found ${st.fileName || 'save'}${st.detail ? ' · ' + st.detail : ''}`;
+    resultEl.style.color = 'var(--accent)';
+  } else if (st && st.reason === 'error') {
+    resultEl.textContent = '✗ could not read this folder (permission?)';
+    resultEl.style.color = 'var(--loss)';
+  } else {
+    resultEl.textContent = `✗ no ${labelName} save file found in this folder`;
+    resultEl.style.color = 'var(--loss)';
+  }
+}
+
+document.getElementById('rp-test-read-btn')?.addEventListener('click', () => {
+  if (activeGameId) doTestRead(activeGameId);
+});
 
 // Game type dropdown change → update hint, don't start watcher yet (need save)
 document.getElementById('rp-game-type').addEventListener('change', e => {
@@ -2768,7 +2914,10 @@ function bootUI() {
   initWatchers();
 }
 
-(async () => {
+// Deferred via queueMicrotask so all module-level consts (e.g. bgFx) finish
+// initializing before boot runs — the offline path (sb === null) calls bootUI
+// synchronously and would otherwise hit those consts in their temporal dead zone.
+const _boot = async () => {
   // Share-link mode: #share/<uuid>
   const shareMatch = window.location.hash.match(/^#share\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
   if (shareMatch) {
@@ -2815,7 +2964,8 @@ function bootUI() {
     }
     updateAuthBar();
   });
-})();
+};
+queueMicrotask(_boot);
 
 // ── Settings modal ────────────────────────────────────────────────────────────
 function openSettingsModal() {

@@ -294,6 +294,12 @@
 
   .watcher-dot.error { background: var(--loss); }
 
+  .watcher-dot.warn { background: #ffb300; box-shadow: 0 0 6px #ffb300; animation: watcher-pulse 2s ease-in-out infinite; }
+
+  .watcher-detail { font-size: 10px; color: var(--text-dim); line-height: 1.5; margin: 2px 0 8px; display: none; }
+  .watcher-detail.visible { display: block; }
+  .watcher-detail.flash { color: var(--accent); text-shadow: 0 0 6px var(--accent-glow); }
+
   @keyframes watcher-pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
@@ -1025,8 +1031,13 @@
         <span class="watcher-label" id="rp-watcher-label">no folder selected</span>
       </div>
       <div class="watcher-folder-name" id="rp-folder-name"></div>
+      <div class="watcher-detail" id="rp-watcher-detail"></div>
       <div class="fields-add-row">
         <button class="fields-add-btn" id="rp-select-folder-btn">⊕ select save folder</button>
+      </div>
+      <div class="fields-add-row" id="rp-test-read-row" style="display:none">
+        <button class="fields-add-btn" id="rp-test-read-btn">⊕ test read now</button>
+        <span id="rp-test-read-result" style="font-size:10px;color:var(--text-dim);margin-left:6px"></span>
       </div>
       <div class="fields-add-row" id="rp-ocr-test-row" style="display:none">
         <button class="fields-add-btn" id="rp-ocr-test-btn">⊕ test OCR now</button>
